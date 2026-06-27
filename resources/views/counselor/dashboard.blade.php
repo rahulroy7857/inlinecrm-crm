@@ -130,8 +130,8 @@
 <div class="container-xxl flex-grow-1 container-p-y">
   
   <!-- Dashboard Header -->
-  <div class="dashboard-header">
-    <h1 style="color: #fff !important;">Welcome Back rahul, {{ auth()->user()->name }}! 👋</h1>
+  <div class="dashboard-header">   
+    <h1 style="color: #fff !important;">Welcome Back rahul gupta,{{ auth()->user()->name }}! 👋</h1>
     <p>Here's your lead performance overview for {{ session('academic_year_name') }}</p>
   </div>
 
