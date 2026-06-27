@@ -1,0 +1,30 @@
+const countriesData = {
+    "India": [
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+        "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+        "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+        "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
+        "Uttarakhand", "West Bengal"
+    ],
+    "USA": ["Alabama", "Alaska", "Arizona", "Any"],
+    "UK": ["Any"],
+    "Canada": ["Any"],
+    "Australia": ["Any"],
+    "Germany": ["Any"],
+    "France": ["Any"],
+    "Japan": ["Any"],
+    "China": ["Any"],
+    "Brazil": ["Any"],
+    "South Africa": ["Any"],
+    "Mexico": ["Any"],
+    "Russia": ["Any"],
+    "Italy": ["Any"],
+    "Spain": ["Any"],
+    "Netherlands": ["Any"],
+    "Sweden": ["Any"],
+    "South Korea": ["Any"],
+    "Norway": ["Any"],
+    "Finland": ["Any"],
+    "Denmark": ["Any"],
+    // Add other countries and their states
+};

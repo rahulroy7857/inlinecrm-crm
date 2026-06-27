@@ -1,0 +1,140 @@
+@extends('admin.layouts.app')
+@section('title', 'Search Leads')
+@section('style')   
+<!-- Include DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<style>
+    table#leadsTable th, table#leadsTable td {
+        border-top: 1px solid #dee2e6 !important;
+    }
+</style>
+@endsection
+@section('content')
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-lg-12 mb-4 order-0">
+            <div class="card">
+                <div class="card-header border-bottom">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="">Search Leads</h5>
+                      </div>
+                </div>
+                <div class="card-body mt-3">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-6 col-lg-6">
+                        <form action="" method="GET" style="border: 1px solid #dee2e6; padding: 20px; border-radius: 5px;">
+                            <div class="mb-3">
+                                <label for="referenceName" class="form-label">Column Name</label>
+                                <select class="form-select" id="referenceName" name="column_name" required>
+                                    <option value="" disabled {{ request('column_name') ? '' : 'selected' }}>Select</option>
+                                    <option value="mobile" {{ request('column_name') == 'mobile' ? 'selected' : '' }}>Mobile</option>
+                                    <option value="personal_email" {{ request('column_name') == 'personal_email' ? 'selected' : '' }}>Email</option>
+                                    <option value="state" {{ request('column_name') == 'state' ? 'selected' : '' }}>State</option>
+                                    <option value="lead_id" {{ request('column_name') == 'lead_id' ? 'selected' : '' }}>Lead ID</option>
+                                    <option value="name" {{ request('column_name') == 'name' ? 'selected' : '' }}>Name</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="leadEmail" class="form-label">Value</label>
+                                <input type="text" value="{{ request('value') }}" class="form-control" id="leadEmail" name="value" placeholder="Value">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body mt-3 border-top">
+                    <div class="table-responsive text-nowrap">
+                        
+                        <table id="leadsTable" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>SL.No</th>
+                                    <th>Lead ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>State</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-border-bottom-0">
+                                @forelse($leads ?? [] as $lead)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $lead->lead_id }}</td>
+                                        <td>{{ $lead->name }}</td>
+                                        <td>{{ $lead->personal_email }}</td>
+                                        <td>{{ $lead->mobile }}</td>
+                                        <td>{{ $lead->state }}</td>
+                                        <td>{!! \App\Helpers\LeadStatus::getBadge($lead->status) !!}</td>
+                                        <td>
+                                            <a href="{{ route('admin.leads.show', $lead->id) }}" 
+                                            class="btn btn-icon btn-outline-primary">
+                                                <span class="tf-icons bx bx-show"></span>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-icon btn-outline-danger delete-lead"
+                                                    data-id="{{ $lead->id }}"
+                                                    data-lead-name="{{ $lead->name }}">
+                                                <span class="tf-icons bx bx-trash"></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+            </div>    
+    </div>
+</div>
+@endsection
+@section('scripts')   
+<!-- Include jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#leadsTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+        // Handle delete button click
+        $(document).on('click', '.delete-lead', function() {
+            const button = $(this);
+            const leadId = button.data('id');
+            const leadName = button.data('lead-name');
+            
+            if (confirm(`Are you sure you want to delete lead "${leadName}"?`)) {
+                $.ajax({
+                    url: `/admin/delete-lead/${leadId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            button.closest('tr').remove();
+                            showToast('success', 'Lead deleted successfully');
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Error deleting lead');
+                    }
+                });
+            }
+        });
+    });
+</script>
+@endsection
