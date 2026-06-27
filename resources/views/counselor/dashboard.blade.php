@@ -131,7 +131,7 @@
   
   <!-- Dashboard Header -->
   <div class="dashboard-header">
-    <h1 style="color: #fff !important;">Welcome Back, {{ auth()->user()->name }}! 👋</h1>
+    <h1 style="color: #fff !important;">Welcome Back rahul test {{ auth()->user()->name }}! 👋</h1>
     <p>Here's your lead performance overview for {{ session('academic_year_name') }}</p>
   </div>
 
