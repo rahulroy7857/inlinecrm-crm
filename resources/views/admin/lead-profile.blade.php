@@ -5,109 +5,6 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <style>
-    .timeline {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        position: relative;
-    }
-    .timeline::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 20px;
-        width: 3px;
-        height: 100%;
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        border-radius: 2px;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 25px;
-        padding-left: 50px;
-    }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        top: 5px;
-        left: 12px;
-        width: 16px;
-        height: 16px;
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 4px 15px rgba(212, 54, 97, 0.3);
-        z-index: 1;
-    }
-    .timeline-date {
-        font-size: 0.9rem;
-        color: #6c757d;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
-    .timeline-content {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid #d43661;
-    }
-    .timeline-content h6 {
-        font-size: 1.1rem;
-        margin-bottom: 8px;
-        color: #495057;
-        font-weight: 600;
-    }
-    .timeline-content p {
-        margin: 0;
-        color: #6c757d;
-        line-height: 1.6;
-    }
-    /* .timeline {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        position: relative;
-    }
-    .timeline::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 20px;
-        width: 2px;
-        height: 100%;
-        background-color: #dee2e6;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 20px;
-        padding-left: 40px;
-    }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 14px;
-        width: 12px;
-        height: 12px;
-        background-color: #0d6efd;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        z-index: 1;
-    }
-    .timeline-date {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-bottom: 5px;
-    }
-    .timeline-content h6 {
-        font-size: 1rem;
-        margin-bottom: 5px;
-    }
-    .timeline-content p {
-        margin: 0;
-        color: #6c757d;
-    } */
     .editable-buttons .btn-default{
         background-color: #e44444;
         color: #fff;
@@ -199,186 +96,32 @@
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
-    .card-header {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 20px 20px 0 0;
-        padding: 1.5rem;
-    }
-    /* Editable Styling */
-    .editable {
-        padding: 0.5rem 1rem;
-        color: #645c5e;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        background: rgba(212, 54, 97, 0.05) !important;
-        border: 1px solid transparent;
-    }
-    
-    .editable:hover {
-        background: rgba(212, 54, 97, 0.1);
-        border-color: #d43661;
-        color: #d43661;
-        text-decoration: none;
-    }
-    /* Section Headers */
-    .section-header {
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        font-size: 1rem;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .section-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-        z-index: 1;
-    }
-    
-    .section-header span {
-        position: relative;
-        z-index: 2;
-    }
-
-    /* Navigation Pills */
-    .nav-pills-custom {
-        border: none;
-        /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); */
-        /* border-radius: 15px; */
-        /* padding: 1rem; */
-        /* margin-top: 1.5rem; */
-        text-align: left;
-    }
-    
-    .nav-pills-custom .nav-link {
-        border: none;
-        border-radius: 10px;
-        margin: 0.25rem;
-        padding: 0.75rem 1.25rem;
-        color: #6c757d;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .nav-pills-custom .nav-link::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        transition: left 0.3s ease;
-        z-index: -1;
-    }
-    
-    .nav-pills-custom .nav-link:hover::before,
-    .nav-pills-custom .nav-link.active::before {
-        left: 0;
-    }
-    
-    .nav-pills-custom .nav-link:hover,
-    .nav-pills-custom .nav-link.active {
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(212, 54, 97, 0.3);
-    }
 </style>
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-            @if(session('success'))
-            <div class="bs-toast toast bg-success" 
-                role="alert" 
-                aria-live="assertive" 
-                aria-atomic="true" 
-                style="position: fixed; top: 20px; right: 20px; z-index: 1080;">
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Success</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    {{ session('success') }}
-                </div>
-            </div>
-            @endif
-
-            @if(session('error'))
-            <div class="bs-toast toast bg-danger" 
-                role="alert" 
-                aria-live="assertive" 
-                aria-atomic="true" 
-                style="position: fixed; top: 20px; right: 20px; z-index: 1080;">
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Error</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    {{ session('error') }}
-                </div>
-            </div>
-            @endif
-            @if ($errors->any())
-            <div
-                class="bs-toast toast fade show bg-danger auto-hide-toast"
-                role="alert"
-                aria-live="assertive"
-                aria-atomic="true"
-                style="position: absolute; top: 20px; right: 20px; z-index: 1080;"
-            >
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Error</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-            @endif
-        <div class="col-lg-3 mb-4 order-0">
-            <div class="card text-center">
+<div class="container-xxl flex-grow-1 container-p-y lead-profile-page px-3 px-lg-4">
+    <div class="lead-profile-layout">
+        <div class="lead-profile-sidebar-col">
+            <div class="card lead-profile-sidebar">
             <div class="card-body">
-                <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
+                <div class="lead-profile-header">
+                <div class="dropdown">
                 <button
-                  class="btn p-0"
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
                   type="button"
                   id="cardOpt3"
                   data-bs-toggle="dropdown"
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i class="bx bx-dots-vertical-rounded"></i>
+                  <i class="bx bx-dots-vertical-rounded text-lg"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#followupModal">Add Contact Log</a>
                         <form action="{{ route('admin.lead.destroy', $lead->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure?')">Delete</button>
+                            <button type="submit" class="dropdown-item" data-confirm-delete="Are you sure you want to delete this lead?">Delete</button>
                         </form>
                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#transferModal">Transfer</a>
                         @if(!in_array($lead->status, ['Application', 'Reservation', 'Admission', 'Cancelled']))
@@ -393,116 +136,114 @@
                         @if(in_array($lead->status, ['Reservation', 'Admission']))
                             <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#cancelModal">Cancel</a>
                         @endif
-                        <!-- <a class="dropdown-item" href="javascript:void(0);">WhatsApp</a>
-                        <a class="dropdown-item" href="javascript:void(0);">SMS</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Mail</a> -->
                     </div>
                 </div>
-                <!-- <img src="{{ url('/crm/assets/img/avatars/1.png') }}" alt="Lead Photo" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;"> -->
 
-                <div class="position-relative" style="width: 100px; margin: 0 auto;">
+                <div class="lead-photo-wrap">
                     <form id="photoForm" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <img src="{{ $lead->photo ? url('storage/leads/' . $lead->photo) : url('/crm/assets/img/avatars/1.png') }}" 
-                            alt="Lead Photo" 
-                            class="rounded-circle mb-3" 
-                            style="width: 100px; height: 100px; object-fit: cover;"
-                            id="leadPhoto">
-                        <label for="photoInput" 
-                            class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle"
-                            style="cursor: pointer;padding: 1px 5px 5px 5px;">
-                            <i class="bx bx-camera"></i>
+                        @php
+                            $leadPhotoUrl = ($lead->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists('leads/' . $lead->photo))
+                                ? asset('storage/leads/' . $lead->photo)
+                                : null;
+                        @endphp
+                        @if($leadPhotoUrl)
+                            <img src="{{ $leadPhotoUrl }}" alt="Lead Photo" class="mb-0" id="leadPhoto">
+                        @else
+                            <div class="lead-photo-placeholder mb-0" id="leadPhotoPlaceholder" aria-hidden="true">
+                                <i class="bx bx-user"></i>
+                            </div>
+                            <img src="" alt="Lead Photo" class="mb-0 d-none" id="leadPhoto">
+                        @endif
+                        <label for="photoInput">
+                            <i class="bx bx-camera text-sm"></i>
                             <input type="file" 
                                 id="photoInput" 
                                 name="photo"
-                                style="display: none;" 
+                                class="hidden" 
                                 accept="image/*"
                                 onchange="updatePhoto(this)">
                         </label>
                     </form>
                 </div>
 
-                <h5 class="card-title mt-1">{{ $lead->name ?? 'Unknown' }}</h5>
-                <p class="card-text text-muted mb-1"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}</p>
-                <p class="card-text text-muted mb-1"><strong>Status:</strong> <span class="badge bg-{!! \App\Helpers\LeadStatus::getColor($lead->status) !!} mb-2">{{$lead->status}}</span></p>
-                <p class="card-text text-muted mb-1"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
-                <p class="card-text text-muted mb-1"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
-                <div class="d-flex justify-content-center mt-3">
-                    <a href="#" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#followupModal" title="Follow Up">
-                        <i class="bx bx-phone"></i>
+                <h5 class="mb-2 text-lg font-semibold text-slate-900">{{ $lead->name ?? 'Unknown' }}</h5>
+                <div class="lead-meta">
+                    <p class="mb-0"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}</p>
+                    <p class="mb-0"><strong>Status:</strong> <span class="badge bg-{!! \App\Helpers\LeadStatus::getColor($lead->status) !!}">{{ $lead->status }}</span></p>
+                    <p class="mb-0"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
+                    <p class="mb-0"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
+                </div>
+                </div>
+
+                <div class="lead-quick-actions">
+                    <div class="flex flex-wrap justify-center gap-2">
+                    <a href="#" class="btn btn-primary lead-action-btn" data-bs-toggle="modal" data-bs-target="#followupModal" title="Follow Up" aria-label="Follow Up">
+                        <i class="bx bx-phone" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#transferModal" title="Transfer">
-                        <i class="bx bx-transfer"></i>
+                    <a href="#" class="btn btn-warning lead-action-btn" data-bs-toggle="modal" data-bs-target="#transferModal" title="Transfer" aria-label="Transfer">
+                        <i class="bx bx-transfer-alt" aria-hidden="true"></i>
                     </a>
                     @if(!in_array($lead->status, ['Application', 'Reservation', 'Admission', 'Cancelled']))
-                    <a href="#" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#applicationModal" title="Application">
-                        <i class="bx bx-file"></i>
+                    <a href="#" class="btn btn-info lead-action-btn" data-bs-toggle="modal" data-bs-target="#applicationModal" title="Application" aria-label="Application">
+                        <i class="bx bx-file" aria-hidden="true"></i>
                     </a>
                     @endif
                     @if(!in_array($lead->status, ['Cancelled', 'Admission']))
-                    <a href="#" class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#admissionModal" title="Admission">
-                        <i class="bx bx-building"></i>
+                    <a href="#" class="btn btn-success lead-action-btn" data-bs-toggle="modal" data-bs-target="#admissionModal" title="Admission" aria-label="Admission">
+                        <i class="bx bx-building-house" aria-hidden="true"></i>
                     </a>
                     @endif
                     @if(in_array($lead->status, ['Reservation', 'Admission']))
                     @if($lead->status != 'Cancelled')
-                    <a href="#" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal" data-bs-target="#cancelModal" title="Cancel">
-                        <i class="bx bx-x"></i>
+                    <a href="#" class="btn btn-danger lead-action-btn" data-bs-toggle="modal" data-bs-target="#cancelModal" title="Cancel" aria-label="Cancel">
+                        <i class="bx bx-x" aria-hidden="true"></i>
                     </a>
                     @endif
                     @endif
+                    </div>
                 </div>
-                <hr>
-                <div class="nav-pills-custom">
-                        <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+
+                <nav class="lead-profile-nav" aria-label="Lead sections">
+                        <div class="nav flex-column" role="tablist" aria-orientation="vertical">
                             <a class="nav-link active" href="#overview" role="tab" onclick="activateMenu(this); showContent('overview')">
-                                <i class="bx bx-user me-2"></i>Overview
+                                <i class="bx bx-user"></i><span>Overview</span>
                             </a>
                             <a class="nav-link" href="#contacts" role="tab" onclick="activateMenu(this); showContent('contacts')">
-                                <i class="bx bx-phone me-2"></i>Contact Details
+                                <i class="bx bx-phone"></i><span>Contact Details</span>
                             </a>
                             <a class="nav-link" href="#timeline" role="tab" onclick="activateMenu(this); showContent('timeline')">
-                                <i class="bx bx-time me-2"></i>Timeline
+                                <i class="bx bx-time"></i><span>Timeline</span>
                             </a>
                             <a class="nav-link" href="#call-log" role="tab" onclick="activateMenu(this); showContent('call-log')">
-                                <i class="bx bx-log-in me-2"></i>Contact Log
+                                <i class="bx bx-log-in"></i><span>Contact Log</span>
                             </a>
                             <a class="nav-link" href="#education" role="tab" onclick="activateMenu(this); showContent('education')">
-                                <i class="bx bx-book me-2"></i>Education
+                                <i class="bx bx-book"></i><span>Education</span>
                             </a>
                             <a class="nav-link" href="#exams" role="tab" onclick="activateMenu(this); showContent('exams')">
-                                <i class="bx bx-test-tube me-2"></i>Exams
+                                <i class="bx bx-test-tube"></i><span>Exams</span>
                             </a>
                             <a class="nav-link" href="#payments" role="tab" onclick="activateMenu(this); showContent('payments')">
-                                <i class="bx bx-dollar me-2"></i>Payments
+                                <i class="bx bx-dollar"></i><span>Payments</span>
                             </a>
                         </div>
-                    </div>
-                <!-- <div class="nav flex-column nav-pills mt-4 text-start" role="tablist" aria-orientation="vertical">
-                <a class="nav-link active" href="#overview" role="tab" onclick="activateMenu(this); showContent('overview')"><i class="bx bx-user me-2"></i>Overview</a>
-                <a class="nav-link" href="#contacts" role="tab" onclick="activateMenu(this); showContent('contacts')"><i class="bx bx-phone me-2"></i>Contact Details</a>
-                <a class="nav-link" href="#timeline" role="tab" onclick="activateMenu(this); showContent('timeline')"><i class="bx bx-time me-2"></i>Timeline</a>
-                <a class="nav-link" href="#call-log" role="tab" onclick="activateMenu(this); showContent('call-log')"><i class="bx bx-log-in me-2"></i>Contact Log</a>
-                <a class="nav-link" href="#education" role="tab" onclick="activateMenu(this); showContent('education')"><i class="bx bx-book me-2"></i>Education</a>
-                <a class="nav-link" href="#exams" role="tab" onclick="activateMenu(this); showContent('exams')"><i class="bx bx-test-tube me-2"></i>Exams</a>
-                <a class="nav-link" href="#payments" role="tab" onclick="activateMenu(this); showContent('payments')"><i class="bx bx-dollar me-2"></i>Payments</a>
-                </div> -->
+                </nav>
             </div>
             </div>
         </div>
-        <div class="col-lg-9 mb-4 order-0">
-            <div class="card" id="overview-card">
+        <div class="lead-profile-content-col">
+            <div class="card lead-content-card" id="overview-card">
                 <div class="card-header border-bottom">
-                    <h5><i class="bx bx-user me-2"></i>Overview</h5>
+                    <h5><i class="bx bx-user"></i>Overview</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 686px;min-height: 686px;overflow-y: auto;">
-                    <div class="row mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
+                <div class="card-body lead-content-body">
+                    <div class="overview-grid mb-4">
+                            <div class="overview-section">
                                 <div class="section-header">
                                     <span><i class="bx bx-info-circle me-2"></i>Lead Information</span>
                                 </div>                                
-                                <table class="table table-borderless table-first-section">
+                                <table class="table table-borderless table-first-section w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 17%;">Name</th>
@@ -626,11 +367,11 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="col-md-6">
+                            <div class="overview-section">
                                 <div class="section-header">
                                     <span><i class="bx bx-group me-2"></i>Parent Details</span>
                                 </div>                                
-                                <table class="table table-borderless">
+                                <table class="table table-borderless w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 30%;">Father's Name</th>
@@ -712,10 +453,12 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="section-header mt-4">
+                            </div>
+                            <div class="overview-section">
+                                <div class="section-header">
                                     <span><i class="bx bx-detail me-2"></i>Other Details</span>
                                 </div>                                
-                                <table class="table table-borderless table-third-section">
+                                <table class="table table-borderless table-third-section w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 30%;">Gender</th>
@@ -770,9 +513,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
                     </div>
-                    <div class="row mb-4">
+                    <div class="row mb-4 g-0">
                         <div class="col-12">
                             <div class="section-header">
                                 <span><i class="bx bx-note me-2"></i>Notes</span>
@@ -1154,11 +896,11 @@
                 </div>
             </div>
 
-            <div class="card" id="contacts-card" style="display: none;">
+            <div class="card lead-content-card" id="contacts-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <h5><i class="bx bx-phone me-2"></i>Contact Details</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 686px;min-height: 686px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="section-header">
@@ -1539,15 +1281,12 @@
                 </div>
             </div>
 
-            <div class="card" id="timeline-card" style="display: none;">
+            <div class="card lead-content-card" id="timeline-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <h5><i class="bx bx-time me-2"></i>Timeline</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 686px;min-height: 686px;overflow-y: auto;">
-                    <div class="section-header">
-                        <span><i class="bx bx-time me-2"></i>Lead Timeline</span>
-                    </div>                    
-                    <ul class="timeline">
+                <div class="card-body lead-content-body">
+                    <ul class="timeline list-unstyled m-0 p-0">
                         @foreach(($lead->timeline ?? []) as $event)
                             <li class="timeline-item">
                                 <span class="timeline-date">{{ \Carbon\Carbon::parse($event->event_date)->format('d M Y, h:i A') }}</span>
@@ -1578,19 +1317,17 @@
                 </div>
             </div>
 
-            <div class="card" id="call-log-card" style="display: none;">
+            <div class="card lead-content-card" id="call-log-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-log-in me-2"></i>Contact Log</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followupModal">Add Contact Log</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 673px;min-height: 673px;overflow-y: auto;">
-                    <div class="section-header">
-                        <span><i class="bx bx-log-in me-2"></i>Contact Logs</span>
-                    </div>                    
+                <div class="card-body lead-content-body">
+                    <div class="table-modern-wrap">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table w-100" id="leadContactLogTable">
                             <thead>
                                 <tr>
                                     <th>Date & Time</th>
@@ -1662,10 +1399,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('admin.lead.contact_logs.destroy', $contactLog->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this contact log?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this contact log?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1673,22 +1410,21 @@
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card" id="education-card" style="display: none;">
+            <div class="card lead-content-card" id="education-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-book me-2"></i>Education</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#educationModal">Add Education</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 673px;min-height: 673px;overflow-y: auto;">
-                    <div class="section-header">
-                        <span><i class="bx bx-book me-2"></i>Education Qualifications</span>
-                    </div>                    
+                <div class="card-body lead-content-body">
+                    <div class="table-modern-wrap">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table w-100" id="leadEducationTable">
                             <thead>
                                 <tr>
                                     <th>Qualification</th>
@@ -1739,10 +1475,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('admin.lead.education.destroy', $education->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this education record?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this education record?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1750,22 +1486,21 @@
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card" id="exams-card" style="display: none;">
+            <div class="card lead-content-card" id="exams-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-test-tube me-2"></i>Exams</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#examModal">Add Exam</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 673px;min-height: 673px;overflow-y: auto;">
-                    <div class="section-header">
-                        <span><i class="bx bx-test-tube me-2"></i>Competitive Exams</span>
-                    </div>                    
+                <div class="card-body lead-content-body">
+                    <div class="table-modern-wrap">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table w-100" id="leadExamsTable">
                             <thead>
                                 <tr>
                                     <th>Exam Name</th>
@@ -1816,10 +1551,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('admin.lead.exams.destroy', $exam->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this exam record?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this exam record?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1827,22 +1562,21 @@
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card" id="payments-card" style="display: none;">
+            <div class="card lead-content-card" id="payments-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-dollar me-2"></i>Received Payments</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Add Payment</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 673px;min-height: 673px;overflow-y: auto;">
-                    <div class="section-header">
-                        <span><i class="bx bx-dollar me-2"></i>Payment History</span>
-                    </div>                    
+                <div class="card-body lead-content-body">
+                    <div class="table-modern-wrap">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table w-100" id="leadPaymentsTable">
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -1881,6 +1615,7 @@
                                 @endphp
                             </tbody>
                         </table>
+                    </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-4">
@@ -2648,6 +2383,7 @@
 </div>
 @endsection
 @section('scripts')
+@include('admin.partials.datatables-scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -2779,13 +2515,12 @@ document.addEventListener('DOMContentLoaded', function() {
     //     });
     // });
 </script>
-</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const hash = window.location.hash.substring(1);
         if (hash) {
             // Activate the corresponding menu and show the content
-            const activeLink = document.querySelector(`.nav-link[href="#${hash}"]`);
+            const activeLink = document.querySelector(`.lead-profile-nav .nav-link[href="#${hash}"]`);
             if (activeLink) {
                 activateMenu(activeLink);
                 showContent(hash);
@@ -2795,40 +2530,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function activateMenu(element) {
         // Remove 'active' class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.lead-profile-nav .nav-link').forEach(link => link.classList.remove('active'));
         // Add 'active' class to the clicked link
         element.classList.add('active');
     }
 
     function showContent(section) {
-        // Hide all target cards except the menu card
-        document.querySelectorAll('.col-lg-9 .card').forEach(card => card.style.display = 'none');
-        // Show the selected card
+        document.querySelectorAll('.lead-profile-content-col .card').forEach(card => card.style.display = 'none');
         const selectedCard = document.getElementById(`${section}-card`);
         if (selectedCard) {
             selectedCard.style.display = 'block';
         }
-        // Update the URL hash
         history.pushState(null, null, `#${section}`);
+
+        const tableMap = {
+            'call-log': '#leadContactLogTable',
+            'education': '#leadEducationTable',
+            'exams': '#leadExamsTable',
+            'payments': '#leadPaymentsTable',
+        };
+        if (tableMap[section] && window.adjustCrmDataTable) {
+            setTimeout(() => window.adjustCrmDataTable(tableMap[section]), 50);
+        }
     }
+
+    $(function() {
+        const leadTableOptions = {
+            dom: "<'crm-dt-toolbar'<'crm-dt-search'f>>rt<'crm-dt-footer'<'crm-dt-length'l><'crm-dt-info'i><'crm-dt-paginate'p>>",
+            buttons: [],
+            pageLength: 10,
+        };
+        ['#leadContactLogTable', '#leadEducationTable', '#leadExamsTable', '#leadPaymentsTable'].forEach(function(selector) {
+            if ($(selector).length) {
+                initCrmDataTable(selector, $.extend(true, {}, leadTableOptions, {
+                    order: selector === '#leadContactLogTable' ? [[0, 'desc']] : [[0, 'asc']]
+                }));
+            }
+        });
+    });
 </script> 
 <script>
-    function activateMenu(element) {
-        // Remove 'active' class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-        // Add 'active' class to the clicked link
-        element.classList.add('active');
-    }
-
-    function showContent(section) {
-        // Hide all target cards except the menu card
-        document.querySelectorAll('.col-lg-9 .card').forEach(card => card.style.display = 'none');
-        // Show the selected card
-        const selectedCard = document.getElementById(`${section}-card`);
-        if (selectedCard) {
-            selectedCard.style.display = 'block';
-        }
-    }
 $(function() {
     $.fn.editable.defaults.params = function (params) {
         params._token = '{{ csrf_token() }}';
@@ -2964,7 +2705,8 @@ function updatePhoto(input) {
             contentType: false,
             success: function(response) {
                 if (response.success) {
-                    $('#leadPhoto').attr('src', response.photo);
+                    $('#leadPhoto').attr('src', response.photo).removeClass('d-none');
+                    $('#leadPhotoPlaceholder').addClass('d-none');
                     toastr.success('Photo updated successfully');
                 } else {
                     toastr.error('Failed to update photo');

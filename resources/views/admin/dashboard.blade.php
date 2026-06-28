@@ -1,137 +1,13 @@
 @extends('admin.layouts.app')
 @section('title', 'Dashboard')
-@section('style')   
-<style>
-    .stats-card {
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .stats-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-        z-index: 1;
-    }
-    
-    .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.25);
-    }
-    
-    .stats-card .card-body {
-        position: relative;
-        z-index: 2;
-        color: white;
-    }
-    
-    .stats-card .card-title {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stats-card h3 {
-        color: white;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stats-card .trend {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .stats-card .icon-bg {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-    }
-    
-    .chart-card {
-        background: white;
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-    }
-    
-    .chart-card:hover {
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-    
-    .chart-card .card-header {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 15px 15px 0 0;
-        padding: 1.25rem 1.5rem;
-    }
-    
-    .chart-card .card-header h5 {
-        color: #495057;
-        font-weight: 600;
-        margin: 0;
-    }
-    
-    .dashboard-header {
-        background: linear-gradient(135deg, #66a6ea 0%, #4ba278 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        border-radius: 15px;
-        text-align: center;
-    }
-    
-    .dashboard-header h1 {
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .dashboard-header p {
-        opacity: 0.9;
-        margin: 0;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-    }
-</style>
+@section('style')
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
   
   <!-- Dashboard Header -->
   <div class="dashboard-header">
-    <h1 style="color: #fff !important;">Welcome Back rahul kumar {{ auth()->user()->name }}! 👋</h1>
+    <h1>Welcome back, {{ auth()->guard('admin')->user()->name }}!</h1>
     <p>Here's your comprehensive overview for {{ session('academic_year_name') }}</p>
   </div>
 
@@ -363,8 +239,7 @@
                                   @foreach($recentAdmissions as $admission)
                                     <li class="d-flex mb-4 pb-1">
                                         <div class="avatar flex-shrink-0 me-3">
-                                            <img src="{{ $admission->photo ? url('storage/leads/' . $admission->photo) : url('/crm/assets/img/avatars/1.png') }}" 
-                                                alt="User" class="rounded">
+                                            @include('admin.partials.lead-avatar', ['photo' => $admission->photo, 'name' => $admission->name])
                                         </div>
                                         <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                             <div class="me-2">
@@ -409,8 +284,7 @@
                                   @foreach($recentTransactions as $transaction)
                                     <li class="d-flex mb-4 pb-1">
                                         <div class="avatar flex-shrink-0 me-3">
-                                            <img src="{{ $transaction->lead->photo ? url('storage/leads/' . $transaction->lead->photo) : url('/crm/assets/img/avatars/1.png') }}" 
-                                                alt="User" class="rounded">
+                                            @include('admin.partials.lead-avatar', ['photo' => $transaction->lead->photo ?? null, 'name' => $transaction->lead->name ?? 'User'])
                                         </div>
                                         <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                             <div class="me-2">

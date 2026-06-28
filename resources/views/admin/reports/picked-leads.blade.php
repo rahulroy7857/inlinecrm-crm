@@ -1,35 +1,11 @@
 @extends('admin.layouts.app')
 @section('title', 'Picked Leads Report')
-@section('style')   
-<!-- Include DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-<style>
-    table#leadsTable th, table#leadsTable td {
-        border-top: 1px solid #dee2e6 !important;
-        border-bottom: 1px solid #dee2e6 !important;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .metric-value {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-    .metric-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-</style>
+@section('style')
+@include('admin.partials.datatables-head')
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
             <div class="card">
@@ -45,8 +21,8 @@
 
                 <div class="card-body mt-3">
                     <!-- Date Filter Form -->
-                    <div class="d-flex justify-content-center mb-4">
-                        <form action="" method="GET" style="width: 99%; border: 1px solid #dee2e6; padding: 20px; border-radius: 5px;">
+                    <div class="crm-filter-panel mb-4">
+                        <form action="" method="GET">
                             @csrf
                             <div class="row">
                                 <div class="col-md-3 mb-3">
@@ -99,8 +75,9 @@
                             <h6 class="mb-0">Counselor Picked Leads Summary</h6>
                         </div>
                         <div class="card-body">
+                            <div class="table-modern-wrap">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="leadsTable">
+                                <table class="table crm-table" id="leadsTable">
                                     <thead class="">
                                         <tr>
                                             <th>SL.No</th>
@@ -145,6 +122,7 @@
                                     </tfoot>
                                 </table>
                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -154,8 +132,8 @@
 </div>
 
 <!-- Modal for showing picked leads details -->
-<div class="modal fade" id="pickedLeadsModal" tabindex="-1" aria-labelledby="pickedLeadsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade modal-crm-table" id="pickedLeadsModal" tabindex="-1" aria-labelledby="pickedLeadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-table">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="pickedLeadsModalLabel">Picked Leads Details</h5>
@@ -169,41 +147,35 @@
 </div>
 @endsection
 
-@section('scripts')   
-<!-- Include jQuery and DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
+@section('scripts')
+@include('admin.partials.datatables-scripts')
 <script>
+    let modalLeadsTable = null;
+
     $(document).ready(function() {
-        $('#leadsTable').DataTable({
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ],
-            pageLength: 25,
-            order: [[1, 'asc']],
-            responsive: true
+        initCrmDataTable('#leadsTable', {
+            order: [[1, 'asc']]
         });
     });
 
     function showPickedLeads(counselorId, counselorName) {
-        // Get the picked leads data for this counselor
         const counselorData = @json($pickedLeadsData);
         const data = counselorData.find(item => item.counselor_id === counselorId);
         
         if (data && data.picked_leads.length > 0) {
+            if (modalLeadsTable) {
+                modalLeadsTable.destroy();
+                modalLeadsTable = null;
+            }
+
             let tableHtml = `
-                <h6 class="mb-3">${counselorName} - Picked Leads Details</h6>
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
-                        <thead class="">
+                <div class="modal-table-toolbar">
+                    <h6 class="mb-0 fw-semibold">${counselorName} — Picked Leads</h6>
+                    <span class="badge bg-primary">${data.picked_leads.length} leads</span>
+                </div>
+                <div class="modal-table-body">
+                    <table class="table crm-table w-100" id="modalLeadsTable">
+                        <thead>
                             <tr>
                                 <th>Lead ID</th>
                                 <th>Name</th>
@@ -233,16 +205,21 @@
                 `;
             });
             
-            tableHtml += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            tableHtml += `</tbody></table></div>`;
             
             document.getElementById('pickedLeadsDetails').innerHTML = tableHtml;
             $('#pickedLeadsModal').modal('show');
+
+            $('#pickedLeadsModal').one('shown.bs.modal', function() {
+                modalLeadsTable = initCrmDataTable('#modalLeadsTable', {
+                    dom: "<'crm-dt-toolbar'<'crm-dt-export'B><'crm-dt-search'f>>rtip",
+                    pageLength: 50
+                });
+            });
         } else {
-            alert('No picked leads found for this counselor.');
+            if (window.showCrmToast) {
+                window.showCrmToast('warning', 'No picked leads found for this counselor.');
+            }
         }
     }
 </script>

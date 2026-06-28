@@ -28,6 +28,15 @@ class LeadController extends Controller
         $this->academicYear = session('academic_year_id');
     }
 
+    protected function scopeAcademicYear($query)
+    {
+        if ($this->academicYear) {
+            $query->where('academic_year_id', $this->academicYear);
+        }
+
+        return $query;
+    }
+
     public function show($id)
     {
         $lead = Lead::with([
@@ -249,10 +258,10 @@ class LeadController extends Controller
 
     public function pendingFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
-            ->where('academic_year_id', $this->academicYear)
-            ->where('next_follow_up', '<', now()->startOfDay())
-            ->where('status', '!=', 'Bin')
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
+            ->where('next_follow_up', '<', today())
+            ->whereNotIn('status', ['Converted', 'Bin'])
             ->orderBy('next_follow_up')
             ->get();
 
@@ -442,17 +451,23 @@ class LeadController extends Controller
     public function getCounts()
     {
         $counts = [
-            'new_leads' => Lead::where('status', 'New')->whereNull('counselor_id')->count(),
-            'today_followups' => Lead::whereDate('next_follow_up', today())
+            'new_leads' => $this->scopeAcademicYear(Lead::query())
+                ->where('status', 'New')->whereNull('counselor_id')->count(),
+            'today_followups' => $this->scopeAcademicYear(Lead::query())
+                ->whereDate('next_follow_up', today())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'tomorrow_followups' => Lead::whereDate('next_follow_up', today()->addDay())
+            'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
+                ->whereDate('next_follow_up', today()->addDay())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'pending_followups' => Lead::where('next_follow_up', '<', today())
-                ->whereNotIN('status', ['Converted', 'Bin'])
+            'pending_followups' => $this->scopeAcademicYear(Lead::query())
+                ->where('next_follow_up', '<', today())
+                ->whereNotIn('status', ['Converted', 'Bin'])
                 ->count(),
-            'bin' => Lead::where('status', 'Bin')->count()
+            'bin' => $this->scopeAcademicYear(Lead::query())
+                ->where('status', 'Bin')
+                ->count(),
         ];
 
         return response()->json($counts);

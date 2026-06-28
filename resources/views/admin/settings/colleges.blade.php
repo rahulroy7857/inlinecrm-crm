@@ -1,9 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', 'Colleges')
 @section('style')   
-<!-- Include DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+@include('admin.partials.datatables-head')
 <style>
     table#leadsTable th, table#leadsTable td {
         border-top: 1px solid #dee2e6 !important;
@@ -11,7 +9,7 @@
 </style>
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
           @if(session('success'))
@@ -48,8 +46,9 @@
                 </div>
                 <div class="card-body mt-3">
                     
+                    <div class="table-modern-wrap">
                     <div class="table-responsive text-nowrap">
-                        <table id="leadsTable" class="table table-bordered">
+                        <table id="leadsTable" class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>SL.No</th>
@@ -73,15 +72,15 @@
                                             data-name="{{ $college->name }}"
                                             data-place="{{ $college->place }}"
                                             data-status="{{ $college->status }}">
-                                            <span class="tf-icons bx bx-edit"></span>
+                                            <i class="bx bx-edit"></i>
                                         </button>
                                         <form action="{{ route('admin.settings.colleges.destroy', $college->id) }}" 
                                             method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-icon btn-outline-danger"
-                                                    onclick="return confirm('Are you sure?')">
-                                                <span class="tf-icons bx bx-trash"></span>
+                                                    data-confirm-delete="Are you sure you want to delete this college?">
+                                                <i class="bx bx-trash"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -89,6 +88,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
                     </div>
                 </div>
             </div>    
@@ -173,25 +173,11 @@
 </div>
 @endsection
 @section('scripts')   
-<!-- Include jQuery and DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="{{ url('crm/js/common.js') }}"></script>
+@include('admin.partials.datatables-scripts')
 <script>
     $(document).ready(function() {
+        initCrmDataTable('#leadsTable');
         initializeFormSubmission('#addForm');
-        $('#leadsTable').DataTable({
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ]
-        });
         // Edit button click handler
       $(document).on('click', '.edit-btn', function() {
           var id = $(this).data('id');

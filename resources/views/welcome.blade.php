@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Under Construction</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

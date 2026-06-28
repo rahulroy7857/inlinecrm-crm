@@ -1,9 +1,7 @@
 @extends('counselor.layouts.app')
 @section('title', 'Leads Report')
 @section('style')   
-<!-- Include DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+@include('admin.partials.datatables-head')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     table#leadsTable th, table#leadsTable td {
@@ -36,7 +34,7 @@
 </style>
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
             <div class="card">
@@ -114,8 +112,9 @@
                 </div>
 
                 <div class="card-body mt-3 border-top">
+                    <div class="table-modern-wrap">
                     <div class="table-responsive text-nowrap">
-                        <table id="leadsTable" class="table table-bordered">
+                        <table id="leadsTable" class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>
@@ -158,13 +157,14 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('counselor.leads.show', $lead->id) }}" class="btn btn-icon btn-outline-primary">
-                                            <span class="tf-icons bx bx-show"></span>
+                                            <i class="bx bx-show"></i>
                                         </a>
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
                     </div>
                 </div>
             </div>    
@@ -210,62 +210,13 @@
     </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <!-- Success Toast -->
-    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-success text-white">
-            <i class="bx bx-check-circle me-2"></i>
-            <strong class="me-auto">Success</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-
-    <!-- Warning Toast -->
-    <div id="warningToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-warning text-dark">
-            <i class="bx bx-error-circle me-2"></i>
-            <strong class="me-auto">Warning</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-
-    <!-- Error Toast -->
-    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-danger text-white">
-            <i class="bx bx-x-circle me-2"></i>
-            <strong class="me-auto">Error</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-</div>
-
 @endsection
 @section('scripts')   
-<!-- Include jQuery and DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+@include('admin.partials.datatables-scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#leadsTable').DataTable({
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ]
-        });
+        initCrmDataTable('#leadsTable');
         $('.select2-multiple').select2({
             placeholder: function() {
                 return $(this).attr('placeholder') || 'Select options';
@@ -344,14 +295,9 @@
 
         // Updated showToast function
         function showToast(type, message) {
-            const toast = $(`#${type}Toast`);
-            toast.find('.toast-body').html(message);
-            const bsToast = new bootstrap.Toast(toast, {
-                animation: true,
-                autohide: true,
-                delay: 3000
-            });
-            bsToast.show();
+            if (window.showCrmToast) {
+                window.showCrmToast(type, message);
+            }
         }
     });
 </script>

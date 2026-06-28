@@ -1,34 +1,12 @@
-    <meta name="description" content="" />
+    <meta name="description" content="Inline CRM - Education Admissions Management" />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{url('crm/assets/img/favicon/favicon.ico')}}" />
+    <link rel="icon" type="image/x-icon" href="{{ url('crm/assets/img/favicon/favicon.ico') }}" />
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="{{url('crm/assets/vendor/fonts/boxicons.css')}}" />
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="{{url('crm/assets/vendor/css/core.css')}}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{url('crm/assets/vendor/css/theme-default.css')}}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{{url('crm/assets/css/demo.css')}}" />
-
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="{{url('crm/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css')}}" />
-
-    <link rel="stylesheet" href="{{url('crm/assets/vendor/libs/apex-charts/apex-charts.css')}}" />
-
-    <!-- Page CSS -->
-
-    <!-- Helpers -->
-    <script src="{{url('crm/assets/vendor/js/helpers.js')}}"></script>
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="{{url('crm/assets/js/config.js')}}"></script>
+    @include('admin.partials.datatables-head')
+    @include('admin.partials.crm-assets')

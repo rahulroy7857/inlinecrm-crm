@@ -1,9 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', 'New Leads')
 @section('style')   
-<!-- Include DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+@include('admin.partials.datatables-head')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     table#leadsTable th, table#leadsTable td {
@@ -87,7 +85,7 @@
 </style>
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
             @if(session('success'))
@@ -231,8 +229,8 @@
                 </div>
                 <div class="card-body mt-3">
                     
-                    <div class="table-responsive text-nowrap">
-                        <table id="leadsTable" class="table table-bordered">
+                    <div class="table-modern-wrap">
+                        <table id="leadsTable" class="table crm-table w-full">
                             <thead>
                                 <tr>
                                     <th>SL.No</th>
@@ -257,16 +255,15 @@
                                     <td>{{ $lead->next_follow_up->format('d M Y h:i A') }}</td>
                                     <td>
                                         <a href="{{url('/admin/lead-profile/'.$lead->id)}}">
-                                            <button type="button" class="btn btn-icon btn-outline-primary">
-                                                <span class="tf-icons bx bx-show"></span>
+                                            <button type="button" class="btn btn-icon btn-outline-primary" title="View">
+                                                <i class="bx bx-show"></i>
                                             </button>
                                         </a>
-                                        <a href="{{url('/admin/delete-lead/'.$lead->id)}}" onclick="return confirm('Are you sure you want to delete this lead?');">
-                                            <button type="button" class="btn btn-icon btn-outline-danger delete-lead" 
-                                                data-id="{{ $lead->id }}"
-                                                data-lead-name="{{ $lead->name }}">
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                        <a href="{{url('/admin/delete-lead/'.$lead->id)}}"
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this lead?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -279,41 +276,6 @@
     </div>
 </div>
 
-
-<!-- Success Toast -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-success text-white">
-            <i class="bx bx-check-circle me-2"></i>
-            <strong class="me-auto">Success</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-
-    <!-- Warning Toast -->
-    <div id="warningToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-warning text-dark">
-            <i class="bx bx-error-circle me-2"></i>
-            <strong class="me-auto">Warning</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-
-    <!-- Error Toast -->
-    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-danger text-white">
-            <i class="bx bx-x-circle me-2"></i>
-            <strong class="me-auto">Error</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-</div>
 
 <!-- Bulk Transfer Modal -->
 <div class="modal fade" id="bulkTransferModal" tabindex="-1" aria-hidden="true">
@@ -356,27 +318,13 @@
 
 @endsection
 @section('scripts')   
-<!-- Include jQuery and DataTables JS -->
 <script src="{{ url('crm/assets/js/countries-states.js') }}"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+@include('admin.partials.datatables-scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="{{ url('crm/js/common.js') }}"></script>
 <script>
     $(document).ready(function() {
+        initCrmDataTable('#leadsTable');
         initializeFormSubmission('#newLeadForm');
-        $('#leadsTable').DataTable({
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ]
-        });
     });
 $(document).ready(function() {
     const selectConfig = {
@@ -492,10 +440,9 @@ $('#offcanvasEnd').on('hidden.bs.offcanvas', function () {
 });
 
 function showToast(type, message) {
-    const toast = $(`#${type}Toast`);
-    toast.find('.toast-body').html(message);
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
+    if (window.showCrmToast) {
+        window.showCrmToast(type, message);
+    }
 }
 
 // Add this inside your $(document).ready function
@@ -658,21 +605,6 @@ $(document).ready(function() {
         isVerified = false;
     });
 });
-function showToast(type, message) {
-    // Remove alerts after success
-    const toast = document.getElementById(`${type}Toast`);
-    const bsToast = new bootstrap.Toast(toast, {
-        animation: true,
-        autohide: true,
-        delay: 3000
-    });
-
-    // Update toast content
-    toast.querySelector('.toast-body').innerHTML = message;
-    
-    // Show the toast
-    bsToast.show();
-}
 
 $(document).ready(function() {
     // Handle select all checkbox
@@ -684,8 +616,7 @@ $(document).ready(function() {
     // Handle individual checkboxes
     $(document).on('change', '.lead-checkbox', function() {
         updateBulkTransferButton();
-        
-        // Update select all checkbox
+
         if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) {
             $('#selectAll').prop('checked', true);
         } else {
@@ -693,7 +624,6 @@ $(document).ready(function() {
         }
     });
 
-    // Function to update transfer button visibility
     function updateBulkTransferButton() {
         if ($('.lead-checkbox:checked').length > 0) {
             $('#bulkTransferBtn').removeClass('d-none');
@@ -702,7 +632,6 @@ $(document).ready(function() {
         }
     }
 
-    // Handle bulk transfer button click
     $('#bulkTransferBtn').click(function() {
         const selectedLeads = $('.lead-checkbox:checked').map(function() {
             return $(this).val();
@@ -717,12 +646,11 @@ $(document).ready(function() {
         $('#bulkTransferModal').modal('show');
     });
 
-    // Handle bulk transfer form submission
     $('#bulkTransferForm').submit(function(e) {
         e.preventDefault();
         const form = $(this);
         const submitBtn = form.find('button[type="submit"]');
-        
+
         submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
 
         $.ajax({
@@ -736,7 +664,7 @@ $(document).ready(function() {
                     window.location.reload();
                 }, 1500);
             },
-            error: function(xhr) {
+            error: function() {
                 showToast('error', 'Error transferring leads. Please try again.');
                 submitBtn.prop('disabled', false).text('Transfer');
             }
