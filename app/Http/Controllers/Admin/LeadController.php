@@ -147,8 +147,11 @@ class LeadController extends Controller
     
         // Get countries list
         $countries = countries();
+        $country_codes = country_codes();
 
-        return view('admin.new-leads', compact('leads', 'sources', 'countries', 'courses', 'academicYears'));
+        // exit;
+
+        return view('admin.new-leads', compact('leads', 'sources', 'countries','country_codes', 'courses', 'academicYears'));
     }
 
     public function store(Request $request)
@@ -264,8 +267,9 @@ class LeadController extends Controller
             ->whereNotIn('status', ['Converted', 'Bin'])
             ->orderBy('next_follow_up')
             ->get();
+        $country_codes = country_codes();
 
-        return view('admin.followups.pending', compact('leads'));
+        return view('admin.followups.pending', compact('leads', 'country_codes'));
     }
 
     public function todayFollowups()

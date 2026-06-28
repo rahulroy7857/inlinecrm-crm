@@ -235,7 +235,7 @@
                                 <tr>
                                     <th>SL.No</th>
                                     <th>Lead ID</th>
-                                    <th>Name</th>
+                                    <th>Name</th>                                    
                                     <th>Phone</th>
                                     <th>State</th>
                                     <th>Status</th>
@@ -248,8 +248,8 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $lead->lead_id }}</td>
-                                    <td>{{ $lead->name }}</td>
-                                    <td>{{ $lead->mobile }}</td>
+                                    <td>{{ $lead->name }}</td>                                    
+                                    <td>{{ $country_codes[$lead->country] ?? '' }} - {{ $lead->mobile }}</td>
                                     <td>{{ $lead->state }}</td>
                                     <td>{!! \App\Helpers\LeadStatus::getBadge($lead->status) !!}</td>
                                     <td>{{ $lead->next_follow_up->format('d M Y h:i A') }}</td>

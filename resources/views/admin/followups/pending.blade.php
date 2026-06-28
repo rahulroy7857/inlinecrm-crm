@@ -32,7 +32,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $lead->lead_id }}</td>
                                     <td>{{ $lead->name }}</td>
-                                    <td>{{ $lead->mobile }}</td>
+                                    <td>{{ $country_codes[$lead->country] ?? '' }} - {{ $lead->mobile }}</td>
                                     <td>{{ $lead->course->name ?? '-' }}</td>
                                     <td>{{ $lead->source->name ?? '-' }}</td>
                                     <td>{!! \App\Helpers\LeadStatus::getBadge($lead->status) !!}</td>

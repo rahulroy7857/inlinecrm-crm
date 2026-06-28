@@ -947,6 +947,9 @@
                                     <tr>
                                         <th style="width: 20%;">Mobile</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="mobile"
@@ -956,7 +959,7 @@
                                                data-title="Edit Mobile"
                                                data-placement="right"
                                                data-value="{{ $lead->mobile ?? '' }}"
-                                               style="margin-left: 5px;">
+                                               style="{{ $lead->mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -964,6 +967,9 @@
                                     <tr>
                                         <th style="width: 20%;">Alternative</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->alternative_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="alternative_mobile"
@@ -972,7 +978,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Alternative Mobile"
                                                data-value="{{ $lead->alternative_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->alternative_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->alternative_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -980,6 +987,9 @@
                                     <tr>
                                         <th style="width: 20%;">Father</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->father_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="father_mobile"
@@ -988,7 +998,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Father's Contact"
                                                data-value="{{ $lead->father_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->father_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->father_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -996,6 +1007,9 @@
                                     <tr>
                                         <th style="width: 20%;">Mother</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->mother_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="mother_mobile"
@@ -1004,7 +1018,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Mother's Contact"
                                                data-value="{{ $lead->mother_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->mother_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->mother_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1012,6 +1027,9 @@
                                     <tr>
                                         <th style="width: 20%;">Guardian</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->guardian_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="guardian_mobile"
@@ -1020,7 +1038,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Guardian's Contact"
                                                data-value="{{ $lead->guardian_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->guardian_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->guardian_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
