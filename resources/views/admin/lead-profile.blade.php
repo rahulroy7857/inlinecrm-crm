@@ -169,7 +169,15 @@
 
                 <h5 class="mb-2 text-lg font-semibold text-slate-900">{{ $lead->name ?? 'Unknown' }}</h5>
                 <div class="lead-meta">
-                    <p class="mb-0"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}</p>
+                    <p class="mb-0"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}
+                        @if($lead->lead_id)
+                        <a href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}"
+                           class="btn btn-sm btn-outline-primary lead-register-btn ms-1"
+                           title="{{ $lead->student ? 'Open student login' : 'Open student registration' }}">
+                            <i class="bx bx-link-external" aria-hidden="true"></i>
+                        </a>
+                        @endif
+                    </p>
                     <p class="mb-0"><strong>Status:</strong> <span class="badge bg-{!! \App\Helpers\LeadStatus::getColor($lead->status) !!}">{{ $lead->status }}</span></p>
                     <p class="mb-0"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
                     <p class="mb-0"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
@@ -227,6 +235,16 @@
                             <a class="nav-link" href="#payments" role="tab" onclick="activateMenu(this); showContent('payments')">
                                 <i class="bx bx-dollar"></i><span>Payments</span>
                             </a>
+                            @if($lead->lead_id)
+                            <a class="nav-link lead-student-link" href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}" target="_blank" rel="noopener"
+                               title="{{ $lead->student ? 'Student registered — open login' : 'Open student registration' }}">
+                                <i class="bx bx-user"></i><span>Student</span>
+                                @if($lead->student)
+                                    <span class="badge bg-success ms-1" style="font-size:10px;">Registered</span>
+                                @endif
+                                <i class="bx bx-link-external ms-auto small opacity-75"></i>
+                            </a>
+                            @endif
                         </div>
                 </nav>
             </div>

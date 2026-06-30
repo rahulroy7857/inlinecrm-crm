@@ -21,6 +21,16 @@ use App\Http\Controllers\Admin\LeadContactLogController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AccountUserController;
+use App\Http\Controllers\Admin\StudentUserController;
+use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
+use App\Http\Controllers\Account\LedgerAccountController as AccountLedgerController;
+use App\Http\Controllers\Account\TransactionController as AccountTransactionController;
+use App\Http\Controllers\Account\DaybookController as AccountDaybookController;
+use App\Http\Controllers\Account\ProfitLossController as AccountProfitLossController;
+use App\Http\Controllers\Account\CrmSyncController as AccountCrmSyncController;
+use App\Http\Controllers\Account\ReportController as AccountReportController;
+use App\Http\Controllers\Account\FinancialYearController as AccountFinancialYearController;
 
 
 Route::get('/', function () {
@@ -55,7 +65,7 @@ Route::prefix('admin')->name('admin.')->group(function() {
         }
         return app(AdminAuthController::class)->login();
     })->name('login');
-    Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::match(['get', 'post'], 'logout', [AdminAuthController::class, 'logout'])->name('logout');
     Route::post('login', [AdminAuthController::class, 'authenticate'])->name('authenticate');
     
     // Protected routes
@@ -154,6 +164,55 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::put('/{id}', 'update')->name('update');
                 Route::delete('/{id}', 'destroy')->name('destroy');
             });
+
+            Route::controller(AccountUserController::class)->prefix('account')->name('account.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'store')->name('store');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+
+            Route::controller(StudentUserController::class)->prefix('student')->name('student.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::put('/{id}/status', 'updateStatus')->name('status');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+        });
+
+        Route::prefix('accounts')->name('accounts.')->group(function () {
+            Route::get('dashboard', [AccountDashboardController::class, 'index'])->name('dashboard');
+
+            Route::controller(AccountLedgerController::class)->group(function () {
+                Route::get('ledger-accounts', 'index')->name('ledger-accounts.index');
+                Route::post('ledger-accounts', 'store')->name('ledger-accounts.store');
+                Route::put('ledger-accounts/{id}', 'update')->name('ledger-accounts.update');
+                Route::delete('ledger-accounts/{id}', 'destroy')->name('ledger-accounts.destroy');
+            });
+
+            Route::controller(AccountTransactionController::class)->group(function () {
+                Route::get('transactions', 'index')->name('transactions.index');
+                Route::get('transactions/create', 'create')->name('transactions.create');
+                Route::post('transactions', 'store')->name('transactions.store');
+                Route::delete('transactions/{id}', 'destroy')->name('transactions.destroy');
+            });
+
+            Route::get('daybook', [AccountDaybookController::class, 'index'])->name('daybook.index');
+            Route::get('profit-loss', [AccountProfitLossController::class, 'index'])->name('profit-loss.index');
+
+            Route::controller(AccountCrmSyncController::class)->group(function () {
+                Route::get('crm-sync', 'index')->name('crm-sync.index');
+                Route::post('crm-sync', 'sync')->name('crm-sync.sync');
+                Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
+            });
+
+            Route::controller(AccountReportController::class)->group(function () {
+                Route::get('reports', 'index')->name('reports.index');
+                Route::get('reports/account-statement', 'accountStatement')->name('reports.account-statement');
+                Route::get('reports/cash-flow', 'cashFlow')->name('reports.cash-flow');
+                Route::get('reports/ledger-summary', 'ledgerSummary')->name('reports.ledger-summary');
+            });
+
+            Route::post('change-financial-year', [AccountFinancialYearController::class, 'change'])->name('change-financial-year');
         });
 
         Route::get('users/role', function() {

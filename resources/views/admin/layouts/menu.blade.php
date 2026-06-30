@@ -94,6 +94,52 @@
                 <li class="menu-item {{ request()->is('admin/users/counselor') ? 'active' : '' }}">
                     <a href="{{ url('/admin/users/counselor') }}" class="menu-link"><span>Counselor</span></a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/users/account') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/users/account') }}" class="menu-link"><span>Account</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/users/student') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/users/student') }}" class="menu-link"><span>Student</span></a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->is('admin/accounts*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon bx bx-wallet"></i>
+                <span>Accounts</span>
+                <i class="bx bx-chevron-down ml-auto text-slate-500"></i>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/accounts/dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.dashboard') }}" class="menu-link"><span>Dashboard</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/ledger-accounts*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.ledger-accounts.index') }}" class="menu-link"><span>Bank & Cash</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/transactions*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.transactions.index') }}" class="menu-link"><span>Transactions</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/daybook*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.daybook.index') }}" class="menu-link"><span>Daybook</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/profit-loss*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.profit-loss.index') }}" class="menu-link"><span>Profit & Loss</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/crm-sync*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.crm-sync.index') }}" class="menu-link"><span>CRM Sync</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/reports') && !request()->is('admin/accounts/reports/*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.reports.index') }}" class="menu-link"><span>Reports</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/reports/account-statement') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.reports.account-statement') }}" class="menu-link"><span>Account Statement</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/reports/cash-flow') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.reports.cash-flow') }}" class="menu-link"><span>Cash Flow</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/reports/ledger-summary') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.reports.ledger-summary') }}" class="menu-link"><span>Ledger Summary</span></a>
+                </li>
             </ul>
         </li>
 

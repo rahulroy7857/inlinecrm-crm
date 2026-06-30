@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ActivityLogger;
+use App\Http\Controllers\Auth\Concerns\LogsOutGuard;
+
 class CounselorAuthController extends Controller
 {
+    use LogsOutGuard;
     public function login()
     {
         return view('counselor.auth.login');
@@ -59,20 +62,13 @@ class CounselorAuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Log the logout activity
-        if (Auth::guard('counselor')->check()) {
+        return $this->performGuardLogout($request, 'counselor', 'counselor.login', function ($counselor) {
             ActivityLogger::log(
-                "Counselor logged out: " . Auth::guard('counselor')->user()->name,
+                'Counselor logged out: ' . $counselor->name,
                 'Logout',
-                Auth::guard('counselor')->user(),
+                $counselor,
                 []
             );
-        }
-
-        Auth::guard('counselor')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('counselor.login');
+        });
     }
 }

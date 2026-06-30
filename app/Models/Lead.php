@@ -145,4 +145,9 @@ class Lead extends Model
     {
         return $this->hasMany(Timeline::class)->orderBy('event_date', 'desc');
     }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
 }

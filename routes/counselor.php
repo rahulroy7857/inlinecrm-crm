@@ -21,7 +21,7 @@ Route::get('login', function() {
     return app(CounselorAuthController::class)->login();
 })->name('login');
 
-Route::post('logout', [CounselorAuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], 'logout', [CounselorAuthController::class, 'logout'])->name('logout');
 Route::post('login', [CounselorAuthController::class, 'authenticate'])->name('authenticate');
 
 // Protected routes

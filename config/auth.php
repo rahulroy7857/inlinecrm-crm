@@ -56,6 +56,16 @@ return [
             'driver' => 'session',
             'provider' => 'counselors',
         ],
+
+        'account' => [
+            'driver' => 'session',
+            'provider' => 'accounts',
+        ],
+
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'students',
+        ],
     ],
 
     /*
@@ -89,6 +99,16 @@ return [
         'counselors' => [
             'driver' => 'eloquent',
             'model' => App\Models\Counselor::class,
+        ],
+
+        'accounts' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Account::class,
+        ],
+
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Student::class,
         ],
         // 'users' => [
         //     'driver' => 'database',

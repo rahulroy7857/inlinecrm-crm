@@ -80,3 +80,77 @@ if (!function_exists('transaction_types')) {
         return $type ? $types[$type] ?? null : $types;
     }
 }
+
+if (!function_exists('is_admin_account_portal')) {
+    function is_admin_account_portal(): bool
+    {
+        return request()->is('admin/accounts*');
+    }
+}
+
+if (!function_exists('account_route_prefix')) {
+    function account_route_prefix(): string
+    {
+        return is_admin_account_portal() ? 'admin.accounts' : 'account';
+    }
+}
+
+if (!function_exists('account_route')) {
+    function account_route(string $name, $parameters = [], bool $absolute = true): string
+    {
+        return route(account_route_prefix() . '.' . $name, $parameters, $absolute);
+    }
+}
+
+if (!function_exists('account_can_manage')) {
+    function account_can_manage(): bool
+    {
+        if (is_admin_account_portal()) {
+            return auth()->guard('admin')->check();
+        }
+
+        return auth()->guard('account')->user()?->canManage() ?? false;
+    }
+}
+
+if (!function_exists('account_actor')) {
+    function account_actor()
+    {
+        if (is_admin_account_portal()) {
+            return auth()->guard('admin')->user();
+        }
+
+        return auth()->guard('account')->user();
+    }
+}
+
+if (!function_exists('account_user_name')) {
+    function account_user_name(): string
+    {
+        return account_actor()?->name ?? '';
+    }
+}
+
+if (!function_exists('indian_states')) {
+    function indian_states(): array
+    {
+        return [
+            'Any', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
+            'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
+            'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+            'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
+            'Uttarakhand', 'West Bengal',
+        ];
+    }
+}
+
+if (!function_exists('student_registration_url')) {
+    function student_registration_url(?string $leadRef): string
+    {
+        if (!$leadRef) {
+            return route('student.registration');
+        }
+
+        return route('student.registration.lead', $leadRef);
+    }
+}

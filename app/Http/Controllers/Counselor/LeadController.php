@@ -40,6 +40,7 @@ class LeadController extends Controller
             'exams',
             'payments',
             'timeline',
+            'student',
             'contactLogs' => function($query) {
                 $query->orderBy('contact_date', 'desc');
             }
