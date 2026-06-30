@@ -79,6 +79,58 @@ class Student extends Authenticatable
         return $this->hasMany(StudentPayment::class);
     }
 
+    public function documents()
+    {
+        return $this->hasMany(StudentDocument::class);
+    }
+
+    public function hasRequiredDocuments(): bool
+    {
+        foreach (config('student.required_documents', []) as $type) {
+            if (!$this->documents()->where('document_type', $type)->exists()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function documentsProgressLabel(): string
+    {
+        $required = config('student.required_documents', []);
+        $uploaded = $this->documents()->whereIn('document_type', $required)->count();
+
+        return $uploaded . '/' . count($required);
+    }
+
+    public function applicationProgressPercent(): int
+    {
+        $steps = 0;
+
+        if ($this->isProfileComplete()) {
+            $steps++;
+        }
+
+        if ($this->hasPaid()) {
+            $steps++;
+        }
+
+        if ($this->hasRequiredDocuments()) {
+            $steps++;
+        }
+
+        if (in_array($this->application_status, ['submitted', 'under_review', 'approved'], true)) {
+            $steps++;
+        }
+
+        return (int) round(($steps / 4) * 100);
+    }
+
+    public function isApplicationSubmitted(): bool
+    {
+        return in_array($this->application_status, ['submitted', 'under_review', 'approved'], true);
+    }
+
     public function applicationStatusLabel(): string
     {
         return match ($this->application_status) {

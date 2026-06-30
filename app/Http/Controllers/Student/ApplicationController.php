@@ -25,6 +25,11 @@ class ApplicationController extends Controller
                 ->with('error', 'Please complete payment before submitting your application.');
         }
 
+        if (!$student->hasRequiredDocuments()) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Please upload all required documents before submitting.');
+        }
+
         if ($student->application_status === 'submitted') {
             return redirect()->route('student.dashboard')
                 ->with('info', 'Your application has already been submitted.');

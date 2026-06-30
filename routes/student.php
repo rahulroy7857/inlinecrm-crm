@@ -7,6 +7,7 @@ use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Student\ApplicationController;
 use App\Http\Controllers\Student\PaymentController;
+use App\Http\Controllers\Student\DocumentController;
 
 Route::get('login', function () {
     if (auth()->guard('student')->check()) {
@@ -33,6 +34,10 @@ Route::middleware(['auth:student'])->group(function () {
 
     Route::redirect('application/status', '/student/dashboard')->name('application.status');
     Route::post('application/submit', [ApplicationController::class, 'submit'])->name('application.submit');
+
+    Route::post('documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
     Route::get('payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::post('payment/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');

@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="dashboard-header mb-4">
+    <div class="dashboard-header mt-4">
         <h1 style="color: #fff !important;">Profit & Loss Statement</h1>
         <p>{{ $selectedYear?->name ?? 'All Financial Years' }}</p>
     </div>

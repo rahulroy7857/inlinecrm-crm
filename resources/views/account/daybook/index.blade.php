@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <div class="stats-grid mb-4">
+    <div class="stats-grid mt-4">
         <div class="stats-card"><div class="card-body">
             <div class="card-title">Date</div>
             <h3 class="fs-5">{{ $date->format('d M Y, l') }}</h3>
