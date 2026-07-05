@@ -38,7 +38,7 @@ class LeadController extends Controller
             'college',
             'education',
             'exams',
-            'payments',
+            'payments.accountTransaction.ledgerAccount',
             'timeline',
             'student',
             'contactLogs' => function($query) {
@@ -99,6 +99,7 @@ class LeadController extends Controller
             $lead->transfer_seen = true;
             $lead->save();
         }
+        $ledgerAccounts = \App\Models\LedgerAccount::where('status', 'Active')->orderBy('name')->get();
         return view('counselor.lead-profile', compact(
             'lead',
             'sources',
@@ -110,7 +111,8 @@ class LeadController extends Controller
             'states',
             'holidays',
             'statuses',
-            'agents'
+            'agents',
+            'ledgerAccounts'
         ));
     }
 

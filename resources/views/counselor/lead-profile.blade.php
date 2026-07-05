@@ -1664,6 +1664,7 @@
                                     <th>Transaction Type</th>
                                     <th>Payment Type</th>
                                     <th>Mode</th>
+                                    <th>Bank / Cash Account</th>
                                     <th>Remark</th>
                                     <th>Amount</th>
                                 </tr>
@@ -1680,6 +1681,7 @@
                                     <td>{{ transaction_types($payment->transaction_type) }}</td>
                                     <td>{{ $payment->payment_type }}</td>
                                     <td>{{ $payment->payment_mode }}</td>
+                                    <td>{{ $payment->accountTransaction?->ledgerAccount?->name ?? '—' }}</td>
                                     <td>{{ $payment->remark }}</td>
                                     <td>{{ number_format($payment->amount, 2) }}</td>
                                 </tr>
@@ -1942,80 +1944,13 @@
           aria-label="Close"
         ></button>
       </div>
-    <div class="modal-body">
-      <div class="row">
-        <div class="col-12 mb-3">
-          <label for="paymentDate" class="form-label">Payment Date</label>
-          <input
-            type="date"
-            id="paymentDate"
-            name="payment_date"
-            class="form-control"
-            placeholder="Select Payment Date"
-            onfocus="this.showPicker()"
-            max="{{ date('Y-m-d') }}"
-            required
-          />
-        </div>
-        <div class="col-12 mb-3">
-          <label for="transactionType" class="form-label">Transaction Type</label>
-          <select id="transactionType" class="form-select" name="transaction_type" required>
-            <option value="1">Received From Student</option>
-            <option value="2">Received From Agent</option>
-            <option value="3">Received From College</option>
-            <option value="4">Paid To Student</option>
-            <option value="5">Paid To Agent</option>
-            <option value="6">Paid To College</option>
-            <option value="7">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="type" class="form-label">Type</label>
-          <select id="type" class="form-select" name="payment_type" required>
-            <option value="Application Fee">Application Fee</option>
-            <option value="Reservation Fee">Reservation Fee</option>
-            <option value="Admission Fee">Admission Fee</option>
-            <option value="Commission">Commission</option>
-            <option value="Refund">Refund</option>
-            <option value="Tution Fee">Tution Fee</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentMode" class="form-label">Payment Mode</label>
-          <select id="paymentMode" class="form-select" name="payment_mode" required>
-            <option value="Cash">Cash</option>
-            <option value="Card">Card</option>
-            <option value="UPI">UPI</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cheque">Cheque</option>
-            <option value="RazorPay">RazorPay</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentAmount" class="form-label">Amount</label>
-          <input
-            type="number"
-            id="paymentAmount"
-            class="form-control"
-            name="amount"
-            placeholder="Enter Payment Amount"
-            require
-          />
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentRemark" class="form-label">Remark</label>
-          <textarea
-            id="paymentRemark"
-            class="form-control"
-            rows="3"
-            placeholder="Enter Remark"
-            name="remarks"
-          ></textarea>
+      <div class="modal-body">
+        <div class="row">
+          @include('partials.lead-payment-form-fields', [
+              'ledgerAccounts' => $ledgerAccounts ?? collect(),
+          ])
         </div>
       </div>
-    </div>
       <div class="modal-footer border-top">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
           Close

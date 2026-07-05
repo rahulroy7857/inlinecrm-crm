@@ -87,7 +87,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><span class="chart-icon chart-icon--transactions"><i class="bx bx-transfer"></i></span> Recent Transactions</h5>
                     @if(account_can_manage())
-                        <a href="{{ account_route('transactions.create') }}" class="btn btn-sm btn-primary">New Entry</a>
+                        <a href="{{ account_route('lead-payments.index', ['add' => 1]) }}" class="btn btn-sm btn-primary">Add Payment</a>
                     @endif
                 </div>
                 <div class="card-body">

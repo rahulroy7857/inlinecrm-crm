@@ -76,7 +76,7 @@
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="2">{{ old('description') }}</textarea>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 pt-4">
                         <button type="submit" class="btn btn-primary">Save Transaction</button>
                     </div>
                 </div>

@@ -123,7 +123,7 @@ class Lead extends Model
 
     public function payments(): HasMany
     {
-        return $this->hasMany(LeadPayment::class);
+        return $this->hasMany(LeadPayment::class)->orderByDesc('payment_date')->orderByDesc('id');
     }
 
     public function contactLogs(): HasMany

@@ -20,7 +20,7 @@
         <li class="menu-item {{ request()->is('account/ledger-accounts*') ? 'active' : '' }}">
             <a href="{{ route('account.ledger-accounts.index') }}" class="menu-link">
                 <i class="menu-icon bx bx-wallet"></i>
-                <span>Bank & Cash Accounts</span>
+                <span>Bank Accounts</span>
             </a>
         </li>
 
@@ -49,6 +49,20 @@
             <a href="{{ route('account.crm-sync.index') }}" class="menu-link">
                 <i class="menu-icon bx bx-sync"></i>
                 <span>CRM Payment Sync</span>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->is('account/lead-payments*') ? 'active' : '' }}">
+            <a href="{{ route('account.lead-payments.index') }}" class="menu-link">
+                <i class="menu-icon bx bx-dollar-circle"></i>
+                <span>Lead Payments</span>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->is('account/counselor-salaries*') ? 'active' : '' }}">
+            <a href="{{ route('account.counselor-salaries.index') }}" class="menu-link">
+                <i class="menu-icon bx bx-money"></i>
+                <span>Counselor Salaries</span>
             </a>
         </li>
 

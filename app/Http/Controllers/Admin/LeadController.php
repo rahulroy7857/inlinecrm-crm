@@ -47,7 +47,7 @@ class LeadController extends Controller
             'college',
             'education',
             'exams',
-            'payments',
+            'payments.accountTransaction.ledgerAccount',
             'timeline',
             'student',
             'contactLogs' => function($query) {

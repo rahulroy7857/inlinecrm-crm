@@ -11,6 +11,8 @@ use App\Http\Controllers\Account\CrmSyncController;
 use App\Http\Controllers\Account\ReportController;
 use App\Http\Controllers\Account\ChangePasswordController;
 use App\Http\Controllers\Account\FinancialYearController;
+use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
+use App\Http\Controllers\Account\CounselorSalaryController;
 
 Route::get('login', function () {
     if (auth()->guard('account')->check()) {
@@ -46,6 +48,17 @@ Route::middleware(['auth:account'])->group(function () {
         Route::get('crm-sync', 'index')->name('crm-sync.index');
         Route::post('crm-sync', 'sync')->name('crm-sync.sync');
         Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
+    });
+
+    Route::controller(AccountLeadPaymentController::class)->group(function () {
+        Route::get('lead-payments', 'index')->name('lead-payments.index');
+        Route::get('lead-payments/search-leads', 'searchLeads')->name('lead-payments.search-leads');
+        Route::post('lead-payments', 'store')->name('lead-payments.store');
+    });
+
+    Route::controller(CounselorSalaryController::class)->group(function () {
+        Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');
+        Route::get('counselor-salaries/{id}', 'show')->name('counselor-salaries.show');
     });
 
     Route::controller(ReportController::class)->group(function () {

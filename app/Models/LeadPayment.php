@@ -25,4 +25,9 @@ class LeadPayment extends Model
     {
         return $this->belongsTo(Lead::class);
     }
+
+    public function accountTransaction()
+    {
+        return $this->hasOne(AccountTransaction::class);
+    }
 }

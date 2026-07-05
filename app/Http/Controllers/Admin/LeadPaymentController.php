@@ -4,56 +4,39 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\LeadPayment; 
+use App\Models\Timeline;
 use App\Services\ActivityLogger;
-use App\Models\Timeline; // Assuming you have a Timeline model
-use App\Models\Lead; // Assuming you have a Lead model
+use App\Services\LeadPaymentService;
 
 class LeadPaymentController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, LeadPaymentService $paymentService)
     {
-        $validator = \Validator::make($request->all(), [
+        $validated = $request->validate([
             'lead_id' => 'required|exists:leads,id',
-            'payment_date' => 'required|date',
+            'payment_date' => 'required|date|before_or_equal:today',
             'payment_type' => 'required|string',
             'transaction_type' => 'required|integer|between:1,7',
             'payment_mode' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'remark' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'remarks' => 'nullable|string|max:255',
+            'ledger_account_id' => 'nullable|exists:ledger_accounts,id',
         ]);
 
-        if ($validator->fails()) {
-            $leadId = $request->input('lead_id');
-            $redirectUrl = '/admin/lead-profile/' . $leadId . '#payments';
-            return redirect($redirectUrl)
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $validated['remarks'] = $request->input('remarks');
+        $ledgerAccountId = $request->filled('ledger_account_id') ? (int) $request->ledger_account_id : null;
 
-        $validated = $validator->validated();
-        $validated['remarks'] = $request->remarks ?? null; // Optional field
-        // Assuming you have a LeadPayment model and a relationship with Lead
-        LeadPayment::create([
-            'lead_id'      => $validated['lead_id'],
-            'payment_date' => $validated['payment_date'],
-            'payment_type' => $validated['payment_type'],
-            'transaction_type' => $validated['transaction_type'],
-            'payment_mode' => $validated['payment_mode'],
-            'amount'      => $validated['amount'],
-            'remark'      => $validated['remarks'],
-        ]);
+        $paymentService->create($validated, $ledgerAccountId);
 
         Timeline::create([
-            'lead_id'     => $validated['lead_id'],
-            'title'       => "Added payment: {$validated['payment_type']}",
-            'description' => "Amount: {$validated['amount']}, Mode: {$validated['payment_mode']}" . ($validated['remarks'] ? ", Remarks: {$validated['remarks']}" : ""),
-            'event_type'  => 'payment',
-            'performed_by'=> auth()->guard('admin')->id(),
-            'event_date'  => now(),
+            'lead_id' => $validated['lead_id'],
+            'title' => "Added payment: {$validated['payment_type']}",
+            'description' => "Amount: {$validated['amount']}, Mode: {$validated['payment_mode']}" . ($validated['remarks'] ? ", Remarks: {$validated['remarks']}" : ''),
+            'event_type' => 'payment',
+            'performed_by' => auth()->guard('admin')->id(),
+            'event_date' => now(),
         ]);
 
-        // Log the activity
         ActivityLogger::log(
             "Added payment for lead ID: {$request->input('lead_id')}",
             'Create',

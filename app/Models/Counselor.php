@@ -14,7 +14,12 @@ class Counselor extends Authenticatable
         'mobile',
         'password',
         'languages',
-        'status'
+        'status',
+        'joining_date',
+        'office_start_time',
+        'office_end_time',
+        'working_days',
+        'salary',
     ];
 
     protected $hidden = [
@@ -24,7 +29,10 @@ class Counselor extends Authenticatable
 
     protected $casts = [
         'languages' => 'array',
-        'status' => 'boolean'
+        'working_days' => 'array',
+        'status' => 'boolean',
+        'joining_date' => 'date',
+        'salary' => 'decimal:2',
     ];
 
     public function leads()

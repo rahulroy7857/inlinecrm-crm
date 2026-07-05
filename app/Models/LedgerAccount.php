@@ -12,7 +12,7 @@ class LedgerAccount extends Model
         'account_number',
         'bank_name',
         'ifsc_code',
-        'opening_balance',
+        'opening_balance' => 'nullable|decimal:2',
         'status',
         'description',
     ];

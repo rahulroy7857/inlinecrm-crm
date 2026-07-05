@@ -28,8 +28,7 @@ class LedgerAccountController extends Controller
             'type' => 'required|in:bank,cash',
             'account_number' => 'nullable|string|max:50',
             'bank_name' => 'nullable|string|max:255',
-            'ifsc_code' => 'nullable|string|max:20',
-            'opening_balance' => 'required|numeric',
+            'ifsc_code' => 'nullable|string|max:20',            
             'status' => 'required|in:Active,Inactive',
             'description' => 'nullable|string',
         ]);

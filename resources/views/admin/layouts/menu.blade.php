@@ -128,6 +128,12 @@
                 <li class="menu-item {{ request()->is('admin/accounts/crm-sync*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.crm-sync.index') }}" class="menu-link"><span>CRM Sync</span></a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/accounts/lead-payments*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.lead-payments.index') }}" class="menu-link"><span>Lead Payments</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/counselor-salaries*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.counselor-salaries.index') }}" class="menu-link"><span>Counselor Salaries</span></a>
+                </li>
                 <li class="menu-item {{ request()->is('admin/accounts/reports') && !request()->is('admin/accounts/reports/*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.reports.index') }}" class="menu-link"><span>Reports</span></a>
                 </li>

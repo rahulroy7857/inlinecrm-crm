@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\CounselorController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\LeadEducationController;
 use App\Http\Controllers\Admin\LeadExamController;
-use App\Http\Controllers\Admin\LeadPaymentController;
 use App\Http\Controllers\Admin\LeadContactLogController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -31,6 +30,8 @@ use App\Http\Controllers\Account\ProfitLossController as AccountProfitLossContro
 use App\Http\Controllers\Account\CrmSyncController as AccountCrmSyncController;
 use App\Http\Controllers\Account\ReportController as AccountReportController;
 use App\Http\Controllers\Account\FinancialYearController as AccountFinancialYearController;
+use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
+use App\Http\Controllers\Account\CounselorSalaryController as AccountCounselorSalaryController;
 
 
 Route::get('/', function () {
@@ -205,6 +206,17 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
             });
 
+            Route::controller(AccountLeadPaymentController::class)->group(function () {
+                Route::get('lead-payments', 'index')->name('lead-payments.index');
+                Route::get('lead-payments/search-leads', 'searchLeads')->name('lead-payments.search-leads');
+                Route::post('lead-payments', 'store')->name('lead-payments.store');
+            });
+
+            Route::controller(AccountCounselorSalaryController::class)->group(function () {
+                Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');
+                Route::get('counselor-salaries/{id}', 'show')->name('counselor-salaries.show');
+            });
+
             Route::controller(AccountReportController::class)->group(function () {
                 Route::get('reports', 'index')->name('reports.index');
                 Route::get('reports/account-statement', 'accountStatement')->name('reports.account-statement');
@@ -240,8 +252,6 @@ Route::prefix('admin')->name('admin.')->group(function() {
         Route::get('leads/exams/{id}/destroy', [LeadExamController::class, 'destroy'])->name('lead.exams.destroy');
         Route::post('leads/exams', [LeadExamController::class, 'store'])->name('lead.exams.store');
         Route::post('leads/exams/{id}/update', [LeadExamController::class, 'update'])->name('lead.exams.update');
-
-        Route::post('leads/payments', [LeadPaymentController::class, 'store'])->name('lead.payments.store');
 
         Route::get('leads/contact-logs/{id}/delete', [LeadContactLogController::class, 'destroy'])->name('lead.contact_logs.destroy');
         Route::post('leads/contact-logs', [LeadContactLogController::class, 'store'])->name('lead.contact_logs.store');

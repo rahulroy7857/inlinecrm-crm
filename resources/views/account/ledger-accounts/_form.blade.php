@@ -23,10 +23,7 @@
         <label class="form-label">IFSC Code</label>
         <input type="text" name="ifsc_code" id="{{ $p }}ifsc_code" class="form-control">
     </div>
-    <div class="col-md-4">
-        <label class="form-label">Opening Balance *</label>
-        <input type="number" step="0.01" name="opening_balance" id="{{ $p }}opening_balance" class="form-control" value="0" required>
-    </div>
+    
     <div class="col-md-4">
         <label class="form-label">Status *</label>
         <select name="status" id="{{ $p }}status" class="form-control" required>

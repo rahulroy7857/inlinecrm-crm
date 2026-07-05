@@ -41,10 +41,7 @@ class TransactionController extends Controller
 
     public function create()
     {
-        $this->authorizeAccountManage();
-        $ledgerAccounts = LedgerAccount::where('status', 'Active')->orderBy('name')->get();
-
-        return view('account.transactions.create', compact('ledgerAccounts'));
+        return redirect(account_route('lead-payments.index', ['add' => 1]));
     }
 
     public function store(Request $request)

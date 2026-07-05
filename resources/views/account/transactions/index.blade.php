@@ -36,7 +36,7 @@
                     <button type="submit" class="btn btn-primary">Filter</button>
                     <a href="{{ account_route('transactions.index') }}" class="btn btn-outline-secondary">Reset</a>
                     @if(account_can_manage())
-                    <a href="{{ account_route('transactions.create') }}" class="btn btn-success">New Entry</a>
+                    <a href="{{ account_route('lead-payments.index', ['add' => 1]) }}" class="btn btn-success">Add Payment</a>
                     @endif
                 </div>
             </form>

@@ -60,6 +60,8 @@
                                     <th>Email</th>
                                     <th>Mobile</th>
                                     <th>Languages</th>
+                                    <th>Joining Date</th>
+                                    <th>Salary</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -72,6 +74,8 @@
                                     <td>{{ $counselor->email }}</td>
                                     <td>{{ $counselor->mobile }}</td>
                                     <td>{{ implode(', ', $counselor->languages ?? []) }}</td>
+                                    <td>{{ $counselor->joining_date?->format('d-m-Y') ?? '—' }}</td>
+                                    <td>₹{{ number_format($counselor->salary ?? 0, 2) }}</td>
                                     <td>
                                         <span class="badge bg-{{ $counselor->status ? 'success' : 'danger' }}">
                                             {{ $counselor->status ? 'Active' : 'Inactive' }}
@@ -85,6 +89,11 @@
                                                 data-email="{{ $counselor->email }}"
                                                 data-mobile="{{ $counselor->mobile }}"
                                                 data-languages="{{ json_encode($counselor->languages) }}"
+                                                data-joining-date="{{ $counselor->joining_date?->format('Y-m-d') }}"
+                                                data-office-start="{{ $counselor->office_start_time ? \Carbon\Carbon::parse($counselor->office_start_time)->format('H:i') : '' }}"
+                                                data-office-end="{{ $counselor->office_end_time ? \Carbon\Carbon::parse($counselor->office_end_time)->format('H:i') : '' }}"
+                                                data-working-days="{{ json_encode($counselor->working_days ?? []) }}"
+                                                data-salary="{{ $counselor->salary }}"
                                                 data-status="{{ $counselor->status }}">
                                             <i class="bx bx-edit"></i>
                                         </button>
@@ -112,7 +121,7 @@
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form class="modal-content" method="POST" action="{{ route('admin.users.counselor.store') }}">
             @csrf
             <div class="modal-header border-bottom">
@@ -135,6 +144,38 @@
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Joining Date</label>
+                        <input type="date" name="joining_date" class="form-control" value="{{ old('joining_date') }}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Office Start Time</label>
+                        <input type="time" name="office_start_time" class="form-control" value="{{ old('office_start_time', '09:00') }}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Office End Time</label>
+                        <input type="time" name="office_end_time" class="form-control" value="{{ old('office_end_time', '18:00') }}" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Monthly Salary (₹)</label>
+                    <input type="number" name="salary" class="form-control" min="0" step="0.01" value="{{ old('salary') }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Working Days</label>
+                    <div class="row">
+                        @foreach(config('weekdays') as $key => $label)
+                        <div class="col-md-4 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="working_days[]" value="{{ $key }}"
+                                    {{ is_array(old('working_days')) && in_array($key, old('working_days')) ? 'checked' : '' }}>
+                                <label class="form-check-label">{{ $label }}</label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Languages</label>
@@ -167,7 +208,7 @@
 
 <!-- Edit Modal -->
 <div class="modal fade" id="editModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form class="modal-content" method="POST" id="editForm">
             @csrf
             @method('PUT')
@@ -192,6 +233,37 @@
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Joining Date</label>
+                        <input type="date" name="joining_date" id="edit_joining_date" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Office Start Time</label>
+                        <input type="time" name="office_start_time" id="edit_office_start" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Office End Time</label>
+                        <input type="time" name="office_end_time" id="edit_office_end" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Monthly Salary (₹)</label>
+                    <input type="number" name="salary" id="edit_salary" class="form-control" min="0" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Working Days</label>
+                    <div class="row">
+                        @foreach(config('weekdays') as $key => $label)
+                        <div class="col-md-4 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input edit-working-day" type="checkbox" name="working_days[]" value="{{ $key }}">
+                                <label class="form-check-label">{{ $label }}</label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Languages</label>
@@ -235,11 +307,20 @@
             var email = $(this).data('email');
             var mobile = $(this).data('mobile');
             var languages = $(this).data('languages');
+            var joiningDate = $(this).data('joining-date');
+            var officeStart = $(this).data('office-start');
+            var officeEnd = $(this).data('office-end');
+            var workingDays = $(this).data('working-days');
+            var salary = $(this).data('salary');
             var status = $(this).data('status');
 
             $('#edit_name').val(name);
             $('#edit_email').val(email);
             $('#edit_mobile').val(mobile);
+            $('#edit_joining_date').val(joiningDate);
+            $('#edit_office_start').val(officeStart);
+            $('#edit_office_end').val(officeEnd);
+            $('#edit_salary').val(salary);
             $('#edit_status').prop('checked', status == 1);
 
             // Reset and set languages
@@ -247,6 +328,13 @@
             if (languages) {
                 languages.forEach(function(lang) {
                     $('.edit-language[value="' + lang + '"]').prop('checked', true);
+                });
+            }
+
+            $('.edit-working-day').prop('checked', false);
+            if (workingDays) {
+                workingDays.forEach(function(day) {
+                    $('.edit-working-day[value="' + day + '"]').prop('checked', true);
                 });
             }
 
