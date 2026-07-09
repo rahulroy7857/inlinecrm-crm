@@ -185,7 +185,7 @@
                                         <div class="mb-2">
                                             <label for="source_id" class="form-label">Source</label>
                                             <select class="form-select" id="source_id" name="source_id" aria-label="Default select example" required>
-                                                <option selected>Select Source</option>
+                                                <option value="">Select Source</option>
                                                 @foreach($sources as $source)
                                                     <option value="{{ $source['value'] }}">{{ $source['text'] }}</option>
                                                 @endforeach
@@ -255,7 +255,7 @@
                                     <td>{!! \App\Helpers\LeadStatus::getBadge($lead->status) !!}</td>
                                     <td>{{ $lead->next_follow_up->format('d M Y h:i A') }}</td>
                                     <td>
-                                        <a href="{{url('/counselor/lead-profile/'.$lead->id)}}">
+                                        <a href="{{ route('counselor.leads.show', ['id' => $lead->id, 'acknowledge' => 1]) }}">
                                             <button type="button" class="btn btn-icon btn-outline-primary">
                                                 <i class="bx bx-show"></i>
                                             </button>

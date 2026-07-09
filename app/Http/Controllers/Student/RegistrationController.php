@@ -44,7 +44,7 @@ class RegistrationController extends Controller
 
         if (Student::where('lead_id', $lead->id)->exists()) {
             return redirect()->route('student.login')
-                ->with('info', 'An account already exists for this lead. Please sign in.');
+                ->with('info', 'An account already exists for this student. Please sign in.');
         }
 
         return view('student.auth.register', [
@@ -65,7 +65,7 @@ class RegistrationController extends Controller
 
         if (Student::where('lead_id', $lead->id)->exists()) {
             return redirect()->route('student.login')
-                ->with('info', 'An account already exists for this lead. Please sign in.');
+                ->with('info', 'An account already exists for this student. Please sign in.');
         }
 
         $validated = $request->validate([

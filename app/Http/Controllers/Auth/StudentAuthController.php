@@ -38,7 +38,7 @@ class StudentAuthController extends Controller
             );
 
             if (!$student->isProfileComplete()) {
-                return redirect()->route('student.profile.complete');
+                return redirect()->route('student.dashboard');
             }
 
             return redirect()->intended(route('student.dashboard'));

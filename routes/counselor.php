@@ -32,7 +32,7 @@ Route::middleware(['auth:counselor'])->group(function () {
     Route::get('leads/{status}', [LeadController::class, 'statusWiseLeads'])->name('leads.status');
     Route::get('new-leads', [LeadController::class, 'newLeads'])->name('new-leads');
     Route::get('leads-basket', [LeadController::class, 'leadsBasket'])->name('leads-basket');
-    Route::get('pick-lead/{id}', [LeadController::class, 'pickLead']);
+    Route::get('pick-lead/{id}', [LeadController::class, 'pickLead'])->name('pick-lead');
     Route::get('search', [LeadController::class, 'search'])->name('search');
     Route::get('lead-profile/{id}', [LeadController::class, 'show'])->name('leads.show');
     Route::post('leads/{id}/update', [LeadController::class, 'update'])->name('leads.update');

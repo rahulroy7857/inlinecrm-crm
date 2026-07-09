@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('timelines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lead_id')->constrained('leads')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('event_type')->nullable();
-            $table->foreignId('performed_by')->nullable()->constrained('users');
+            $table->nullableMorphs('performer');
             $table->timestamp('event_date');
             $table->timestamps();
         });

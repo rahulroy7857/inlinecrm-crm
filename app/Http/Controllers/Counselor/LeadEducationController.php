@@ -48,7 +48,7 @@ class LeadEducationController extends Controller
             'title'       => "Added education: {$validated['qualification']}",
             'description' => "Institute: {$validated['institute']}, Marks: {$validated['marks']}, Year: {$validated['year']}",
             'event_type'  => 'education',
-            'performed_by'=> auth()->guard('counselor')->id(),
+            ...Timeline::performerAttributes(auth()->guard('counselor')->user()),
             'event_date'  => now(),
         ]);
 
@@ -103,7 +103,7 @@ class LeadEducationController extends Controller
             'title'       => "Deleted education: {$education->qualification}",
             'description' => "Institute: {$education->institute}, Marks: {$education->marks}, Year: {$education->year}",
             'event_type'  => 'education',
-            'performed_by'=> auth()->guard('counselor')->id(),
+            ...Timeline::performerAttributes(auth()->guard('counselor')->user()),
             'event_date'  => now(),
         ]);
 

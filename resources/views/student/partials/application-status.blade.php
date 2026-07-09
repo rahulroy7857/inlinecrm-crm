@@ -241,7 +241,7 @@
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="studentApplicationSubmitBtn">
-                    <i class="bx bx-check me-1"></i> Yes, Submit
+                    <i class="bx bx-check me-1"></i>Submit
                 </button>
             </div>
         </div>

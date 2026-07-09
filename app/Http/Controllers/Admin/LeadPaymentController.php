@@ -33,7 +33,7 @@ class LeadPaymentController extends Controller
             'title' => "Added payment: {$validated['payment_type']}",
             'description' => "Amount: {$validated['amount']}, Mode: {$validated['payment_mode']}" . ($validated['remarks'] ? ", Remarks: {$validated['remarks']}" : ''),
             'event_type' => 'payment',
-            'performed_by' => auth()->guard('admin')->id(),
+            ...Timeline::performerAttributes(auth()->guard('admin')->user()),
             'event_date' => now(),
         ]);
 

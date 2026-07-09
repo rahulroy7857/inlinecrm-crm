@@ -187,7 +187,7 @@ class LeadController extends Controller
                 'title' => 'New Lead Created',
                 'description' => "Lead created with name: {$lead->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -212,6 +212,11 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         $field = $request->name;
         $value = $request->value;
+
+        $dateFields = ['dob', 'application_date', 'reservation_date', 'admission_date', 'cancel_date'];
+        if (in_array($field, $dateFields, true) && $value) {
+            $value = parse_editable_date($value);
+        }
 
         $oldValue = $lead->$field;
         $lead->$field = $value;
@@ -249,7 +254,7 @@ class LeadController extends Controller
             'title' => 'Deleted Lead',
             'description' => "Lead deleted with name: {$lead->name}",
             'event_type' => 'manual',
-            'performed_by' => auth()->id(),
+            ...Timeline::performerAttributes(),
             'event_date' => now(),
         ]);
 
@@ -490,7 +495,7 @@ class LeadController extends Controller
         try {
             $request->validate([
                 'source_id' => 'required|exists:sources,id',
-                'leads_file' => 'required|file|mimes:xlsx,xls|max:5120'
+                'leads_file' => 'required|file|mimes:xlsx,xls,csv|max:5120'
             ]);
             
             // Validate mandatory columns in the uploaded Excel file
@@ -499,7 +504,7 @@ class LeadController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $header = $sheet->rangeToArray('A1:' . $sheet->getHighestColumn() . '1')[0];
 
-            $requiredFields = ['name', 'email', 'mobile', 'country', 'state', 'course'];
+            $requiredFields = ['name', 'email', 'mobile', 'country', 'state', 'course'];   
             $missingFields = array_diff($requiredFields, array_map('strtolower', $header));
 
             if (!empty($missingFields)) {
@@ -563,7 +568,7 @@ class LeadController extends Controller
                 'title' => 'Transferred Lead',
                 'description' => "Lead transferred to counselor: {$lead->counselor->name}, from counselor: {$fromCounselorName}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
         ]);
 
@@ -649,7 +654,7 @@ class LeadController extends Controller
                 'title' => 'Admission Processed',
                 'description' => "Admission processed for lead: {$lead->name}, Admission No: {$lead->admission_no}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -709,7 +714,7 @@ class LeadController extends Controller
                 'title' => 'Application Processed',
                 'description' => "Application processed for lead: {$lead->name}, Application No: {$lead->id}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -770,7 +775,7 @@ class LeadController extends Controller
                 'title' => 'Reservation Processed',
                 'description' => "Reservation processed for lead: {$lead->name}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -828,7 +833,7 @@ class LeadController extends Controller
                 'title' => 'Lead Cancelled',
                 'description' => "Lead cancelled: {$lead->name}, Reason: {$validated['cancel_reason']}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -916,7 +921,7 @@ class LeadController extends Controller
                         'title' => 'Transferred Lead',
                         'description' => "Lead transferred to counselor: {$toCounselor->name}, from counselor: {$fromCounselorName}",
                         'event_type' => 'manual',
-                        'performed_by' => auth()->id(),
+                        ...Timeline::performerAttributes(),
                         'event_date' => now(),
                     ]);
 

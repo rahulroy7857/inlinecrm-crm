@@ -31,6 +31,7 @@ if (!function_exists('country_codes')) {
     {
         return [
             'India' => '+91',
+            'india' => '+91',
             'USA' => '+1',
             'UK' => '+44',
             'Canada' => '+1',
@@ -141,6 +142,27 @@ if (!function_exists('indian_states')) {
             'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
             'Uttarakhand', 'West Bengal',
         ];
+    }
+}
+
+if (!function_exists('parse_editable_date')) {
+    function parse_editable_date(?string $value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $formats = ['d-m-Y', 'd-m-y', 'Y-m-d', 'Y-n-j', 'd/m/Y', 'd-m-Y H:i:s'];
+
+        foreach ($formats as $format) {
+            try {
+                return \Carbon\Carbon::createFromFormat($format, $value)->format('Y-m-d');
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
     }
 }
 

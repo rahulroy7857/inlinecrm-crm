@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Model;
 
 class AcademicYear extends Model
 {
     protected $fillable = ['name', 'is_active'];
+    // example name: 2026-2027
 
     protected $casts = [
         'is_active' => 'boolean',

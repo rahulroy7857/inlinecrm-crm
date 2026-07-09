@@ -16,6 +16,11 @@ return new class extends Migration
             $table->string('password');
             $table->json('languages')->nullable();
             $table->boolean('status')->default(1);
+            $table->date('joining_date')->nullable();
+            $table->time('office_start_time')->nullable();
+            $table->time('office_end_time')->nullable();
+            $table->json('working_days')->nullable();
+            $table->decimal('salary', 12, 2)->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

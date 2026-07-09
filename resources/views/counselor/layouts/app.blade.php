@@ -84,6 +84,7 @@
     @include('counselor.layouts.scripts')
     @include('counselor.partials.toast-stack')
     @include('admin.partials.delete-confirm-modal')
+    @include('admin.partials.pick-confirm-modal')
     @yield('scripts')
 
     <script>

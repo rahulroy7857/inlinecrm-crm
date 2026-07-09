@@ -10,7 +10,7 @@ class AcademicYearController extends Controller
 {
     public function index()
     {
-        $academicYears = AcademicYear::orderByDesc('name')->get();
+        $academicYears = AcademicYear::orderByDesc('name')->orderBy('id', 'desc')->get();
         return view('admin.settings.academic-years', compact('academicYears'));
     }
 

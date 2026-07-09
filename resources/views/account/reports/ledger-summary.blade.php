@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card mt-4">
         <div class="card-header border-bottom"><h5 class="mb-0">All Ledger Accounts</h5></div>
         <div class="card-body">
             <div class="table-responsive">

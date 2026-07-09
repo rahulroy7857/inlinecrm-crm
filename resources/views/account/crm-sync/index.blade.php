@@ -27,7 +27,7 @@
     </div>
     @endif
 
-    <div class="card mb-4">
+    <div class="card mt-4">
         <div class="card-header border-bottom"><h5 class="mb-0">Pending CRM Payments</h5></div>
         <div class="card-body">
             @if(account_can_manage() && $pendingPayments->count())
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card mt-4">
         <div class="card-header border-bottom"><h5 class="mb-0">Synced Payments</h5></div>
         <div class="card-body">
             <div class="table-responsive">

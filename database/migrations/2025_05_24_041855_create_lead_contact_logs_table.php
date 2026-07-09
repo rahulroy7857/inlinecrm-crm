@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('lead_contact_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lead_id')->constrained('leads')->cascadeOnDelete();
             $table->dateTime('contact_date');
             $table->text('remark')->nullable();
             $table->integer('duration')->nullable(); // in minutes

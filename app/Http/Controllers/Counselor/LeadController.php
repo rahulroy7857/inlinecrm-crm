@@ -95,7 +95,7 @@ class LeadController extends Controller
                 return ['value' => $item->id, 'text' => $item->name];
             });
 
-        if($lead->transfer_seen == false){
+        if ($lead->transfer_seen == false && request()->boolean('acknowledge')) {
             $lead->transfer_seen = true;
             $lead->save();
         }
@@ -191,33 +191,56 @@ class LeadController extends Controller
     
     public function pickLead($id)
     {
-        $lead = Lead::findOrFail($id);
-        if($lead->counselor_id != null){
-            return redirect()->back()->with('error', 'Lead already picked by another counselor');
+        $counselor = auth()->guard('counselor')->user();
+
+        try {
+            DB::beginTransaction();
+
+            $lead = Lead::whereNull('counselor_id')
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            $lead->update([
+                'counselor_id' => $counselor->id,
+                'transfer_seen' => false,
+                'received_at' => now(),
+                'picked_at' => now(),
+            ]);
+
+            Timeline::create([
+                'lead_id' => $lead->id,
+                'title' => 'Picked Lead',
+                'description' => "Lead picked by {$counselor->name}",
+                'event_type' => 'manual',
+                ...Timeline::performerAttributes($counselor),
+                'event_date' => now(),
+            ]);
+
+            ActivityLogger::log(
+                "Picked lead {$lead->name} by counselor {$counselor->name}",
+                'Pick',
+                $counselor,
+                ['lead' => $lead->id, 'counselor' => $counselor->id]
+            );
+
+            DB::commit();
+
+            return redirect()
+                ->route('counselor.new-leads')
+                ->with('success', "Lead assigned to {$counselor->name} successfully. Check New Leads.");
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Lead already picked by another counselor.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to pick lead. Please try again.');
         }
-        $lead->counselor_id = auth()->guard('counselor')->user()->id;
-        $lead->transfer_seen = false;
-        $lead->received_at = now();
-        $lead->picked_at = now();
-        $lead->save();
-
-        Timeline::create([
-            'lead_id' => $lead->id,
-            'title' => 'Picked Lead',
-            'description' => "Lead picked by {$lead->counselor->name}",
-            'event_type' => 'manual',
-            'performed_by' => auth()->id(),
-            'event_date' => now(),
-        ]);
-
-        ActivityLogger::log(
-            "Picked lead {$lead->name} by counselor {$lead->counselor->name}",
-            'Pick',
-            auth()->guard('counselor')->user(),
-            ['lead' => $lead->id, 'counselor' => $lead->counselor_id]
-        );
-        
-        return redirect('/counselor/lead-profile/'.$lead->id)->with('success', 'Lead picked successfully');
     }
 
     public function store(Request $request)
@@ -252,7 +275,7 @@ class LeadController extends Controller
                 'title' => 'New Lead Created',
                 'description' => "Lead created with name: {$lead->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -277,6 +300,11 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         $field = $request->name;
         $value = $request->value;
+
+        $dateFields = ['dob', 'application_date', 'reservation_date', 'admission_date', 'cancel_date'];
+        if (in_array($field, $dateFields, true) && $value) {
+            $value = parse_editable_date($value);
+        }
 
         $oldValue = $lead->$field;
         $lead->$field = $value;
@@ -329,6 +357,7 @@ class LeadController extends Controller
     {
         $leads = Lead::with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
+            ->where('transfer_seen', true)
             ->where('academic_year_id', $this->academicYear)
             ->where('next_follow_up', '<', now()->startOfDay())
             ->orderBy('next_follow_up')
@@ -341,6 +370,7 @@ class LeadController extends Controller
     {
         $leads = Lead::with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
+            ->where('transfer_seen', true)
             ->whereDate('next_follow_up', now()->today())
             ->orderBy('next_follow_up')
             ->get();
@@ -352,6 +382,7 @@ class LeadController extends Controller
     {
         $leads = Lead::with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
+            ->where('transfer_seen', true)
             ->whereDate('next_follow_up', now()->addDay())
             ->orderBy('next_follow_up')
             ->get();
@@ -525,13 +556,19 @@ class LeadController extends Controller
         $counts = [
             'basket_leads' => Lead::whereNull('counselor_id')->count(),
             'new_leads' => Lead::where('transfer_seen', false)->where('counselor_id', auth()->guard('counselor')->user()->id)->count(),
-            'today_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)->whereDate('next_follow_up', today())
+            'today_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+                ->where('transfer_seen', true)
+                ->whereDate('next_follow_up', today())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'tomorrow_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)->whereDate('next_follow_up', today()->addDay())
+            'tomorrow_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+                ->where('transfer_seen', true)
+                ->whereDate('next_follow_up', today()->addDay())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'pending_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)->where('next_follow_up', '<', today())
+            'pending_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+                ->where('transfer_seen', true)
+                ->where('next_follow_up', '<', today())
                 ->whereNotIN('status', ['Converted', 'Bin'])
                 ->count(),
             'bin' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)->where('status', 'Bin')->count()
@@ -624,7 +661,7 @@ class LeadController extends Controller
                 'title' => 'Transferred Lead',
                 'description' => "Lead transferred to counselor: {$lead->counselor->name}, from counselor: {$fromCounselorName}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
         ]);
 
@@ -710,7 +747,7 @@ class LeadController extends Controller
                 'title' => 'Admission Processed',
                 'description' => "Admission processed for lead: {$lead->name}, Admission No: {$lead->admission_no}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -770,7 +807,7 @@ class LeadController extends Controller
                 'title' => 'Application Processed',
                 'description' => "Application processed for lead: {$lead->name}, Application No: {$lead->id}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -831,7 +868,7 @@ class LeadController extends Controller
                 'title' => 'Reservation Processed',
                 'description' => "Reservation processed for lead: {$lead->name}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -889,7 +926,7 @@ class LeadController extends Controller
                 'title' => 'Lead Cancelled',
                 'description' => "Lead cancelled: {$lead->name}, Reason: {$validated['cancel_reason']}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -977,7 +1014,7 @@ class LeadController extends Controller
                         'title' => 'Transferred Lead',
                         'description' => "Lead transferred to counselor: {$toCounselor->name}, from counselor: {$fromCounselorName}",
                         'event_type' => 'manual',
-                        'performed_by' => auth()->id(),
+                        ...Timeline::performerAttributes(),
                         'event_date' => now(),
                     ]);
 

@@ -185,7 +185,7 @@
                                         <div class="mb-2">
                                             <label for="source_id" class="form-label">Source</label>
                                             <select class="form-select" id="source_id" name="source_id" aria-label="Default select example" required>
-                                                <option selected>Select Source</option>
+                                                <option value="">Select Source</option>
                                                 @foreach($sources as $source)
                                                     <option value="{{ $source['value'] }}">{{ $source['text'] }}</option>
                                                 @endforeach
@@ -255,10 +255,10 @@
                                     <td>{!! \App\Helpers\LeadStatus::getBadge($lead->status) !!}</td>
                                     <td>{{ $lead->next_follow_up->format('d M Y h:i A') }}</td>
                                     <td>
-                                        <a href="{{url('/counselor/pick-lead/'.$lead->id)}}" onclick="return confirm('Are you sure you want to pick this lead?')">
-                                            <button type="button" class="btn btn-icon btn-outline-primary">
-                                                Pick
-                                            </button>
+                                        <a href="{{ route('counselor.pick-lead', $lead->id) }}"
+                                           class="btn btn-outline-primary btn-sm"
+                                           data-confirm-pick="Are you sure you want to pick this lead?">
+                                            Pick
                                         </a>
                                         
                                     </td>
@@ -307,74 +307,7 @@ function showToast(type, message) {
     }
 }
 
-// Add this inside your $(document).ready function
-// $('#verifyBtn').on('click', function() {
-//     const btn = $(this);
-//     const spinner = btn.find('.spinner-border');
-//     const btnText = btn.find('.btn-text');
-//     const form = $('#newLeadForm');
 
-//     // Basic validation
-//     if (!form[0].checkValidity()) {
-//         form[0].reportValidity();
-//         return;
-//     }
-
-//     // Show loading state
-//     btn.prop('disabled', true);
-//     spinner.removeClass('d-none');
-//     btnText.text('Verifying...');
-
-//     // Send verification request
-//     $.ajax({
-//         url: '{{ route("counselor.leads.verify") }}',
-//         method: 'POST',
-//         data: {
-//             _token: $('meta[name="csrf-token"]').attr('content'),
-//             mobile: $('#basic-default-phone').val(),
-//             email: $('#basic-default-email').val()
-//         },
-//         success: function(response) {
-//             if (response.can_proceed) {
-//                 // Show success toast and submit button
-//                 const successToast = $('#successToast');
-//                 successToast.find('.toast-body').text('Verification successful. You can proceed.');
-//                 const bsSuccessToast = new bootstrap.Toast(successToast);
-//                 bsSuccessToast.show();
-                
-//                 $('#submitBtn').removeClass('d-none');
-//                 btn.addClass('d-none');
-//             } else {
-//                 // Show warning toast for duplicates
-//                 let message = 'Duplicate records found:\n';
-//                 if (response.duplicates.mobile) {
-//                     message += `\nPhone: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
-//                 }
-//                 if (response.duplicates.email) {
-//                     message += `\nEmail: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
-//                 }
-                
-//                 const warningToast = $('#warningToast');
-//                 warningToast.find('.toast-body').html(message.replace(/\n/g, '<br>'));
-//                 const bsWarningToast = new bootstrap.Toast(warningToast);
-//                 bsWarningToast.show();
-//             }
-//         },
-//         error: function(xhr) {
-//             // Show error toast
-//             const errorToast = $('#errorToast');
-//             errorToast.find('.toast-body').text('Error during verification. Please try again.');
-//             const bsErrorToast = new bootstrap.Toast(errorToast);
-//             bsErrorToast.show();
-//         },
-//         complete: function() {
-//             // Reset button state
-//             btn.prop('disabled', false);
-//             spinner.addClass('d-none');
-//             btnText.text('Verify');
-//         }
-//     });
-// });
 
 
 </script>

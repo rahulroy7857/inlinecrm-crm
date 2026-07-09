@@ -53,7 +53,7 @@ class LeadContactLogController extends Controller
                 'title'       => 'Status Updated',
                 'description' => "Status changed from {$oldStatus} to {$request->status}",
                 'event_type'  => 'status_change',
-                'performed_by'=> auth()->guard('admin')->id(),
+                ...Timeline::performerAttributes(auth()->guard('admin')->user()),
                 'event_date'  => now(),
             ]);
 
@@ -81,7 +81,7 @@ class LeadContactLogController extends Controller
             'title'       => "Contacted via {$validated['type']}",
             'description' => "Contacted by: " . ($validated['contacted_by'] ?? 'N/A') . ". Remark: " . ($validated['remark'] ?? ''),
             'event_type'  => 'followup',
-            'performed_by'=> auth()->guard('admin')->id(),
+            ...Timeline::performerAttributes(auth()->guard('admin')->user()),
             'event_date'  => now(),
         ]);
 

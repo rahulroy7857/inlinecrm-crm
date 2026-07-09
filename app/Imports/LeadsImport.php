@@ -122,7 +122,7 @@ class LeadsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchI
                     'title' => 'New Lead Created',
                     'description' => "Lead created with name: {$lead->name}",
                     'event_type' => 'manual',
-                    'performed_by' => auth()->id(),
+                    ...Timeline::performerAttributes(auth()->guard('admin')->user()),
                     'event_date' => now(),
                 ]);
                 if($lead) {

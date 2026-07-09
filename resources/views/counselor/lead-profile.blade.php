@@ -601,9 +601,10 @@
                                                     class="editable"
                                                     data-name="dob"
                                                     data-type="combodate"
-                                                    data-format="DD-m-YYYY"
-                                                    data-viewformat="DD-m-YYYY"
-                                                    data-template="D / m / YYYY"
+                                                    data-format="DD-MM-YYYY"
+                                                    data-viewformat="DD-MM-YYYY"
+                                                    data-template="DD / MM / YYYY"
+                                                    data-combodate='{"minYear":1970,"maxYear":{{ date("Y") }}}'
                                                     data-pk="{{ $lead->id }}"
                                                     data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                     data-title="Select Date of Birth"

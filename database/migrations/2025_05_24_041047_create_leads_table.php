@@ -25,15 +25,15 @@ return new class extends Migration
                 'Application',
                 'Reservation',
                 'Admission',
-                'Cancelled'
+                'Cancelled',
             ])->default('New');
             $table->dateTime('next_follow_up')->nullable();
-            $table->foreignId('source_id')->nullable()->constrained();
-            $table->foreignId('counselor_id')->nullable()->constrained('counselors'); // Added this line
-            $table->foreignId('academic_year_id')->nullable()->constrained();
-            $table->foreignId('course_id')->nullable()->constrained();
+            $table->foreignId('source_id')->nullable()->constrained('sources')->nullOnDelete();
+            $table->foreignId('counselor_id')->nullable()->constrained('counselors')->nullOnDelete();
+            $table->foreignId('academic_year_id')->nullable()->constrained('academic_years')->nullOnDelete();
+            $table->foreignId('course_id')->nullable()->constrained('courses')->nullOnDelete();
             $table->string('specialization')->nullable();
-            $table->foreignId('college_id')->nullable()->constrained();
+            $table->foreignId('college_id')->nullable()->constrained('colleges')->nullOnDelete();
             $table->string('country')->nullable();
             $table->string('state')->nullable();
             $table->boolean('transfer_seen')->nullable();
@@ -44,14 +44,14 @@ return new class extends Migration
             $table->string('mother_occupation')->nullable();
             $table->string('guardian_name')->nullable();
             $table->string('relation')->nullable();
-            
+
             // Other Details
             $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
             $table->date('dob')->nullable();
             $table->string('aadhar')->nullable();
             $table->text('notes')->nullable();
             $table->json('languages')->nullable();
-            
+
             // Contact Details
             $table->string('mobile')->nullable();
             $table->string('alternative_mobile')->nullable();
@@ -62,7 +62,7 @@ return new class extends Migration
             $table->string('father_email')->nullable();
             $table->string('mother_email')->nullable();
             $table->string('guardian_email')->nullable();
-            
+
             // Present Address
             $table->text('present_address')->nullable();
             $table->string('present_country')->nullable();
@@ -70,7 +70,7 @@ return new class extends Migration
             $table->string('present_city')->nullable();
             $table->string('present_place')->nullable();
             $table->string('present_pin')->nullable();
-            
+
             // Permanent Address
             $table->text('permanent_address')->nullable();
             $table->string('permanent_country')->nullable();
@@ -79,16 +79,16 @@ return new class extends Migration
             $table->string('permanent_place')->nullable();
             $table->string('permanent_pin')->nullable();
 
-            //admission details
+            // admission details
             $table->string('admission_no')->nullable();
             $table->date('admission_date')->nullable();
             $table->decimal('commission', 10, 2)->nullable();
-            $table->foreignId('agent_id')->nullable()->constrained('agents'); 
+            $table->foreignId('agent_id')->nullable()->constrained('agents')->nullOnDelete();
             $table->decimal('agent_commission', 10, 2)->nullable();
             $table->text('terms_and_conditions')->nullable();
             $table->string('photo')->nullable();
 
-            //Application Details
+            // Application Details
             $table->date('application_date')->nullable();
             $table->text('application_note')->nullable();
 
@@ -101,6 +101,7 @@ return new class extends Migration
             $table->string('cancel_reason')->nullable();
             $table->text('cancel_note')->nullable();
             $table->timestamp('picked_at')->nullable();
+            $table->timestamp('received_at')->nullable();
 
             $table->softDeletes();
             $table->timestamps();

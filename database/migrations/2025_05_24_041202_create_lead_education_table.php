@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lead_exams', function (Blueprint $table) {
+        Schema::create('lead_education', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained()->onDelete('cascade');
-            $table->string('exam_name');
-            $table->string('score');
+            $table->foreignId('lead_id')->constrained('leads')->cascadeOnDelete();
+            $table->string('qualification');
+            $table->string('marks');
+            $table->string('institute');
             $table->year('year');
-            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lead_exams');
+        Schema::dropIfExists('lead_education');
     }
 };

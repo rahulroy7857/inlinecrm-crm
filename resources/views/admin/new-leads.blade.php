@@ -185,7 +185,7 @@
                                         <div class="mb-2">
                                             <label for="source_id" class="form-label">Source</label>
                                             <select class="form-select" id="source_id" name="source_id" aria-label="Default select example" required>
-                                                <option selected>Select Source</option>
+                                                <option value="">Select Source</option>
                                                 @foreach($sources as $source)
                                                     <option value="{{ $source['value'] }}">{{ $source['text'] }}</option>
                                                 @endforeach
@@ -212,11 +212,7 @@
                                 <div class="offcanvas-footer border-top">
                                     <div class="d-flex justify-content-end mt-3 mb-3 mr-3" style="margin-right: 20px;">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="offcanvas">Close</button>
-                                        <button type="button" class="btn btn-info me-2" id="verifyBtn">
-                                            <span class="spinner-border spinner-border-sm d-none me-1" role="status"></span>
-                                            <span class="btn-text">Verify</span>
-                                        </button>
-                                        <button type="submit" class="btn btn-primary d-none" id="submitBtn">
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
                                             <span class="spinner-border spinner-border-sm d-none me-1" role="status"></span>
                                             <span class="btn-text">Submit</span>
                                         </button>
@@ -435,8 +431,7 @@ $('#offcanvasEnd').on('hidden.bs.offcanvas', function () {
     $('#newLeadForm')[0].reset();
     $('input, select').removeClass('is-invalid');
     $('.select2').val(null).trigger('change');
-    $('#verifyBtn').removeClass('d-none').prop('disabled', false);
-    $('#submitBtn').addClass('d-none');
+    $('#submitBtn').prop('disabled', false);
 });
 
 function showToast(type, message) {
@@ -515,38 +510,41 @@ function showToast(type, message) {
 // });
 
 $(document).ready(function() {
-    // Track verification status
-    let isVerified = false;
+    // Track whether the duplicate check already passed, so we can submit on a single click
+    let duplicateCheckPassed = false;
 
-    // Monitor email and phone changes
-    $('#basic-default-phone, #basic-default-email').on('change input', function() {
-        if (isVerified) {
-            $('#submitBtn').addClass('d-none');
-            $('#verifyBtn').removeClass('d-none');
-            isVerified = false;
-            showToast('warning', 'Contact details changed. Please verify again.');
-        }
-    });
-
-    // Update verify button click handler
-    $('#verifyBtn').on('click', function() {
-        const btn = $(this);
+    function setSubmitLoading(isLoading, text) {
+        const btn = $('#submitBtn');
         const spinner = btn.find('.spinner-border');
         const btnText = btn.find('.btn-text');
-        const form = $('#newLeadForm');
+        btn.prop('disabled', isLoading);
+        if (isLoading) {
+            spinner.removeClass('d-none');
+        } else {
+            spinner.addClass('d-none');
+        }
+        btnText.text(text);
+    }
 
-        // Basic validation
-        if (!form[0].checkValidity()) {
-            form[0].reportValidity();
-            return;
+    // Single-click submit: run duplicate check first, then submit automatically if clean
+    $('#newLeadForm').on('submit', function(e) {
+        const form = this;
+
+        // Native required-field validation
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            e.preventDefault();
+            return false;
         }
 
-        // Show loading state
-        btn.prop('disabled', true);
-        spinner.removeClass('d-none');
-        btnText.text('Verifying...');
+        // Allow the actual submit once the duplicate check has passed
+        if (duplicateCheckPassed) {
+            return true;
+        }
 
-        // Send verification request
+        e.preventDefault();
+        setSubmitLoading(true, 'Checking...');
+
         $.ajax({
             url: '{{ route("admin.leads.verify") }}',
             method: 'POST',
@@ -557,10 +555,9 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.can_proceed) {
-                    isVerified = true;
-                    showToast('success', 'Verification successful! Please submit.');
-                    $('#submitBtn').removeClass('d-none');
-                    btn.addClass('d-none');
+                    duplicateCheckPassed = true;
+                    setSubmitLoading(true, 'Submitting...');
+                    form.submit();
                 } else {
                     let message = '<strong>Duplicate records found:</strong><br>';
                     if (response.duplicates.mobile) {
@@ -572,27 +569,21 @@ $(document).ready(function() {
                         message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
                     }
                     showToast('warning', message);
+                    setSubmitLoading(false, 'Submit');
                 }
             },
             error: function(xhr) {
-                showToast('error', 'Error during verification. Please try again.');
-                alert('error');
-            },
-            complete: function() {
-                btn.prop('disabled', false);
-                spinner.addClass('d-none');
-                btnText.text('Verify');
+                showToast('error', 'Error while checking for duplicates. Please try again.');
+                setSubmitLoading(false, 'Submit');
             }
         });
+
+        return false;
     });
 
-    // Update form submission handler
-    $('#newLeadForm').on('submit', function(e) {
-        if (!isVerified) {
-            e.preventDefault();
-            showToast('warning', 'Please verify contact details before submitting.');
-            return false;
-        }
+    // Re-check duplicates if the contact details change after a passed check
+    $('#basic-default-phone, #basic-default-email').on('change input', function() {
+        duplicateCheckPassed = false;
     });
 
     // Update offcanvas close handler
@@ -600,9 +591,8 @@ $(document).ready(function() {
         $('#newLeadForm')[0].reset();
         $('input, select').removeClass('is-invalid');
         $('.select2').val(null).trigger('change');
-        $('#verifyBtn').removeClass('d-none').prop('disabled', false);
-        $('#submitBtn').addClass('d-none');
-        isVerified = false;
+        setSubmitLoading(false, 'Submit');
+        duplicateCheckPassed = false;
     });
 });
 

@@ -77,6 +77,8 @@ class Lead extends Model
     protected $casts = [
         'dob' => 'date',
         'next_follow_up' => 'datetime',
+        'picked_at' => 'datetime',
+        'received_at' => 'datetime',
         'languages' => 'array',
     ];
 

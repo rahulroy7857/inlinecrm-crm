@@ -39,6 +39,7 @@ function showCrmToast(type, message) {
 
 window.showCrmToast = showCrmToast;
 window.openCrmDeleteModal = openCrmDeleteModal;
+window.openCrmPickModal = openCrmPickModal;
 
 function setupBootstrapModalShim() {
     if (typeof jQuery === 'undefined' || typeof bootstrap === 'undefined' || jQuery.fn.modal) {
@@ -56,6 +57,7 @@ function setupBootstrapModalShim() {
 }
 
 let crmDeleteCallback = null;
+let crmPickCallback = null;
 
 function openCrmDeleteModal(message, onConfirm) {
     const modalEl = document.getElementById('crmDeleteModal');
@@ -75,9 +77,29 @@ function openCrmDeleteModal(message, onConfirm) {
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
+function openCrmPickModal(message, onConfirm) {
+    const modalEl = document.getElementById('crmPickModal');
+    if (!modalEl || typeof bootstrap === 'undefined') {
+        if (window.confirm(message || 'Are you sure you want to pick this lead?')) {
+            onConfirm();
+        }
+        return;
+    }
+
+    const messageEl = document.getElementById('crmPickMessage');
+    if (messageEl) {
+        messageEl.textContent = message || 'Are you sure you want to pick this lead?';
+    }
+
+    crmPickCallback = onConfirm;
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
 function setupCrmDeleteConfirmation() {
     const modalEl = document.getElementById('crmDeleteModal');
     const confirmBtn = document.getElementById('crmDeleteConfirmBtn');
+    const pickModalEl = document.getElementById('crmPickModal');
+    const pickConfirmBtn = document.getElementById('crmPickConfirmBtn');
 
     confirmBtn?.addEventListener('click', () => {
         if (crmDeleteCallback) {
@@ -93,7 +115,30 @@ function setupCrmDeleteConfirmation() {
         crmDeleteCallback = null;
     });
 
+    pickConfirmBtn?.addEventListener('click', () => {
+        if (crmPickCallback) {
+            crmPickCallback();
+            crmPickCallback = null;
+        }
+        if (pickModalEl) {
+            bootstrap.Modal.getOrCreateInstance(pickModalEl).hide();
+        }
+    });
+
+    pickModalEl?.addEventListener('hidden.bs.modal', () => {
+        crmPickCallback = null;
+    });
+
     document.addEventListener('click', (event) => {
+        const pickLink = event.target.closest('a[data-confirm-pick]');
+        if (pickLink) {
+            event.preventDefault();
+            openCrmPickModal(pickLink.getAttribute('data-confirm-pick'), () => {
+                window.location.href = pickLink.href;
+            });
+            return;
+        }
+
         const link = event.target.closest('a[data-confirm-delete]');
         if (link) {
             event.preventDefault();
@@ -114,8 +159,10 @@ function setupCrmDeleteConfirmation() {
 
         const match = onclick.match(/confirm\((['"])(.*?)\1\)/);
         const message = match?.[2] || 'Are you sure you want to delete this item?';
+        const isPickAction = /pick/i.test(message) || /pick/i.test(legacy.href || '');
 
-        openCrmDeleteModal(message, () => {
+        const openModal = isPickAction ? openCrmPickModal : openCrmDeleteModal;
+        openModal(message, () => {
             if (legacy.tagName === 'A' && legacy.href) {
                 window.location.href = legacy.href;
                 return;

@@ -21,10 +21,10 @@
                         <p class="mt-1 text-sm text-slate-500">Sign in to manage your leads</p>
                     </div>
 
-                    <form id="formAuthentication" method="POST" action="{{ route('counselor.login') }}">
+                    <form id="formAuthentication" method="POST" action="{{ route('counselor.authenticate') }}">
                         @csrf
                         <div class="mb-4">
-                            <label for="email" class="form-label">Email / Username</label>
+                            <label for="email" class="form-label">Email</label>
                             <input
                                 type="email"
                                 class="form-control"

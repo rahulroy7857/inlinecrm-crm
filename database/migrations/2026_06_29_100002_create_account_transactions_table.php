@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('account_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ledger_account_id')->constrained()->onDelete('cascade');
+            $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->cascadeOnDelete();
             $table->foreignId('to_ledger_account_id')->nullable()->constrained('ledger_accounts')->nullOnDelete();
-            $table->foreignId('lead_payment_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('academic_year_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('lead_payment_id')->nullable()->constrained('lead_payments')->nullOnDelete();
+            $table->foreignId('academic_year_id')->nullable()->constrained('academic_years')->nullOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('accounts')->nullOnDelete();
             $table->date('transaction_date');
             $table->enum('entry_type', ['credit', 'debit']);

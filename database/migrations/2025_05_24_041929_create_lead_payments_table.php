@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('lead_payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lead_id')->constrained('leads')->cascadeOnDelete();
             $table->date('payment_date');
             $table->enum('payment_type', ['Application Fee', 'Reservation Fee', 'Admission Fee', 'Commission', 'Tuition Fee', 'Refund',  'Other']);
             $table->enum('payment_mode', ['Cash', 'Card', 'UPI', 'Bank Transfer', 'Cheque', 'RazorPay', 'Other']);
