@@ -28,6 +28,15 @@ class LeadController extends Controller
         $this->academicYear = session('academic_year_id');
     }
 
+    protected function scopeAcademicYear($query)
+    {
+        if ($this->academicYear) {
+            $query->where('academic_year_id', $this->academicYear);
+        }
+
+        return $query;
+    }
+
     public function show($id)
     {
         $lead = Lead::with([
@@ -385,11 +394,12 @@ class LeadController extends Controller
 
     public function pendingFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
             ->where('transfer_seen', true)
-            ->where('academic_year_id', $this->academicYear)
-            ->where('next_follow_up', '<', now()->startOfDay())
+            ->where('next_follow_up', '<', today())
+            ->whereNotIn('status', ['Converted', 'Bin'])
             ->orderBy('next_follow_up')
             ->get();
 
@@ -398,10 +408,12 @@ class LeadController extends Controller
 
     public function todayFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
             ->where('transfer_seen', true)
-            ->whereDate('next_follow_up', now()->today())
+            ->whereDate('next_follow_up', today())
+            ->where('status', '!=', 'Converted')
             ->orderBy('next_follow_up')
             ->get();
 
@@ -410,10 +422,12 @@ class LeadController extends Controller
 
     public function tomorrowFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
             ->where('counselor_id', auth()->guard('counselor')->user()->id)
             ->where('transfer_seen', true)
-            ->whereDate('next_follow_up', now()->addDay())
+            ->whereDate('next_follow_up', today()->addDay())
+            ->where('status', '!=', 'Converted')
             ->orderBy('next_follow_up')
             ->get();
 
@@ -568,25 +582,30 @@ class LeadController extends Controller
 
     public function getCounts()
     {
+        $counselorId = auth()->guard('counselor')->user()->id;
+
         $counts = [
             'basket_leads' => Lead::whereNull('counselor_id')->count(),
-            'new_leads' => Lead::where('transfer_seen', false)->where('counselor_id', auth()->guard('counselor')->user()->id)->count(),
-            'today_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+            'new_leads' => Lead::where('transfer_seen', false)->where('counselor_id', $counselorId)->count(),
+            'today_followups' => $this->scopeAcademicYear(Lead::query())
+                ->where('counselor_id', $counselorId)
                 ->where('transfer_seen', true)
                 ->whereDate('next_follow_up', today())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'tomorrow_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+            'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
+                ->where('counselor_id', $counselorId)
                 ->where('transfer_seen', true)
                 ->whereDate('next_follow_up', today()->addDay())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'pending_followups' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)
+            'pending_followups' => $this->scopeAcademicYear(Lead::query())
+                ->where('counselor_id', $counselorId)
                 ->where('transfer_seen', true)
                 ->where('next_follow_up', '<', today())
-                ->whereNotIN('status', ['Converted', 'Bin'])
+                ->whereNotIn('status', ['Converted', 'Bin'])
                 ->count(),
-            'bin' => Lead::where('counselor_id', auth()->guard('counselor')->user()->id)->where('status', 'Bin')->count()
+            'bin' => Lead::where('counselor_id', $counselorId)->where('status', 'Bin')->count(),
         ];
 
         return response()->json($counts);

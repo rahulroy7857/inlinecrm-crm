@@ -310,8 +310,10 @@ class LeadController extends Controller
 
     public function todayFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
-            ->whereDate('next_follow_up', now()->today())
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
+            ->whereDate('next_follow_up', today())
+            ->where('status', '!=', 'Converted')
             ->orderBy('next_follow_up')
             ->get();
 
@@ -320,8 +322,10 @@ class LeadController extends Controller
 
     public function tomorrowFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
-            ->whereDate('next_follow_up', now()->addDay())
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
+            ->whereDate('next_follow_up', today()->addDay())
+            ->where('status', '!=', 'Converted')
             ->orderBy('next_follow_up')
             ->get();
 
