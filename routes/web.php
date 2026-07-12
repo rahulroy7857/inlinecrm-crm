@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\CollegeController;
 use App\Http\Controllers\Admin\ChangePasswordController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\CounselorBreakSettingController;
 use App\Http\Controllers\Admin\CounselorController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\LeadEducationController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Admin\LeadContactLogController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AccountBreakSettingController;
 use App\Http\Controllers\Admin\AccountUserController;
 use App\Http\Controllers\Admin\StudentUserController;
 use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
@@ -141,6 +143,20 @@ Route::prefix('admin')->name('admin.')->group(function() {
             Route::delete('settings/agents/{id}', 'destroy')->name('settings.agents.destroy');
         });
 
+        Route::controller(CounselorBreakSettingController::class)->group(function () {
+            Route::get('settings/counselor-breaks', 'index')->name('settings.counselor-breaks');
+            Route::put('settings/counselor-breaks', 'update')->name('settings.counselor-breaks.update');
+            Route::post('settings/counselor-breaks/requests/{id}/approve', 'approveRequest')->name('settings.counselor-breaks.approve');
+            Route::post('settings/counselor-breaks/requests/{id}/reject', 'rejectRequest')->name('settings.counselor-breaks.reject');
+        });
+
+        Route::controller(AccountBreakSettingController::class)->group(function () {
+            Route::get('settings/account-breaks', 'index')->name('settings.account-breaks');
+            Route::put('settings/account-breaks', 'update')->name('settings.account-breaks.update');
+            Route::post('settings/account-breaks/requests/{id}/approve', 'approveRequest')->name('settings.account-breaks.approve');
+            Route::post('settings/account-breaks/requests/{id}/reject', 'rejectRequest')->name('settings.account-breaks.reject');
+        });
+
         Route::get('users/admin', function() {
             return view('admin.users.admin');
         })->name('users.admin');
@@ -163,6 +179,7 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::get('/', 'index')->name('index');
                 Route::post('/', 'store')->name('store');
                 Route::put('/{id}', 'update')->name('update');
+                Route::post('/{id}/unlock-break-login', 'unlockBreakLogin')->name('unlock-break-login');
                 Route::delete('/{id}', 'destroy')->name('destroy');
             });
 
@@ -170,6 +187,7 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::get('/', 'index')->name('index');
                 Route::post('/', 'store')->name('store');
                 Route::put('/{id}', 'update')->name('update');
+                Route::post('/{id}/unlock-break-login', 'unlockBreakLogin')->name('unlock-break-login');
                 Route::delete('/{id}', 'destroy')->name('destroy');
             });
 

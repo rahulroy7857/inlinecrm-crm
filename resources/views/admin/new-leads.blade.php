@@ -119,6 +119,7 @@
                           </button>
                           <form action="{{ route('admin.leads.store') }}" method="POST" id="newLeadForm">
                           @csrf
+                          <input type="hidden" name="existing_lead_id" id="existing_lead_id" value="">
                           <div
                             class="offcanvas offcanvas-end"
                             tabindex="-1"
@@ -555,20 +556,27 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.can_proceed) {
+                    if (response.is_update && response.existing_lead_id) {
+                        $('#existing_lead_id').val(response.existing_lead_id);
+                        let message = '<strong>Existing lead found — record will be updated:</strong><br>';
+                        if (response.duplicates.mobile) {
+                            const mobileField = response.duplicates.mobile.field || 'Phone';
+                            message += `<br>${mobileField}: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
+                        }
+                        if (response.duplicates.email) {
+                            const emailField = response.duplicates.email.field || 'Email';
+                            message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
+                        }
+                        showToast('info', message);
+                    } else {
+                        $('#existing_lead_id').val('');
+                    }
+
                     duplicateCheckPassed = true;
                     setSubmitLoading(true, 'Submitting...');
                     form.submit();
                 } else {
-                    let message = '<strong>Duplicate records found:</strong><br>';
-                    if (response.duplicates.mobile) {
-                        const mobileField = response.duplicates.mobile.field || 'Phone';
-                        message += `<br>${mobileField}: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
-                    }
-                    if (response.duplicates.email) {
-                        const emailField = response.duplicates.email.field || 'Email';
-                        message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
-                    }
-                    showToast('warning', message);
+                    showToast('error', 'Unable to proceed. Please try again.');
                     setSubmitLoading(false, 'Submit');
                 }
             },
@@ -584,6 +592,7 @@ $(document).ready(function() {
     // Re-check duplicates if the contact details change after a passed check
     $('#basic-default-phone, #basic-default-email').on('change input', function() {
         duplicateCheckPassed = false;
+        $('#existing_lead_id').val('');
     });
 
     // Update offcanvas close handler
@@ -591,6 +600,7 @@ $(document).ready(function() {
         $('#newLeadForm')[0].reset();
         $('input, select').removeClass('is-invalid');
         $('.select2').val(null).trigger('change');
+        $('#existing_lead_id').val('');
         setSubmitLoading(false, 'Submit');
         duplicateCheckPassed = false;
     });

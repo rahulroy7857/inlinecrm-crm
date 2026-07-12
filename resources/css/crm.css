@@ -1943,6 +1943,218 @@ table.crm-table {
 
 .portal-dashboard--counselor .portal-dashboard-header {
     background: linear-gradient(135deg, #4776e6 0%, #8e54e9 50%, #ff6a88 100%);
+    @apply px-5 py-5;
+}
+
+.counselor-attendance-bar {
+    @apply overflow-visible rounded-2xl border border-slate-200/80 bg-white shadow-sm;
+}
+
+.counselor-attendance-bar__row {
+    @apply flex items-center gap-3 overflow-visible p-3;
+    flex-wrap: nowrap;
+}
+
+.counselor-attendance-net {
+    @apply shrink-0 rounded-xl px-3 py-1.5;
+    background: linear-gradient(135deg, #4776e6 0%, #8e54e9 100%);
+}
+
+.counselor-attendance-net__label {
+    @apply block text-[11px] font-medium uppercase tracking-wide text-white/75;
+}
+
+.counselor-attendance-net__value {
+    @apply block text-lg font-bold leading-tight text-white;
+}
+
+.counselor-attendance-chips {
+    @apply flex min-w-0 flex-1 flex-nowrap items-center gap-2 overflow-visible;
+}
+
+.counselor-attendance-chip {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600;
+}
+
+.counselor-attendance-chip i {
+    @apply text-sm text-violet-500;
+}
+
+.counselor-attendance-chip .chip-label {
+    @apply font-medium uppercase tracking-wide text-slate-400;
+}
+
+.counselor-attendance-chip strong {
+    @apply font-semibold text-slate-800;
+}
+
+.counselor-attendance-chip--muted {
+    @apply border-transparent bg-transparent px-1.5 text-slate-500;
+}
+
+.counselor-attendance-bar__controls {
+    @apply ml-auto flex shrink-0 items-center overflow-visible;
+}
+
+.counselor-attendance-bar__control {
+    @apply flex items-center overflow-visible;
+}
+
+.counselor-attendance-is-hidden {
+    display: none !important;
+}
+
+.counselor-break-dropdown {
+    @apply relative inline-flex overflow-visible;
+}
+
+.counselor-break-dropdown__toggle {
+    @apply inline-flex h-[38px] items-center gap-1.5 whitespace-nowrap rounded-xl border border-violet-200 bg-violet-50 px-3 text-xs font-semibold text-violet-700 hover:border-violet-300 hover:bg-violet-100;
+}
+
+.counselor-break-dropdown__chevron {
+    @apply text-sm transition-transform duration-200;
+}
+
+.counselor-break-dropdown.is-open .counselor-break-dropdown__chevron {
+    @apply rotate-180;
+}
+
+.counselor-break-dropdown__menu {
+    @apply m-0 hidden list-none overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-2xl;
+}
+
+.counselor-break-dropdown__menu.is-visible {
+    @apply block;
+}
+
+.counselor-break-dropdown__item {
+    @apply flex w-full items-center justify-between gap-3 rounded-lg border-0 bg-transparent px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-violet-50 hover:text-violet-700;
+}
+
+.counselor-break-dropdown__item small {
+    @apply text-xs text-slate-400;
+}
+
+.counselor-attendance-active {
+    @apply inline-flex h-[38px] shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs text-slate-700;
+}
+
+.counselor-attendance-active__dot {
+    @apply h-2 w-2 shrink-0 rounded-full bg-amber-500;
+    animation: counselor-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes counselor-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.counselor-attendance-active__label {
+    @apply font-semibold text-amber-900;
+}
+
+.counselor-attendance-active__elapsed,
+.counselor-attendance-active__ends {
+    @apply text-slate-500;
+}
+
+.counselor-attendance-pending {
+    @apply inline-flex h-[38px] shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap rounded-xl border border-sky-200 bg-sky-50 px-3 text-xs text-slate-700;
+}
+
+.counselor-attendance-pending__dot {
+    @apply h-2 w-2 shrink-0 rounded-full bg-sky-500;
+    animation: counselor-pulse 1.5s ease-in-out infinite;
+}
+
+.counselor-attendance-pending__label {
+    @apply font-semibold text-sky-900;
+}
+
+.counselor-attendance-pending__text {
+    @apply text-sky-700;
+}
+
+.counselor-break-history {
+    @apply border-t border-slate-100;
+}
+
+.counselor-break-history__toggle {
+    @apply flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-violet-600;
+}
+
+.counselor-break-history__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.counselor-break-history__toggle::before {
+    content: '▸ ';
+    @apply text-slate-400;
+}
+
+.counselor-break-history[open] .counselor-break-history__toggle::before {
+    content: '▾ ';
+}
+
+.counselor-break-history__toggle i {
+    @apply mr-1 text-violet-500;
+}
+
+.counselor-break-history__total strong {
+    @apply text-slate-800 normal-case;
+}
+
+.counselor-break-history__body {
+    @apply space-y-1 px-4 pb-3;
+}
+
+.counselor-break-history__row {
+    @apply grid grid-cols-[1.2fr_1.4fr_auto_auto] items-center gap-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700;
+}
+
+.counselor-break-history__row.is-active {
+    @apply border border-amber-200 bg-amber-50;
+}
+
+.counselor-break-history__row.is-exceeded {
+    @apply border border-rose-200 bg-rose-50;
+}
+
+.counselor-break-history__row.is-exceeded .counselor-break-history__status {
+    @apply text-rose-700;
+}
+
+.counselor-break-history__row.is-pending {
+    @apply border border-sky-200 bg-sky-50;
+}
+
+.counselor-break-history__row.is-pending .counselor-break-history__status {
+    @apply text-sky-700;
+}
+
+.counselor-break-history__type {
+    @apply font-semibold text-slate-800;
+}
+
+.counselor-break-history__time {
+    @apply text-slate-500;
+}
+
+.counselor-break-history__duration {
+    @apply font-semibold text-violet-700;
+}
+
+.counselor-break-history__status {
+    @apply rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500;
+}
+
+.counselor-break-history__row.is-active .counselor-break-history__status {
+    @apply bg-amber-100 text-amber-800;
+}
+
+.counselor-break-history__empty {
+    @apply rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500;
 }
 
 .portal-dashboard .portal-stat-card--balance {

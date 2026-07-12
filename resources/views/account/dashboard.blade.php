@@ -7,6 +7,10 @@
         <p>Financial overview for {{ session('academic_year_name', 'all years') }}</p>
     </div>
 
+    @if(!empty($workingHours))
+        @include('partials.portal-working-hours-panel', ['workingHours' => $workingHours])
+    @endif
+
     <div class="stats-grid portal-stats-grid portal-stats-grid--account mb-4">
         <div class="portal-stat-card portal-stat-card--balance">
             <div class="card-body">
@@ -172,4 +176,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+
+@if(!empty($workingHours))
+@include('partials.portal-working-hours-scripts', [
+    'statusUrl' => route('account.working-hours.status'),
+    'startBreakUrl' => route('account.working-hours.break.start'),
+    'endBreakUrl' => route('account.working-hours.break.end'),
+    'loginUrl' => route('account.login'),
+    'workingHours' => $workingHours,
+])
+@endif
 @endsection

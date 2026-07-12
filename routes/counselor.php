@@ -12,6 +12,8 @@ use App\Http\Controllers\Counselor\DashboardController;
 use App\Http\Controllers\Counselor\ChangePasswordController;
 use App\Http\Controllers\Counselor\ReportController;
 use App\Http\Controllers\Counselor\AcademicYearController;
+use App\Http\Controllers\Counselor\WorkingHoursController;
+use App\Http\Middleware\EnsureCounselorBreakCompliance;
 
 // Public routes
 Route::get('login', function() {
@@ -25,8 +27,12 @@ Route::match(['get', 'post'], 'logout', [CounselorAuthController::class, 'logout
 Route::post('login', [CounselorAuthController::class, 'authenticate'])->name('authenticate');
 
 // Protected routes
-Route::middleware(['auth:counselor'])->group(function () {
+Route::middleware(['auth:counselor', EnsureCounselorBreakCompliance::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('working-hours/status', [WorkingHoursController::class, 'status'])->name('working-hours.status');
+    Route::post('working-hours/break/start', [WorkingHoursController::class, 'startBreak'])->name('working-hours.break.start');
+    Route::post('working-hours/break/end', [WorkingHoursController::class, 'endBreak'])->name('working-hours.break.end');
     
     // Leads management
     Route::get('leads/{status}', [LeadController::class, 'statusWiseLeads'])->name('leads.status');

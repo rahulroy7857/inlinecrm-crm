@@ -3,9 +3,107 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y crm-page portal-dashboard portal-dashboard--counselor">
 
-    <div class="portal-dashboard-header mb-4">
+    <div class="portal-dashboard-header mb-3">
         <h1>Welcome back, {{ auth()->guard('counselor')->user()->name }}! 👋</h1>
         <p>Here's your lead performance overview for {{ session('academic_year_name') }}</p>
+    </div>
+
+    <div class="counselor-attendance-bar mb-4" id="counselorHoursPanel">
+        <div class="counselor-attendance-bar__row">
+            <div class="counselor-attendance-net">
+                <span class="counselor-attendance-net__label">Working today</span>
+                <strong class="counselor-attendance-net__value" id="whNetHours">{{ $workingHours['net_hours'] }}</strong>
+            </div>
+
+            <div class="counselor-attendance-chips">
+                <span class="counselor-attendance-chip">
+                    <i class="bx bx-log-in"></i>
+                    <span class="chip-label">In</span>
+                    <strong id="whLoginAt">{{ $workingHours['login_at'] ?? '—' }}</strong>
+                </span>
+                <span class="counselor-attendance-chip">
+                    <i class="bx bx-log-out"></i>
+                    <span class="chip-label">Out</span>
+                    <strong id="whLogoutAt">{{ $workingHours['logout_at'] ?? ($workingHours['is_logged_in'] ? 'Active' : '—') }}</strong>
+                </span>
+                <span class="counselor-attendance-chip counselor-attendance-chip--muted">
+                    Gross <strong id="whGrossHours">{{ $workingHours['gross_hours'] }}</strong>
+                </span>
+                <span class="counselor-attendance-chip counselor-attendance-chip--muted">
+                    Breaks <strong id="whBreakHours">{{ $workingHours['break_hours'] }}</strong>
+                </span>
+            </div>
+
+            <div class="counselor-attendance-bar__controls">
+                <div class="counselor-attendance-bar__control {{ ($workingHours['active_break'] || $workingHours['pending_break']) ? 'counselor-attendance-is-hidden' : '' }}" id="whBreakActions">
+                    <div class="counselor-break-dropdown" id="counselorBreakDropdown">
+                        <button class="btn btn-sm counselor-break-dropdown__toggle"
+                            type="button"
+                            id="breakDropdown"
+                            aria-expanded="false"
+                            aria-haspopup="true">
+                            <i class="bx bx-coffee"></i> Take a break
+                            <i class="bx bx-chevron-down counselor-break-dropdown__chevron"></i>
+                        </button>
+                        <ul class="counselor-break-dropdown__menu" id="breakDropdownMenu" role="menu">
+                            @foreach($workingHours['break_types'] as $breakType)
+                                <li role="none">
+                                    <button type="button" class="counselor-break-dropdown__item wh-start-break-btn" role="menuitem" data-type="{{ $breakType['type'] }}" data-requires-approval="{{ $breakType['requires_admin_approval'] ? '1' : '0' }}">
+                                        <span>{{ $breakType['label'] }}</span>
+                                        @if($breakType['requires_admin_approval'])
+                                            <small>Admin approval</small>
+                                        @elseif($breakType['duration_minutes'])
+                                            <small>{{ $breakType['duration_minutes'] }} min</small>
+                                        @endif
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="whPendingBreakWrap" class="counselor-attendance-bar__control counselor-attendance-pending {{ $workingHours['pending_break'] ? '' : 'counselor-attendance-is-hidden' }}">
+                    <span class="counselor-attendance-pending__dot"></span>
+                    <span class="counselor-attendance-pending__label" id="whPendingBreakLabel">{{ data_get($workingHours, 'pending_break.label', '') }}</span>
+                    <span class="counselor-attendance-pending__text">Waiting for admin approval</span>
+                </div>
+
+                <div id="whActiveBreakWrap" class="counselor-attendance-bar__control counselor-attendance-active {{ $workingHours['active_break'] ? '' : 'counselor-attendance-is-hidden' }}">
+                    <span class="counselor-attendance-active__dot"></span>
+                    <span class="counselor-attendance-active__label" id="whActiveBreakLabel">{{ data_get($workingHours, 'active_break.label', '') }}</span>
+                    <span class="counselor-attendance-active__elapsed" id="whActiveBreakElapsed">{{ data_get($workingHours, 'active_break.elapsed', '') }}</span>
+                    <span class="counselor-attendance-active__ends {{ data_get($workingHours, 'active_break.ends_at') ? '' : 'counselor-attendance-is-hidden' }}" id="whActiveBreakEnds">
+                        · ends <span id="whActiveBreakEndsAt">{{ data_get($workingHours, 'active_break.ends_at', '') }}</span>
+                    </span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="whEndBreakBtn">End</button>
+                </div>
+            </div>
+        </div>
+
+        <details class="counselor-break-history" id="whBreakHistory">
+            <summary class="counselor-break-history__toggle">
+                <span><i class="bx bx-history"></i> Today's break history (<span id="whBreakCount">{{ $workingHours['break_count'] ?? count($workingHours['breaks']) }}</span>)</span>
+                <span class="counselor-break-history__total">Total break time: <strong id="whBreakHistoryTotal">{{ $workingHours['break_hours'] }}</strong></span>
+            </summary>
+            <div class="counselor-break-history__body" id="whBreakHistoryBody">
+                @forelse(collect($workingHours['breaks'])->reverse() as $break)
+                    <div class="counselor-break-history__row {{ $break['is_active'] ? 'is-active' : '' }}{{ !empty($break['is_pending']) ? ' is-pending' : '' }}{{ !empty($break['exceeded_duration']) ? ' is-exceeded' : '' }}">
+                        <span class="counselor-break-history__type">{{ $break['label'] }}</span>
+                        <span class="counselor-break-history__time">
+                            @if(!empty($break['is_pending']))
+                                {{ $break['requested_at'] ?? '—' }} – Pending
+                            @else
+                                {{ $break['started_at'] }} – {{ $break['ended_at'] ?? 'Active' }}
+                            @endif
+                        </span>
+                        <span class="counselor-break-history__duration">{{ $break['elapsed'] }}</span>
+                        <span class="counselor-break-history__status">{{ $break['status'] }}</span>
+                    </div>
+                @empty
+                    <div class="counselor-break-history__empty" id="whBreakHistoryEmpty">No breaks recorded today.</div>
+                @endforelse
+            </div>
+        </details>
     </div>
 
     <div class="stats-grid portal-stats-grid mb-4">
@@ -99,6 +197,406 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const statusUrl = @json(route('counselor.working-hours.status'));
+    const startBreakUrl = @json(route('counselor.working-hours.break.start'));
+    const endBreakUrl = @json(route('counselor.working-hours.break.end'));
+
+    let breakEndTimer = null;
+    let breakPollTimer = null;
+
+    function showHoursToast(type, message) {
+        if (window.showCrmToast) {
+            window.showCrmToast(type, message);
+        }
+    }
+
+    function redirectToLoginForBreakLock(message) {
+        if (message) {
+            try {
+                sessionStorage.setItem('break_login_lock_message', message);
+            } catch (e) {}
+        }
+        window.location.href = @json(route('counselor.login'));
+    }
+
+    function handleBreakLockFetchResponse(response, data) {
+        if (response.status === 403 && data && data.break_login_locked) {
+            redirectToLoginForBreakLock(data.message);
+            return true;
+        }
+
+        if (data && data.data && data.data.logout_required) {
+            redirectToLoginForBreakLock(data.data.break_login_lock_reason || data.message);
+            return true;
+        }
+
+        return false;
+    }
+
+    function clearBreakTimers() {
+        if (breakEndTimer) {
+            clearTimeout(breakEndTimer);
+            breakEndTimer = null;
+        }
+        if (breakPollTimer) {
+            clearInterval(breakPollTimer);
+            breakPollTimer = null;
+        }
+    }
+
+    function scheduleBreakRefresh(data) {
+        clearBreakTimers();
+
+        if (!data.active_break) {
+            return;
+        }
+
+        breakPollTimer = setInterval(refreshWorkingHours, 30000);
+
+        if (data.active_break.ends_at_iso) {
+            const endsAt = new Date(data.active_break.ends_at_iso).getTime();
+            const delay = Math.max(1000, endsAt - Date.now() + 500);
+
+            breakEndTimer = setTimeout(function () {
+                refreshWorkingHours(true);
+            }, delay);
+        }
+    }
+
+    function renderBreakHistory(data) {
+        const body = document.getElementById('whBreakHistoryBody');
+        const countEl = document.getElementById('whBreakCount');
+        const totalEl = document.getElementById('whBreakHistoryTotal');
+        if (!body) return;
+
+        const breaks = data.breaks || [];
+
+        if (countEl) {
+            countEl.textContent = data.break_count ?? breaks.length;
+        }
+        if (totalEl) {
+            totalEl.textContent = data.break_hours || '0m';
+        }
+
+        if (!breaks.length) {
+            body.innerHTML = '<div class="counselor-break-history__empty" id="whBreakHistoryEmpty">No breaks recorded today.</div>';
+            return;
+        }
+
+        body.innerHTML = breaks.slice().reverse().map(function (item) {
+            const timeLabel = item.is_pending
+                ? (item.requested_at || '—') + ' – Pending'
+                : (item.started_at || '—') + ' – ' + (item.ended_at || 'Active');
+            let activeClass = item.is_active ? ' is-active' : '';
+            if (item.is_pending) {
+                activeClass += ' is-pending';
+            }
+            if (item.exceeded_duration) {
+                activeClass += ' is-exceeded';
+            }
+            return '<div class="counselor-break-history__row' + activeClass + '">' +
+                '<span class="counselor-break-history__type">' + item.label + '</span>' +
+                '<span class="counselor-break-history__time">' + timeLabel + '</span>' +
+                '<span class="counselor-break-history__duration">' + item.elapsed + '</span>' +
+                '<span class="counselor-break-history__status">' + item.status + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    function updateWorkingHoursPanel(data) {
+        document.getElementById('whLoginAt').textContent = data.login_at || '—';
+        document.getElementById('whLogoutAt').textContent = data.logout_at || (data.is_logged_in ? 'Active' : '—');
+        document.getElementById('whNetHours').textContent = data.net_hours;
+        document.getElementById('whGrossHours').textContent = data.gross_hours;
+        document.getElementById('whBreakHours').textContent = data.break_hours;
+
+        renderBreakHistory(data);
+
+        const activeWrap = document.getElementById('whActiveBreakWrap');
+        const pendingWrap = document.getElementById('whPendingBreakWrap');
+        const breakActions = document.getElementById('whBreakActions');
+        const endsWrap = document.getElementById('whActiveBreakEnds');
+        const hadActiveBreak = !activeWrap.classList.contains('counselor-attendance-is-hidden');
+
+        if (data.pending_break) {
+            closeBreakDropdown();
+            pendingWrap.classList.remove('counselor-attendance-is-hidden');
+            breakActions.classList.add('counselor-attendance-is-hidden');
+            activeWrap.classList.add('counselor-attendance-is-hidden');
+            document.getElementById('whPendingBreakLabel').textContent = data.pending_break.label;
+            clearBreakTimers();
+            if (!breakPollTimer) {
+                breakPollTimer = setInterval(refreshWorkingHours, 15000);
+            }
+            return;
+        }
+
+        pendingWrap.classList.add('counselor-attendance-is-hidden');
+
+        if (data.active_break) {
+            closeBreakDropdown();
+            activeWrap.classList.remove('counselor-attendance-is-hidden');
+            breakActions.classList.add('counselor-attendance-is-hidden');
+            document.getElementById('whActiveBreakLabel').textContent = data.active_break.label;
+            document.getElementById('whActiveBreakElapsed').textContent = data.active_break.elapsed;
+
+            if (data.active_break.ends_at) {
+                endsWrap.classList.remove('counselor-attendance-is-hidden');
+                document.getElementById('whActiveBreakEndsAt').textContent = data.active_break.ends_at;
+            } else {
+                endsWrap.classList.add('counselor-attendance-is-hidden');
+            }
+
+            scheduleBreakRefresh(data);
+        } else {
+            activeWrap.classList.add('counselor-attendance-is-hidden');
+            breakActions.classList.remove('counselor-attendance-is-hidden');
+            clearBreakTimers();
+
+            if (hadActiveBreak) {
+                showHoursToast('success', 'Break ended. Working hours updated.');
+            }
+        }
+    }
+
+    function startBreak(type) {
+        if (!type) return;
+
+        fetch(startBreakUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ type: type })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, status: response.status, data: data };
+                });
+            })
+            .then(function (result) {
+                if (handleBreakLockFetchResponse({ status: result.status }, result.data)) {
+                    return;
+                }
+                if (!result.ok) {
+                    showHoursToast('error', result.data.message || 'Unable to start break.');
+                    return;
+                }
+                if (result.data.data && result.data.data.logout_required) {
+                    redirectToLoginForBreakLock(result.data.data.break_login_lock_reason);
+                    return;
+                }
+                updateWorkingHoursPanel(result.data.data);
+                showHoursToast('success', result.data.message || 'Break started.');
+            })
+            .catch(function () {
+                showHoursToast('error', 'Unable to start break.');
+            });
+    }
+
+    function refreshWorkingHours(fromAutoEnd) {
+        fetch(statusUrl, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { response: response, data: data };
+                });
+            })
+            .then(function (result) {
+                if (handleBreakLockFetchResponse(result.response, result.data)) {
+                    return;
+                }
+                if (result.data.success) {
+                    if (result.data.data && result.data.data.logout_required) {
+                        redirectToLoginForBreakLock(result.data.data.break_login_lock_reason);
+                        return;
+                    }
+                    updateWorkingHoursPanel(result.data.data);
+                }
+            })
+            .catch(function () {});
+    }
+
+    const breakDropdown = document.getElementById('counselorBreakDropdown');
+    const breakDropdownBtn = document.getElementById('breakDropdown');
+    const breakDropdownMenu = document.getElementById('breakDropdownMenu');
+    let breakMenuPlaceholder = null;
+
+    function positionBreakMenu() {
+        if (!breakDropdownBtn || !breakDropdownMenu) return;
+
+        const rect = breakDropdownBtn.getBoundingClientRect();
+        breakDropdownMenu.style.position = 'fixed';
+        breakDropdownMenu.style.top = Math.round(rect.bottom + 8) + 'px';
+        breakDropdownMenu.style.left = Math.round(rect.right - Math.max(rect.width, 240)) + 'px';
+        breakDropdownMenu.style.minWidth = Math.max(rect.width, 240) + 'px';
+        breakDropdownMenu.style.zIndex = '9999';
+    }
+
+    function closeBreakDropdown() {
+        if (!breakDropdown || !breakDropdownMenu) return;
+
+        breakDropdown.classList.remove('is-open');
+        breakDropdownMenu.classList.remove('is-visible');
+
+        if (breakMenuPlaceholder && breakMenuPlaceholder.parentNode) {
+            breakMenuPlaceholder.parentNode.insertBefore(breakDropdownMenu, breakMenuPlaceholder);
+            breakMenuPlaceholder.remove();
+            breakMenuPlaceholder = null;
+        }
+
+        breakDropdownMenu.style.position = '';
+        breakDropdownMenu.style.top = '';
+        breakDropdownMenu.style.left = '';
+        breakDropdownMenu.style.minWidth = '';
+        breakDropdownMenu.style.zIndex = '';
+
+        if (breakDropdownBtn) {
+            breakDropdownBtn.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    function openBreakDropdown() {
+        if (!breakDropdown || !breakDropdownMenu || !breakDropdownBtn) return;
+
+        breakDropdown.classList.add('is-open');
+        breakDropdownMenu.classList.add('is-visible');
+        breakDropdownBtn.setAttribute('aria-expanded', 'true');
+
+        breakMenuPlaceholder = document.createComment('break-menu-anchor');
+        breakDropdownMenu.parentNode.insertBefore(breakMenuPlaceholder, breakDropdownMenu);
+        document.body.appendChild(breakDropdownMenu);
+        positionBreakMenu();
+    }
+
+    function toggleBreakDropdown() {
+        if (!breakDropdown) return;
+
+        if (breakDropdown.classList.contains('is-open')) {
+            closeBreakDropdown();
+        } else {
+            openBreakDropdown();
+        }
+    }
+
+    if (breakDropdownBtn) {
+        breakDropdownBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            toggleBreakDropdown();
+        });
+    }
+
+    window.addEventListener('resize', function () {
+        if (breakDropdown && breakDropdown.classList.contains('is-open')) {
+            positionBreakMenu();
+        }
+    });
+
+    window.addEventListener('scroll', function () {
+        if (breakDropdown && breakDropdown.classList.contains('is-open')) {
+            positionBreakMenu();
+        }
+    }, true);
+
+    function endBreak() {
+        const endBreakBtn = document.getElementById('whEndBreakBtn');
+        if (!endBreakBtn || endBreakBtn.disabled) return;
+
+        endBreakBtn.disabled = true;
+
+        fetch(endBreakUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({})
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, status: response.status, data: data };
+                });
+            })
+            .then(function (result) {
+                if (handleBreakLockFetchResponse({ status: result.status }, result.data)) {
+                    return;
+                }
+                if (!result.ok) {
+                    showHoursToast('error', result.data.message || 'Unable to end break.');
+                    return;
+                }
+                if (result.data.data && result.data.data.logout_required) {
+                    redirectToLoginForBreakLock(result.data.data.break_login_lock_reason);
+                    return;
+                }
+                updateWorkingHoursPanel(result.data.data);
+            })
+            .catch(function () {
+                showHoursToast('error', 'Unable to end break.');
+            })
+            .finally(function () {
+                endBreakBtn.disabled = false;
+            });
+    }
+
+    document.addEventListener('click', function (event) {
+        if (event.target.closest('#whEndBreakBtn')) {
+            event.preventDefault();
+            event.stopPropagation();
+            endBreak();
+            return;
+        }
+
+        const breakOption = event.target.closest('.wh-start-break-btn');
+        if (breakOption) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeBreakDropdown();
+            startBreak(breakOption.dataset.type);
+            return;
+        }
+
+        if (!breakDropdown || !breakDropdown.classList.contains('is-open')) {
+            return;
+        }
+
+        if (breakDropdownBtn && breakDropdownBtn.contains(event.target)) {
+            return;
+        }
+
+        if (breakDropdownMenu && breakDropdownMenu.contains(event.target)) {
+            return;
+        }
+
+        closeBreakDropdown();
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeBreakDropdown();
+        }
+    });
+
+    @if($workingHours['active_break'])
+    scheduleBreakRefresh(@json($workingHours));
+    @elseif($workingHours['pending_break'])
+    breakPollTimer = setInterval(refreshWorkingHours, 15000);
+    @endif
+
+    setInterval(function () {
+        if (!document.getElementById('whActiveBreakWrap').classList.contains('counselor-attendance-is-hidden')) {
+            return;
+        }
+        refreshWorkingHours();
+    }, 60000);
+
     if (typeof ApexCharts === 'undefined') return;
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

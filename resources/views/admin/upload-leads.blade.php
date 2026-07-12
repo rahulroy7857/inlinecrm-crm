@@ -20,7 +20,7 @@
                         <ul>
                             <li>Only 1000 leads can be uploaded at a time.</li>
                             <li>File type should be Excel (.xlsx or .xls).</li>
-                            <li>Mandatory fields name, email, mobile, country, state, course.</li>
+                            <li>Mandatory fields: name and mobile. Email, country, state, and course are optional.</li>
                         </ul>
                     </div>
                     <div class="row justify-content-center">

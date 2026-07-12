@@ -36,6 +36,21 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
+
+            @php $lockedCounselors = $counselors->where('break_login_locked', true); @endphp
+            @if($lockedCounselors->isNotEmpty())
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>{{ $lockedCounselors->count() }} counselor(s)</strong> need login permission after exceeding break time.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if(($pendingBreakRequests ?? collect())->isNotEmpty())
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <strong>{{ $pendingBreakRequests->count() }} break request(s)</strong> waiting for approval.
+                    <a href="{{ route('admin.settings.counselor-breaks') }}" class="alert-link">Review in Counselor Breaks</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <div class="card">
                 <div class="card-header border-bottom">
                       <div class="d-flex justify-content-between align-items-center">
@@ -63,6 +78,7 @@
                                     <th>Joining Date</th>
                                     <th>Salary</th>
                                     <th>Status</th>
+                                    <th>Break Lock</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -80,6 +96,20 @@
                                         <span class="badge bg-{{ $counselor->status ? 'success' : 'danger' }}">
                                             {{ $counselor->status ? 'Active' : 'Inactive' }}
                                         </span>
+                                    </td>
+                                    <td>
+                                        @if($counselor->break_login_locked)
+                                            <button type="button"
+                                                    class="btn btn-sm btn-warning grant-login-btn"
+                                                    data-id="{{ $counselor->id }}"
+                                                    data-name="{{ $counselor->name }}"
+                                                    data-reason="{{ $counselor->break_login_lock_reason ?: 'Break time exceeded. Login permission required.' }}"
+                                                    data-locked-at="{{ $counselor->break_login_locked_at?->format('d-m-Y h:i A') }}">
+                                                <i class="bx bx-lock-open me-1"></i>Grant Login
+                                            </button>
+                                        @else
+                                            <span class="badge bg-label-secondary">Clear</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <button type="button" 
@@ -293,6 +323,37 @@
         </form>
     </div>
 </div>
+
+<!-- Grant Login Permission Modal -->
+<div class="modal fade" id="grantLoginModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="POST" id="grantLoginForm">
+            @csrf
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">
+                    <i class="bx bx-lock-open text-warning me-1"></i> Grant Login Permission
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">
+                    Allow <strong id="grantLoginCounselorName"></strong> to login again?
+                </p>
+                <div class="alert alert-warning mb-0">
+                    <div class="fw-semibold mb-1">Lock reason</div>
+                    <p id="grantLoginReason" class="mb-1 small"></p>
+                    <p id="grantLoginLockedAt" class="mb-0 small text-muted"></p>
+                </div>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="bx bx-lock-open me-1"></i>Grant Login
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 @section('scripts')   
 @include('admin.partials.datatables-scripts')
@@ -300,6 +361,24 @@
 <script>
     $(document).ready(function() {
         initCrmDataTable('#leadsTable');
+
+        $(document).on('click', '.grant-login-btn', function () {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            var reason = $(this).data('reason');
+            var lockedAt = $(this).data('locked-at');
+
+            $('#grantLoginCounselorName').text(name);
+            $('#grantLoginReason').text(reason);
+            $('#grantLoginLockedAt').text(lockedAt ? 'Locked at: ' + lockedAt : '');
+
+            var url = "{{ route('admin.users.counselor.unlock-break-login', ':id') }}";
+            url = url.replace(':id', id);
+            $('#grantLoginForm').attr('action', url);
+
+            $('#grantLoginModal').modal('show');
+        });
+
         // Edit button click handler
         $(document).on('click', '.edit-btn', function() {
             var id = $(this).data('id');

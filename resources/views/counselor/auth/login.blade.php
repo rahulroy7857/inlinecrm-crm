@@ -78,6 +78,27 @@
         </div>
     </div>
 
+    <div class="modal fade" id="breakLoginLockModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-danger">
+                        <i class="bx bx-lock-alt me-1"></i> Admin Permission Required
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="breakLoginLockMessage" class="mb-2">
+                        Your break time has exceeded the allowed limit. Please contact your admin to grant login permission.
+                    </p>
+                    <p class="mb-0 text-muted small">You can login once again after admin approves.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function togglePassword() {
         const input = document.getElementById('password');
@@ -90,6 +111,35 @@
             icon.classList.replace('bx-show', 'bx-hide');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('break_login_locked'))
+            var message = @json(session('break_login_lock_message', 'Admin permission is required to login again.'));
+            var messageEl = document.getElementById('breakLoginLockMessage');
+            if (messageEl) {
+                messageEl.textContent = message;
+            }
+            var modalEl = document.getElementById('breakLoginLockModal');
+            if (modalEl && window.bootstrap) {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+        @endif
+
+        try {
+            var storedLockMessage = sessionStorage.getItem('break_login_lock_message');
+            if (storedLockMessage) {
+                sessionStorage.removeItem('break_login_lock_message');
+                var messageEl = document.getElementById('breakLoginLockMessage');
+                if (messageEl) {
+                    messageEl.textContent = storedLockMessage;
+                }
+                var modalEl = document.getElementById('breakLoginLockModal');
+                if (modalEl && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+            }
+        } catch (e) {}
+    });
     </script>
 </body>
 </html>

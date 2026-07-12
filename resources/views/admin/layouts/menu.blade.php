@@ -221,6 +221,12 @@
                 <li class="menu-item {{ request()->is('admin/settings/agents') ? 'active' : '' }}">
                     <a href="{{ url('/admin/settings/agents') }}" class="menu-link"><span>Agents</span></a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/settings/counselor-breaks') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/settings/counselor-breaks') }}" class="menu-link"><span>Counselor Breaks</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/settings/account-breaks') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/settings/account-breaks') }}" class="menu-link"><span>Account Breaks</span></a>
+                </li>
             </ul>
         </li>
 

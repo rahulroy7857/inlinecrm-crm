@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private \App\Services\AccountWorkingHoursService $workingHoursService
+    ) {}
+
     public function index()
     {
         $yearId = session('academic_year_id');
@@ -70,6 +74,13 @@ class DashboardController extends Controller
         $accountBalanceValues = $ledgerAccounts->pluck('current_balance')->map(fn ($v) => (float) $v)->values()->all();
         $netProfit = (float) $totalIncome - (float) $totalExpense;
 
+        $workingHours = null;
+        if (auth()->guard('account')->check()) {
+            $workingHours = $this->workingHoursService->getTodaySummary(
+                auth()->guard('account')->user()
+            );
+        }
+
         return view('account.dashboard', compact(
             'ledgerAccounts',
             'totalBalance',
@@ -81,7 +92,8 @@ class DashboardController extends Controller
             'monthlyExpenseData',
             'accountBalanceLabels',
             'accountBalanceValues',
-            'netProfit'
+            'netProfit',
+            'workingHours'
         ));
     }
 }

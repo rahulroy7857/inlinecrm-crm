@@ -85,6 +85,28 @@
     @include('counselor.partials.toast-stack')
     @include('admin.partials.delete-confirm-modal')
     @include('admin.partials.pick-confirm-modal')
+
+    <div class="modal fade" id="breakLoginLockModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-danger">
+                        <i class="bx bx-lock-alt me-1"></i> Admin Permission Required
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="breakLoginLockMessage" class="mb-2">
+                        Your break time has exceeded the allowed limit. Please contact your admin to grant login permission.
+                    </p>
+                    <p class="mb-0 text-muted small">You can login again once an admin approves your access.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @yield('scripts')
 
     <script>
@@ -127,6 +149,31 @@
             });
         }, 2500);
     });
+
+    (function () {
+        var loginUrl = @json(route('counselor.login'));
+        var originalFetch = window.fetch;
+
+        window.fetch = function () {
+            return originalFetch.apply(this, arguments).then(function (response) {
+                if (response.status !== 403) {
+                    return response;
+                }
+
+                return response.clone().json().then(function (data) {
+                    if (data && data.break_login_locked) {
+                        try {
+                            sessionStorage.setItem('break_login_lock_message', data.message || '');
+                        } catch (e) {}
+                        window.location.href = data.redirect || loginUrl;
+                    }
+                    return response;
+                }).catch(function () {
+                    return response;
+                });
+            });
+        };
+    })();
     </script>
 </body>
 </html>

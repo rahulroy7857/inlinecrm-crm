@@ -3,13 +3,12 @@
 namespace App\Imports;
 
 use App\Models\Lead;
+use App\Models\Course;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use App\Services\ActivityLogger;
 use App\Models\Timeline;
 
@@ -21,7 +20,7 @@ class LeadsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchI
     protected $successCount = 0;
     protected $errors = [];
 
-    public function __construct($source_id, $assign_to)
+    public function __construct($source_id, $assign_to = null)
     {
         $this->source_id = $source_id;
         $this->assign_to = $assign_to;
@@ -30,117 +29,130 @@ class LeadsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchI
     public function model(array $row)
     {
         $this->rowCount++;
-        // Prevent accidental ID override
         unset($row['id']);
 
-        $mobile = (string) $row['mobile'];
-        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        $mobile = (string) ($row['mobile'] ?? '');
+        $mobileDigits = preg_replace('/[^0-9]/', '', $mobile);
+        $email = strtolower(trim($row['email'] ?? ''));
 
-        // Check all phone and email fields in a single query
-        $existingLead = Lead::where(function($query) use ($mobile) {
-            // Check all phone numbers
-            $query->where('mobile', $mobile)
-                ->orWhere('alternative_mobile', $mobile)
-                ->orWhere('father_mobile', $mobile)
-                ->orWhere('mother_mobile', $mobile)
-                ->orWhere('guardian_mobile', $mobile);
-        })
-        ->orWhere(function($query) use ($row) {
-            // Check all email addresses
-            $query->where('personal_email', $row['email'])
-                ->orWhere('father_email', $row['email'])
-                ->orWhere('mother_email', $row['email'])
-                ->orWhere('guardian_email', $row['email']);
-        })
-        ->first();
-        
+        $existingLead = Lead::findDuplicateByContact($mobile, $email ?: null);
+        $academicYearId = $this->resolveAcademicYearId();
+
+        if ($existingLead) {
+            $leadData = $this->buildLeadData($row, $academicYearId, $email, true);
+            $existingLead->update($leadData);
+
+            Timeline::create([
+                'lead_id' => $existingLead->id,
+                'title' => 'Lead Updated',
+                'description' => "Lead updated via bulk upload: {$existingLead->name} ({$existingLead->lead_id})",
+                'event_type' => 'manual',
+                ...Timeline::performerAttributes(auth()->guard('admin')->user() ?? auth()->guard('counselor')->user()),
+                'event_date' => now(),
+            ]);
+
+            ActivityLogger::log(
+                "Updated duplicate lead via Excel upload",
+                'Excel upload',
+                auth()->guard('admin')->user() ?? auth()->guard('counselor')->user(),
+                [
+                    'mobile' => $mobile,
+                    'email' => $email,
+                    'matched_lead_id' => $existingLead->lead_id,
+                ]
+            );
+
+            $this->successCount++;
+            return null;
+        }
+
+        $country = trim($row['country'] ?? '') ?: 'India';
+
+        if ($country === 'India' && strlen($mobileDigits) !== 10) {
+            ActivityLogger::log(
+                "Invalid mobile number format",
+                'Excel upload',
+                auth()->guard('admin')->user() ?? auth()->guard('counselor')->user(),
+                ['mobile' => $mobile]
+            );
+            return null;
+        }
+
+        $lead = new Lead();
+        $lead->fill([
+            ...$this->buildLeadData($row, $academicYearId, $email, false),
+            'status' => 'New',
+            'next_follow_up' => now()->addSeconds(10),
+            'transfer_seen' => false,
+            'received_at' => now(),
+        ]);
+        $lead->save();
+
+        Timeline::create([
+            'lead_id' => $lead->id,
+            'title' => 'New Lead Created',
+            'description' => "Lead created with name: {$lead->name}",
+            'event_type' => 'manual',
+            ...Timeline::performerAttributes(auth()->guard('admin')->user() ?? auth()->guard('counselor')->user()),
+            'event_date' => now(),
+        ]);
+
+        $this->successCount++;
+        return null;
+    }
+
+    protected function buildLeadData(array $row, ?int $academicYearId, string $email, bool $isUpdate): array
+    {
+        $data = [
+            'name' => trim($row['name']),
+            'mobile' => $row['mobile'],
+            'source_id' => $this->source_id,
+            'counselor_id' => $this->assign_to ?? null,
+            'academic_year_id' => $academicYearId,
+        ];
+
+        if ($email !== '') {
+            $data['personal_email'] = $email;
+        }
+
+        if (!empty(trim($row['country'] ?? ''))) {
+            $data['country'] = trim($row['country']);
+        } elseif (!$isUpdate) {
+            $data['country'] = 'India';
+        }
+
+        if (!empty(trim($row['state'] ?? ''))) {
+            $data['state'] = trim($row['state']);
+        }
+
+        $courseId = $this->resolveCourseId($row['course'] ?? null);
+        if ($courseId) {
+            $data['course_id'] = $courseId;
+        }
+
+        return $data;
+    }
+
+    protected function resolveAcademicYearId(): ?int
+    {
         $academicYearId = session('academic_year_id');
-                
-        // If no academic year in session, get the first active one
+
         if (empty($academicYearId)) {
             $defaultAcademicYear = \App\Models\AcademicYear::where('status', 'active')->first();
             $academicYearId = $defaultAcademicYear ? $defaultAcademicYear->id : null;
         }
-        
-        if(!$existingLead){
 
-            if($row['country'] == 'India' || $row['country'] == '') {
-                // Ensure mobile number is 10 digits for India
-                if (strlen($mobile) == 10) {
-                    $lead = new Lead();
-                    $lead->fill([
-                        'name' => trim($row['name']),
-                        'mobile' => $row['mobile'],
-                        'personal_email' => strtolower(trim($row['email'])),
-                        'source_id' => $this->source_id,
-                        'cource' => $row['course'],
-                        'status' => 'New',
-                        'next_follow_up' => now()->addSeconds(10),
-                        'counselor_id' => $this->assign_to ?? NULL,
-                        'state' => $row['state'] ?? null,
-                        'country' => $row['country'] ?? 'India',
-                        'academic_year_id' => $academicYearId,
-                        'transfer_seen' => false,
-                        'received_at' => now(),
-                        'created_by' => auth()->guard('admin')->id()
-                    ]);
-                    $lead->save();
-                    if($lead) {
-                        $this->successCount++;
-                    } 
-                } else {
-                    ActivityLogger::log(
-                        "Invalid mobile number format",
-                        'Excel upload',
-                        auth()->guard('admin')->user(),
-                        [
-                            'mobile' => $row['mobile']
-                        ]
-                    );
-                }
-            } else {
-                $lead = new Lead();
-                $lead->fill([
-                    'name' => trim($row['name']),
-                    'mobile' => $row['mobile'],
-                    'personal_email' => strtolower(trim($row['email'])),
-                    'source_id' => $this->source_id,
-                    'cource' => $row['course'],
-                    'status' => 'New',
-                    'next_follow_up' => now()->addSeconds(10),
-                    'state' => $row['state'] ?? null,
-                    'country' => $row['country'] ?? null,
-                    'academic_year_id' => $academicYearId,
-                    'transfer_seen' => false,
-                    'counselor_id' => $this->assign_to ?? NULL,
-                    'received_at' => now(),
-                    'created_by' => auth()->guard('admin')->id()
-                ]);
-                $lead->save();
-                Timeline::create([
-                    'lead_id' => $lead->id,
-                    'title' => 'New Lead Created',
-                    'description' => "Lead created with name: {$lead->name}",
-                    'event_type' => 'manual',
-                    ...Timeline::performerAttributes(auth()->guard('admin')->user()),
-                    'event_date' => now(),
-                ]);
-                if($lead) {
-                    $this->successCount++;
-                } 
-            }   
-        } else {
-            ActivityLogger::log(
-                "Duplicate lead found",
-                'Excel upload',
-                auth()->guard('admin')->user(),
-                [
-                    'mobile' => $row['mobile'],
-                    'email' => $row['email'],
-                    'matched_lead_id' => $existingLead->lead_id
-                ]
-            );
+        return $academicYearId;
+    }
+
+    protected function resolveCourseId(?string $courseName): ?int
+    {
+        $courseName = trim($courseName ?? '');
+        if ($courseName === '') {
+            return null;
         }
+
+        return Course::where('name', $courseName)->value('id');
     }
 
     public function rules(): array
@@ -148,7 +160,7 @@ class LeadsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchI
         return [
             'name' => 'required|string|max:255',
             'mobile' => 'required',
-            'email' => 'required|max:255'
+            'email' => 'nullable|email|max:255',
         ];
     }
 

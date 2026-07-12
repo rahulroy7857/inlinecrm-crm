@@ -68,7 +68,7 @@ class Kernel extends HttpKernel
         
         // Custom middleware
         'admin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
-        
+        'counselor.break' => \App\Http\Middleware\EnsureCounselorBreakCompliance::class,
     ];
 
     /**

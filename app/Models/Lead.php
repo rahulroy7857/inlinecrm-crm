@@ -152,4 +152,26 @@ class Lead extends Model
     {
         return $this->hasOne(Student::class);
     }
+
+    public static function findDuplicateByContact(string $mobile, ?string $email = null): ?self
+    {
+        $query = static::where(function ($q) use ($mobile) {
+            $q->where('mobile', $mobile)
+                ->orWhere('alternative_mobile', $mobile)
+                ->orWhere('father_mobile', $mobile)
+                ->orWhere('mother_mobile', $mobile)
+                ->orWhere('guardian_mobile', $mobile);
+        });
+
+        if (!empty($email)) {
+            $query->orWhere(function ($q) use ($email) {
+                $q->where('personal_email', $email)
+                    ->orWhere('father_email', $email)
+                    ->orWhere('mother_email', $email)
+                    ->orWhere('guardian_email', $email);
+            });
+        }
+
+        return $query->first();
+    }
 }

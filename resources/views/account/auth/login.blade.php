@@ -57,6 +57,23 @@
         </div>
     </div>
 
+    <div class="modal fade" id="breakLoginLockModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-danger"><i class="bx bx-lock-alt me-1"></i> Admin Permission Required</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="breakLoginLockMessage" class="mb-2">Your break time has exceeded the allowed limit. Please contact your admin to grant login permission.</p>
+                    <p class="mb-0 text-muted small">You can login again once an admin approves your access from the account users panel.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function togglePassword() {
         const input = document.getElementById('password');
@@ -69,6 +86,23 @@
             icon.classList.replace('bx-show', 'bx-hide');
         }
     }
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('break_login_locked'))
+            var message = @json(session('break_login_lock_message', 'Admin permission is required to login again.'));
+            document.getElementById('breakLoginLockMessage').textContent = message;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('breakLoginLockModal')).show();
+        @endif
+        try {
+            var stored = sessionStorage.getItem('break_login_lock_message');
+            if (stored) {
+                sessionStorage.removeItem('break_login_lock_message');
+                document.getElementById('breakLoginLockMessage').textContent = stored;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('breakLoginLockModal')).show();
+            }
+        } catch (e) {}
+    });
     </script>
 </body>
 </html>

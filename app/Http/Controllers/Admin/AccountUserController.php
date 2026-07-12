@@ -4,17 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Services\AccountWorkingHoursService;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AccountUserController extends Controller
 {
+    public function __construct(
+        private AccountWorkingHoursService $workingHoursService
+    ) {}
+
     public function index()
     {
         $accounts = Account::orderBy('name')->get();
+        $pendingBreakRequests = $this->workingHoursService->pendingBreakRequests();
 
-        return view('admin.users.account', compact('accounts'));
+        return view('admin.users.account', compact('accounts', 'pendingBreakRequests'));
     }
 
     public function store(Request $request)
@@ -100,5 +106,28 @@ class AccountUserController extends Controller
         );
 
         return redirect()->back()->with('success', 'Account user deleted successfully.');
+    }
+
+    public function unlockBreakLogin($id)
+    {
+        $account = Account::findOrFail($id);
+
+        if (!$account->isBreakLoginLocked()) {
+            return redirect()->back()->with('error', 'This account user is not locked for break overtime.');
+        }
+
+        $this->workingHoursService->unlockBreakLogin(
+            $account,
+            auth()->guard('admin')->id()
+        );
+
+        ActivityLogger::log(
+            "Granted break login permission: {$account->name}",
+            'Break Unlock',
+            auth()->guard('admin')->user(),
+            ['account_id' => $account->id]
+        );
+
+        return redirect()->back()->with('success', "Login permission granted for {$account->name}.");
     }
 }

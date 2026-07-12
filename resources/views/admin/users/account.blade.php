@@ -22,6 +22,21 @@
         </div>
     @endif
 
+    @php $lockedAccounts = $accounts->where('break_login_locked', true); @endphp
+    @if($lockedAccounts->isNotEmpty())
+        <div class="alert alert-warning alert-dismissible fade show">
+            <strong>{{ $lockedAccounts->count() }} account user(s)</strong> need login permission after exceeding break time.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(($pendingBreakRequests ?? collect())->isNotEmpty())
+        <div class="alert alert-info alert-dismissible fade show">
+            <strong>{{ $pendingBreakRequests->count() }} account break request(s)</strong> waiting for approval.
+            <a href="{{ route('admin.settings.account-breaks') }}" class="alert-link">Review in Account Breaks</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header border-bottom d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Account Portal Users</h5>
@@ -40,6 +55,7 @@
                             <th>Mobile</th>
                             <th>Role</th>
                             <th>Status</th>
+                            <th>Break Lock</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -55,6 +71,20 @@
                                 <span class="badge bg-{{ $account->status ? 'success' : 'danger' }}">
                                     {{ $account->status ? 'Active' : 'Inactive' }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($account->break_login_locked)
+                                    <button type="button"
+                                            class="btn btn-sm btn-warning grant-login-btn"
+                                            data-id="{{ $account->id }}"
+                                            data-name="{{ $account->name }}"
+                                            data-reason="{{ $account->break_login_lock_reason ?: 'Break time exceeded. Login permission required.' }}"
+                                            data-locked-at="{{ $account->break_login_locked_at?->format('d-m-Y h:i A') }}">
+                                        <i class="bx bx-lock-open me-1"></i>Grant Login
+                                    </button>
+                                @else
+                                    <span class="badge bg-label-secondary">Clear</span>
+                                @endif
                             </td>
                             <td>
                                 <button type="button" class="btn btn-icon btn-outline-warning edit-btn"
@@ -121,6 +151,30 @@
         </form>
     </div>
 </div>
+
+<div class="modal fade" id="grantLoginModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="POST" id="grantLoginForm">
+            @csrf
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title"><i class="bx bx-lock-open text-warning me-1"></i> Grant Login Permission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Allow <strong id="grantLoginUserName"></strong> to login again?</p>
+                <div class="alert alert-warning mb-0">
+                    <div class="fw-semibold mb-1">Lock reason</div>
+                    <p id="grantLoginReason" class="mb-1 small"></p>
+                    <p id="grantLoginLockedAt" class="mb-0 small text-muted"></p>
+                </div>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-warning"><i class="bx bx-lock-open me-1"></i>Grant Login</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -137,6 +191,15 @@ $(function() {
         $('#edit_status').prop('checked', d.status == 1);
         $('#editForm').attr('action', "{{ route('admin.users.account.update', ':id') }}".replace(':id', d.id));
         $('#editModal').modal('show');
+    });
+
+    $(document).on('click', '.grant-login-btn', function () {
+        var id = $(this).data('id');
+        $('#grantLoginUserName').text($(this).data('name'));
+        $('#grantLoginReason').text($(this).data('reason'));
+        $('#grantLoginLockedAt').text($(this).data('locked-at') ? 'Locked at: ' + $(this).data('locked-at') : '');
+        $('#grantLoginForm').attr('action', "{{ route('admin.users.account.unlock-break-login', ':id') }}".replace(':id', id));
+        $('#grantLoginModal').modal('show');
     });
 });
 </script>

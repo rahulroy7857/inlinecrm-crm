@@ -13,6 +13,8 @@ use App\Http\Controllers\Account\ChangePasswordController;
 use App\Http\Controllers\Account\FinancialYearController;
 use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
 use App\Http\Controllers\Account\CounselorSalaryController;
+use App\Http\Controllers\Account\WorkingHoursController;
+use App\Http\Middleware\EnsureAccountBreakCompliance;
 
 Route::get('login', function () {
     if (auth()->guard('account')->check()) {
@@ -24,8 +26,12 @@ Route::get('login', function () {
 Route::post('login', [AccountAuthController::class, 'authenticate'])->name('authenticate');
 Route::match(['get', 'post'], 'logout', [AccountAuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth:account'])->group(function () {
+Route::middleware(['auth:account', EnsureAccountBreakCompliance::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('working-hours/status', [WorkingHoursController::class, 'status'])->name('working-hours.status');
+    Route::post('working-hours/break/start', [WorkingHoursController::class, 'startBreak'])->name('working-hours.break.start');
+    Route::post('working-hours/break/end', [WorkingHoursController::class, 'endBreak'])->name('working-hours.break.end');
 
     Route::controller(LedgerAccountController::class)->group(function () {
         Route::get('ledger-accounts', 'index')->name('ledger-accounts.index');

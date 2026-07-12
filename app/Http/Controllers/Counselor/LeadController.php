@@ -255,9 +255,10 @@ class LeadController extends Controller
                 'source_id' => 'required|exists:sources,id',
                 'country' => 'required|string',
                 'state' => 'required|string',
+                'existing_lead_id' => 'nullable|exists:leads,id',
             ]);
 
-            $lead = Lead::create([
+            $leadData = [
                 'name' => $request->name,
                 'mobile' => $request->mobile,
                 'personal_email' => $request->email,
@@ -266,6 +267,36 @@ class LeadController extends Controller
                 'source_id' => $request->source_id,
                 'country' => $request->country,
                 'state' => $request->state,
+            ];
+
+            $existingLead = $request->existing_lead_id
+                ? Lead::find($request->existing_lead_id)
+                : Lead::findDuplicateByContact($request->mobile, $request->email);
+
+            if ($existingLead) {
+                $existingLead->update($leadData);
+
+                Timeline::create([
+                    'lead_id' => $existingLead->id,
+                    'title' => 'Lead Updated',
+                    'description' => "Lead updated with name: {$existingLead->name} (duplicate match)",
+                    'event_type' => 'manual',
+                    ...Timeline::performerAttributes(),
+                    'event_date' => now(),
+                ]);
+
+                ActivityLogger::log(
+                    "Updated existing lead: {$existingLead->name} ({$existingLead->lead_id})",
+                    'Update',
+                    auth()->guard('counselor')->user(),
+                    ['lead' => $existingLead->id]
+                );
+
+                return redirect()->back()->with('success', "Lead updated successfully ({$existingLead->lead_id}).");
+            }
+
+            $lead = Lead::create([
+                ...$leadData,
                 'status' => 'New',
                 'next_follow_up' => now()->addDays(1),
             ]);
@@ -279,7 +310,6 @@ class LeadController extends Controller
                 'event_date' => now(),
             ]);
 
-            // Log the activity
             ActivityLogger::log(
                 "Created new lead: {$lead->name}",
                 'Create',
@@ -398,34 +428,16 @@ class LeadController extends Controller
         ]);
 
         $duplicates = [];
-        
-        // Check all phone and email fields in a single query
-        $existingLead = Lead::where(function($query) use ($request) {
-            // Check all phone numbers
-            $query->where('mobile', $request->mobile)
-                ->orWhere('alternative_mobile', $request->mobile)
-                ->orWhere('father_mobile', $request->mobile)
-                ->orWhere('mother_mobile', $request->mobile)
-                ->orWhere('guardian_mobile', $request->mobile);
-        })
-        ->orWhere(function($query) use ($request) {
-            // Check all email addresses
-            $query->where('personal_email', $request->email)
-                ->orWhere('father_email', $request->email)
-                ->orWhere('mother_email', $request->email)
-                ->orWhere('guardian_email', $request->email);
-        })
-        ->first();
+        $existingLead = Lead::findDuplicateByContact($request->mobile, $request->email);
 
         if ($existingLead) {
-            // Determine which field matched
             if (in_array($request->mobile, [
                 $existingLead->mobile,
                 $existingLead->alternative_mobile,
                 $existingLead->father_mobile,
                 $existingLead->mother_mobile,
                 $existingLead->guardian_mobile
-            ])) {
+            ], true)) {
                 $duplicates['mobile'] = [
                     'lead_id' => $existingLead->lead_id,
                     'name' => $existingLead->name,
@@ -438,7 +450,7 @@ class LeadController extends Controller
                 $existingLead->father_email,
                 $existingLead->mother_email,
                 $existingLead->guardian_email
-            ])) {
+            ], true)) {
                 $duplicates['email'] = [
                     'lead_id' => $existingLead->lead_id,
                     'name' => $existingLead->name,
@@ -447,13 +459,14 @@ class LeadController extends Controller
             }
 
             ActivityLogger::log(
-                "Duplicate lead verification attempted",
+                "Duplicate lead verification — will update existing record",
                 'Verify',
                 auth()->guard('counselor')->user(),
                 [
                     'mobile' => $request->mobile,
                     'email' => $request->email,
-                    'duplicates' => $duplicates
+                    'duplicates' => $duplicates,
+                    'existing_lead_id' => $existingLead->id,
                 ]
             );
         } else {
@@ -471,7 +484,9 @@ class LeadController extends Controller
         return response()->json([
             'success' => true,
             'duplicates' => $duplicates,
-            'can_proceed' => empty($duplicates)
+            'can_proceed' => true,
+            'is_update' => !empty($duplicates),
+            'existing_lead_id' => $existingLead?->id,
         ]);
     }
 
@@ -597,7 +612,7 @@ class LeadController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $header = $sheet->rangeToArray('A1:' . $sheet->getHighestColumn() . '1')[0];
 
-            $requiredFields = ['name', 'email', 'mobile', 'country', 'state'];
+            $requiredFields = ['name', 'mobile'];
             $missingFields = array_diff($requiredFields, array_map('strtolower', $header));
 
             if (!empty($missingFields)) {

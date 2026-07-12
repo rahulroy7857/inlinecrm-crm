@@ -27,8 +27,23 @@ class CounselorAuthController extends Controller
         $credentials['status'] = 1;
 
         if (Auth::guard('counselor')->attempt($credentials)) {
+            $counselor = Auth::guard('counselor')->user();
+
+            if ($counselor->isBreakLoginLocked()) {
+                Auth::guard('counselor')->logout();
+
+                return back()
+                    ->with('break_login_locked', true)
+                    ->with(
+                        'break_login_lock_message',
+                        $counselor->break_login_lock_reason
+                            ?: 'Your break time has exceeded the allowed limit. Admin permission is required to login again.'
+                    )
+                    ->onlyInput('email');
+            }
+
             $request->session()->regenerate();
-            \Log::info('Counselor logged in', ['user' => Auth::guard('counselor')->user()]);
+            \Log::info('Counselor logged in', ['user' => $counselor]);
             $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
             if ($activeYear) {
                 session([
@@ -46,7 +61,7 @@ class CounselorAuthController extends Controller
 
             // Log login activity
             ActivityLogger::log(
-                "Admin logged in: {$counselor->name}",
+                "Counselor logged in: {$counselor->name}",
                 'Login',
                 $counselor,
                 ['ip' => $request->ip()]

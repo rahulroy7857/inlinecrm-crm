@@ -119,6 +119,7 @@
                           </button> -->
                           <form action="{{ route('counselor.leads.store') }}" method="POST" id="newLeadForm">
                           @csrf
+                          <input type="hidden" name="existing_lead_id" id="existing_lead_id" value="">
                           <div
                             class="offcanvas offcanvas-end"
                             tabindex="-1"
@@ -483,6 +484,7 @@ $(document).ready(function() {
             $('#submitBtn').addClass('d-none');
             $('#verifyBtn').removeClass('d-none');
             isVerified = false;
+            $('#existing_lead_id').val('');
             showToast('warning', 'Contact details changed. Please verify again.');
         }
     });
@@ -517,20 +519,28 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.can_proceed) {
                     isVerified = true;
-                    showToast('success', 'Verification successful! You can proceed.');
+
+                    if (response.is_update && response.existing_lead_id) {
+                        $('#existing_lead_id').val(response.existing_lead_id);
+                        let message = '<strong>Existing lead found — record will be updated:</strong><br>';
+                        if (response.duplicates.mobile) {
+                            const mobileField = response.duplicates.mobile.field || 'Phone';
+                            message += `<br>${mobileField}: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
+                        }
+                        if (response.duplicates.email) {
+                            const emailField = response.duplicates.email.field || 'Email';
+                            message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
+                        }
+                        showToast('info', message);
+                    } else {
+                        $('#existing_lead_id').val('');
+                        showToast('success', 'Verification successful! You can proceed.');
+                    }
+
                     $('#submitBtn').removeClass('d-none');
                     btn.addClass('d-none');
                 } else {
-                    let message = '<strong>Duplicate records found:</strong><br>';
-                    if (response.duplicates.mobile) {
-                        const mobileField = response.duplicates.mobile.field || 'Phone';
-                        message += `<br>${mobileField}: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
-                    }
-                    if (response.duplicates.email) {
-                        const emailField = response.duplicates.email.field || 'Email';
-                        message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
-                    }
-                    showToast('warning', message);
+                    showToast('error', 'Unable to proceed. Please try again.');
                 }
             },
             error: function(xhr) {
@@ -559,6 +569,7 @@ $(document).ready(function() {
         $('#newLeadForm')[0].reset();
         $('input, select').removeClass('is-invalid');
         $('.select2').val(null).trigger('change');
+        $('#existing_lead_id').val('');
         $('#verifyBtn').removeClass('d-none').prop('disabled', false);
         $('#submitBtn').addClass('d-none');
         isVerified = false;

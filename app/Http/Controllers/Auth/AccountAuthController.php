@@ -26,6 +26,21 @@ class AccountAuthController extends Controller
         $credentials['status'] = 1;
 
         if (Auth::guard('account')->attempt($credentials)) {
+            $account = Auth::guard('account')->user();
+
+            if ($account->isBreakLoginLocked()) {
+                Auth::guard('account')->logout();
+
+                return back()
+                    ->with('break_login_locked', true)
+                    ->with(
+                        'break_login_lock_message',
+                        $account->break_login_lock_reason
+                            ?: 'Your break time has exceeded the allowed limit. Admin permission is required to login again.'
+                    )
+                    ->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
             $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();

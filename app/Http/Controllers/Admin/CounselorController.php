@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Counselor;
 use App\Services\ActivityLogger;
+use App\Services\CounselorWorkingHoursService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class CounselorController extends Controller
 {
+    public function __construct(
+        private CounselorWorkingHoursService $workingHoursService
+    ) {}
+
     private function employmentRules(): array
     {
         $weekdayKeys = implode(',', array_keys(config('weekdays')));
@@ -38,7 +43,9 @@ class CounselorController extends Controller
     public function index()
     {
         $counselors = Counselor::all();
-        return view('admin.users.counselor', compact('counselors'));
+        $pendingBreakRequests = app(CounselorWorkingHoursService::class)->pendingBreakRequests();
+
+        return view('admin.users.counselor', compact('counselors', 'pendingBreakRequests'));
     }
 
     public function store(Request $request)
@@ -130,5 +137,28 @@ class CounselorController extends Controller
         );
 
         return redirect()->back()->with('success', 'Counselor deleted successfully!');
+    }
+
+    public function unlockBreakLogin($id)
+    {
+        $counselor = Counselor::findOrFail($id);
+
+        if (!$counselor->isBreakLoginLocked()) {
+            return redirect()->back()->with('error', 'This counselor is not locked for break overtime.');
+        }
+
+        $this->workingHoursService->unlockBreakLogin(
+            $counselor,
+            auth()->guard('admin')->id()
+        );
+
+        ActivityLogger::log(
+            "Granted break login permission: {$counselor->name}",
+            'Break Unlock',
+            auth()->guard('admin')->user(),
+            ['counselor_id' => $counselor->id]
+        );
+
+        return redirect()->back()->with('success', "Login permission granted for {$counselor->name}.");
     }
 }
