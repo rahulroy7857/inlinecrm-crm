@@ -37,10 +37,11 @@
                     </div>
                     <div class="col-md-4" id="entryTypeWrap">
                         <label class="form-label">Entry Type *</label>
-                        <select name="entry_type" class="form-control" required>
-                            <option value="credit" {{ old('entry_type') === 'credit' ? 'selected' : '' }}>Credit (Receipt)</option>
-                            <option value="debit" {{ old('entry_type') === 'debit' ? 'selected' : '' }}>Debit (Payment)</option>
+                        <select name="entry_type" id="entry_type" class="form-control" required>
+                            <option value="credit" {{ old('entry_type') === 'credit' ? 'selected' : '' }}>Credit (Receipt / increases balance)</option>
+                            <option value="debit" {{ old('entry_type', 'debit') === 'debit' ? 'selected' : '' }}>Debit (Payment / reduces balance)</option>
                         </select>
+                        <small class="text-muted">Income auto-credits; Expense auto-debits.</small>
                     </div>
                     <div class="col-md-4" id="toAccountWrap" style="display:none">
                         <label class="form-label">Transfer To Account *</label>
@@ -89,9 +90,16 @@
 @section('scripts')
 <script>
 $('#category').on('change', function() {
-    const isTransfer = $(this).val() === 'transfer';
+    const category = $(this).val();
+    const isTransfer = category === 'transfer';
     $('#toAccountWrap').toggle(isTransfer);
     $('#entryTypeWrap').toggle(!isTransfer);
+
+    if (category === 'income') {
+        $('#entry_type').val('credit');
+    } else if (category === 'expense') {
+        $('#entry_type').val('debit');
+    }
 }).trigger('change');
 </script>
 @endsection

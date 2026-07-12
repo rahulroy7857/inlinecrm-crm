@@ -23,6 +23,8 @@ Route::get('registration', [RegistrationController::class, 'show'])->name('regis
 Route::get('registration/{leadRef}', [RegistrationController::class, 'show'])->name('registration.lead');
 Route::post('registration', [RegistrationController::class, 'store'])->name('registration.store');
 Route::post('registration/{leadRef}', [RegistrationController::class, 'store'])->name('registration.lead.store');
+Route::post('registration/{leadRef}/verify-otp', [RegistrationController::class, 'verifyOtp'])->name('registration.verify-otp');
+Route::post('registration/{leadRef}/resend-otp', [RegistrationController::class, 'resendOtp'])->name('registration.resend-otp');
 
 Route::middleware(['auth:student'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

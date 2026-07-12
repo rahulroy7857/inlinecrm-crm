@@ -17,11 +17,11 @@
                 <h3>{{ $student->isProfileComplete() ? 'Complete' : 'Incomplete' }}</h3>
             </div>
         </div>
-        <div class="portal-stat-card {{ $student->hasPaid() ? 'portal-stat-card--payment-done' : 'portal-stat-card--payment-pending' }}">
+        <div class="portal-stat-card {{ ($feeSummary['total_remaining'] ?? 0) <= 0 && ($feeSummary['fees_set'] ?? false) ? 'portal-stat-card--payment-done' : 'portal-stat-card--payment-pending' }}">
             <div class="card-body">
                 <div class="icon-bg"><i class="bx bx-credit-card"></i></div>
-                <div class="card-title">Payment</div>
-                <h3>{{ $student->hasPaid() ? 'Paid' : 'Pending' }}</h3>
+                <div class="card-title">Fee Balance</div>
+                <h3>₹{{ number_format($feeSummary['total_remaining'] ?? 0, 2) }}</h3>
             </div>
         </div>
         <div class="portal-stat-card {{ $student->hasRequiredDocuments() ? 'portal-stat-card--documents-done' : 'portal-stat-card--documents-pending' }}">
@@ -36,6 +36,62 @@
                 <div class="icon-bg"><i class="bx bx-file"></i></div>
                 <div class="card-title">Application</div>
                 <h3>{{ $student->applicationStatusLabel() }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small">Registration Fee Remaining</div>
+                            <h4 class="mb-1">₹{{ number_format($feeSummary['registration_remaining'] ?? 0, 2) }}</h4>
+                            <small class="text-muted">
+                                {{ $feeSummary['registration_plan']['label'] ?? 'Not set' }}
+                                · Total ₹{{ number_format($feeSummary['registration_fee'] ?? 0, 2) }}
+                            </small>
+                        </div>
+                        @if(!empty($feeSummary['registration_complete']))
+                            <span class="badge bg-success">Completed</span>
+                        @elseif(!empty($feeSummary['registration_required_first']))
+                            <span class="badge bg-primary">Pay first</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small">Admission Fee Remaining</div>
+                            <h4 class="mb-1">₹{{ number_format($feeSummary['counselor_remaining'] ?? 0, 2) }}</h4>
+                            <small class="text-muted">Total ₹{{ number_format($feeSummary['counselor_fee'] ?? 0, 2) }} · Paid ₹{{ number_format($feeSummary['counselor_paid'] ?? 0, 2) }}</small>
+                        </div>
+                        @if(!empty($feeSummary['counselor_complete']))
+                            <span class="badge bg-success">Completed</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small">College Fee Remaining</div>
+                            <h4 class="mb-1">₹{{ number_format($feeSummary['college_remaining'] ?? 0, 2) }}</h4>
+                            <small class="text-muted">Total ₹{{ number_format($feeSummary['college_fee'] ?? 0, 2) }} · Paid ₹{{ number_format($feeSummary['college_paid'] ?? 0, 2) }}</small>
+                        </div>
+                        @if(!empty($feeSummary['college_complete']))
+                            <span class="badge bg-success">Completed</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -132,4 +188,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+
+@if(!empty($feeSummary['dues']))
+<div class="modal fade" id="paymentDueModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-warning"><i class="bx bx-time-five me-1"></i> Payment Due Reminder</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">You have upcoming or overdue fee installment(s):</p>
+        <ul class="list-group mb-3">
+          @foreach($feeSummary['dues'] as $due)
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ $due['label'] }}</strong>
+                <div class="small text-muted">
+                  Due {{ $due['due_date']->format('d M Y') }}
+                  @if($due['is_overdue']) <span class="text-danger">(Overdue)</span> @endif
+                </div>
+              </div>
+              <span class="fw-semibold">₹{{ number_format($due['remaining'], 2) }}</span>
+            </li>
+          @endforeach
+        </ul>
+        <a href="{{ route('student.payment.index') }}" class="btn btn-primary w-100">Pay Installment</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl = document.getElementById('paymentDueModal');
+  if (modalEl && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+});
+</script>
+@endif
 @endsection

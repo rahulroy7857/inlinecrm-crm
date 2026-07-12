@@ -14,7 +14,7 @@
                 'monthUrl' => fn ($month) => account_route('counselor-salaries.index', ['month' => $month]),
             ])
         </div>
-        <div class="card-body">           
+        <div class="card-body">
             <div class="table-responsive">
                 <table class="table crm-table">
                     <thead>
@@ -29,6 +29,8 @@
                             <th class="text-center">Absent</th>
                             <th class="text-end">Deduction</th>
                             <th class="text-end">Net Salary</th>
+                            <th class="text-center">Status</th>
+                            <th>Paid Date</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -65,6 +67,21 @@
                             </td>
                             <td class="text-end text-danger">₹{{ number_format($row['deduction'], 2) }}</td>
                             <td class="text-end fw-semibold">₹{{ number_format($row['net_salary'], 2) }}</td>
+                            <td class="text-center">
+                                @if($row['is_paid'])
+                                    <span class="badge bg-success">Paid</span>
+                                @else
+                                    <span class="badge bg-warning">Unpaid</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($row['paid_at'])
+                                    {{ $row['paid_at']->format('d-m-Y') }}
+                                    <br><small class="text-muted">{{ $row['paid_at']->format('h:i A') }}</small>
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td>
                                 <a href="{{ account_route('counselor-salaries.show', ['id' => $counselor->id, 'month' => $selectedMonth]) }}"
                                    class="btn btn-sm btn-outline-primary">Details</a>
@@ -72,7 +89,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted">No counselors with salary and working days configured.</td>
+                            <td colspan="13" class="text-center text-muted">No counselors with salary and working days configured.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -81,7 +98,7 @@
                         <tr class="fw-semibold">
                             <td colspan="9" class="text-end">Total Net Salary</td>
                             <td class="text-end">₹{{ number_format($salaries->sum('net_salary'), 2) }}</td>
-                            <td></td>
+                            <td colspan="3"></td>
                         </tr>
                     </tfoot>
                     @endif

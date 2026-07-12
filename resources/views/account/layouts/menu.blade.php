@@ -59,6 +59,20 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->is('account/student-fees*') ? 'active' : '' }}">
+            <a href="{{ route('account.student-fees.index') }}" class="menu-link">
+                <i class="menu-icon bx bx-money-withdraw"></i>
+                <span>Student Fees</span>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->is('account/student-fee-payments*') ? 'active' : '' }}">
+            <a href="{{ route('account.student-fee-payments.index') }}" class="menu-link">
+                <i class="menu-icon bx bx-credit-card"></i>
+                <span>Student Fee Payments</span>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->is('account/counselor-salaries*') ? 'active' : '' }}">
             <a href="{{ route('account.counselor-salaries.index') }}" class="menu-link">
                 <i class="menu-icon bx bx-money"></i>

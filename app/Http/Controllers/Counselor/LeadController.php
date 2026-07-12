@@ -40,7 +40,7 @@ class LeadController extends Controller
             'exams',
             'payments.accountTransaction.ledgerAccount',
             'timeline',
-            'student',
+            'student.payments',
             'contactLogs' => function($query) {
                 $query->orderBy('contact_date', 'desc');
             }

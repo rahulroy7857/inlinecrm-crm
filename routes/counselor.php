@@ -7,6 +7,8 @@ use App\Http\Controllers\Counselor\LeadController;
 use App\Http\Controllers\Counselor\LeadEducationController;
 use App\Http\Controllers\Counselor\LeadExamController;
 use App\Http\Controllers\Counselor\LeadPaymentController;
+use App\Http\Controllers\Counselor\StudentFeeController;
+use App\Http\Controllers\Counselor\StudentFeePaymentController;
 use App\Http\Controllers\Counselor\LeadContactLogController;
 use App\Http\Controllers\Counselor\DashboardController;
 use App\Http\Controllers\Counselor\ChangePasswordController;
@@ -61,7 +63,8 @@ Route::middleware(['auth:counselor', EnsureCounselorBreakCompliance::class])->gr
     // Lead payments
     Route::post('leads/payments', [LeadPaymentController::class, 'store'])->name('lead.payments.store');
 
-    // Lead contact logs
+    Route::post('leads/{leadId}/student-fees/remind', [StudentFeeController::class, 'sendDueReminder'])->name('leads.student-fees.remind');
+    Route::get('student-fee-payments', [StudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
     Route::get('leads/contact-logs/{id}/delete', [LeadContactLogController::class, 'destroy'])->name('lead.contact_logs.destroy');
     Route::post('leads/contact-logs', [LeadContactLogController::class, 'store'])->name('lead.contact_logs.store');
     Route::post('leads/contact-logs/{id}/update', [LeadContactLogController::class, 'update'])->name('lead.contact_logs.update');

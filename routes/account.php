@@ -14,6 +14,8 @@ use App\Http\Controllers\Account\FinancialYearController;
 use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
 use App\Http\Controllers\Account\CounselorSalaryController;
 use App\Http\Controllers\Account\WorkingHoursController;
+use App\Http\Controllers\Account\StudentFeePaymentController as AccountStudentFeePaymentController;
+use App\Http\Controllers\Account\StudentFeeManageController as AccountStudentFeeManageController;
 use App\Http\Middleware\EnsureAccountBreakCompliance;
 
 Route::get('login', function () {
@@ -62,9 +64,15 @@ Route::middleware(['auth:account', EnsureAccountBreakCompliance::class])->group(
         Route::post('lead-payments', 'store')->name('lead-payments.store');
     });
 
+    Route::get('student-fee-payments', [AccountStudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
+
+    Route::get('student-fees', [AccountStudentFeeManageController::class, 'index'])->name('student-fees.index');
+    Route::put('student-fees/{id}', [AccountStudentFeeManageController::class, 'update'])->name('student-fees.update');
+
     Route::controller(CounselorSalaryController::class)->group(function () {
         Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');
         Route::get('counselor-salaries/{id}', 'show')->name('counselor-salaries.show');
+        Route::post('counselor-salaries/{id}/pay', 'pay')->name('counselor-salaries.pay');
     });
 
     Route::controller(ReportController::class)->group(function () {

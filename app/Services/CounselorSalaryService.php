@@ -2,15 +2,143 @@
 
 namespace App\Services;
 
+use App\Models\AccountTransaction;
 use App\Models\ActivityLog;
 use App\Models\Counselor;
+use App\Models\CounselorSalaryPayment;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class CounselorSalaryService
 {
     public function calculateForMonth(Counselor $counselor, int $year, int $month): array
+    {
+        $row = $this->calculateForMonthWithoutPaymentLookup($counselor, $year, $month);
+        $payment = $this->paymentForMonth($counselor->id, $year, $month);
+        $isPaid = $payment && $payment->isPaid();
+
+        return array_merge($row, [
+            'payment' => $payment,
+            'payment_status' => $isPaid ? CounselorSalaryPayment::STATUS_PAID : CounselorSalaryPayment::STATUS_UNPAID,
+            'is_paid' => $isPaid,
+            'paid_at' => $payment?->paid_at,
+            'paid_amount' => $payment ? (float) $payment->amount : null,
+        ]);
+    }
+
+    public function calculateAllForMonth(int $year, int $month): Collection
+    {
+        $payments = CounselorSalaryPayment::query()
+            ->with(['ledgerAccount', 'paidBy'])
+            ->where('year', $year)
+            ->where('month', $month)
+            ->get()
+            ->keyBy('counselor_id');
+
+        return Counselor::query()
+            ->where('salary', '>', 0)
+            ->whereNotNull('working_days')
+            ->orderBy('name')
+            ->get()
+            ->map(function (Counselor $counselor) use ($year, $month, $payments) {
+                $row = $this->calculateForMonthWithoutPaymentLookup($counselor, $year, $month);
+                $payment = $payments->get($counselor->id);
+                $isPaid = $payment && $payment->isPaid();
+
+                return array_merge($row, [
+                    'payment' => $payment,
+                    'payment_status' => $isPaid ? CounselorSalaryPayment::STATUS_PAID : CounselorSalaryPayment::STATUS_UNPAID,
+                    'is_paid' => $isPaid,
+                    'paid_at' => $payment?->paid_at,
+                    'paid_amount' => $payment ? (float) $payment->amount : null,
+                ]);
+            });
+    }
+
+    public function paySalary(
+        Counselor $counselor,
+        int $year,
+        int $month,
+        array $data,
+        ?int $paidByAccountId = null
+    ): CounselorSalaryPayment {
+        $existing = $this->paymentForMonth($counselor->id, $year, $month);
+        if ($existing && $existing->isPaid()) {
+            throw new \InvalidArgumentException('Salary for this month is already marked as paid.');
+        }
+
+        $salary = $this->calculateForMonthWithoutPaymentLookup($counselor, $year, $month);
+        $amount = (float) ($data['amount'] ?? $salary['net_salary']);
+
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Net salary amount must be greater than zero.');
+        }
+
+        $paidAt = isset($data['paid_at'])
+            ? Carbon::parse($data['paid_at'])
+            : now();
+
+        return DB::transaction(function () use ($counselor, $year, $month, $salary, $amount, $data, $paidByAccountId, $paidAt) {
+            $payment = CounselorSalaryPayment::updateOrCreate(
+                [
+                    'counselor_id' => $counselor->id,
+                    'year' => $year,
+                    'month' => $month,
+                ],
+                [
+                    'base_salary' => $salary['base_salary'],
+                    'deduction' => $salary['deduction'],
+                    'amount' => $amount,
+                    'status' => CounselorSalaryPayment::STATUS_PAID,
+                    'paid_at' => $paidAt,
+                    'paid_by' => $paidByAccountId,
+                    'ledger_account_id' => $data['ledger_account_id'],
+                    'payment_mode' => $data['payment_mode'] ?? null,
+                    'reference_no' => $data['reference_no'] ?? null,
+                    'notes' => $data['notes'] ?? null,
+                ]
+            );
+
+            $monthLabel = Carbon::create($year, $month, 1)->format('F Y');
+
+            AccountTransaction::updateOrCreate(
+                ['counselor_salary_payment_id' => $payment->id],
+                [
+                    'ledger_account_id' => $data['ledger_account_id'],
+                    'academic_year_id' => session('academic_year_id'),
+                    'created_by' => $paidByAccountId,
+                    'transaction_date' => $paidAt->toDateString(),
+                    'entry_type' => 'debit',
+                    'category' => 'expense',
+                    'reference_no' => $data['reference_no'] ?? ('SAL-' . $counselor->id . '-' . sprintf('%04d%02d', $year, $month)),
+                    'party_name' => $counselor->name,
+                    'amount' => $amount,
+                    'payment_mode' => $data['payment_mode'] ?? null,
+                    'description' => trim(
+                        'Counselor salary — ' . $counselor->name . ' — ' . $monthLabel
+                        . (!empty($data['notes']) ? ' | ' . $data['notes'] : '')
+                    ),
+                    'is_crm_synced' => false,
+                ]
+            );
+
+            return $payment->fresh(['ledgerAccount', 'paidBy']);
+        });
+    }
+
+    public function paymentForMonth(int $counselorId, int $year, int $month): ?CounselorSalaryPayment
+    {
+        return CounselorSalaryPayment::query()
+            ->with(['ledgerAccount', 'paidBy'])
+            ->where('counselor_id', $counselorId)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->first();
+    }
+
+    private function calculateForMonthWithoutPaymentLookup(Counselor $counselor, int $year, int $month): array
     {
         $monthStart = Carbon::create($year, $month, 1)->startOfDay();
         $monthEnd = $monthStart->copy()->endOfMonth()->endOfDay();
@@ -67,16 +195,6 @@ class CounselorSalaryService
             'net_salary' => $netSalary,
             'day_details' => $dayDetails,
         ];
-    }
-
-    public function calculateAllForMonth(int $year, int $month): Collection
-    {
-        return Counselor::query()
-            ->where('salary', '>', 0)
-            ->whereNotNull('working_days')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Counselor $counselor) => $this->calculateForMonth($counselor, $year, $month));
     }
 
     private function scheduledWorkingDates(
@@ -142,7 +260,7 @@ class CounselorSalaryService
             ? Carbon::parse($counselor->office_end_time)->format('H:i')
             : null;
 
-        return collect($byDate)->map(function (array $day, string $dateKey) use ($officeStart, $officeEnd) {
+        return collect($byDate)->map(function (array $day) use ($officeStart, $officeEnd) {
             $hasLogin = $day['login_at'] !== null;
             $hasLogout = $day['logout_at'] !== null;
 
@@ -157,7 +275,6 @@ class CounselorSalaryService
             }
 
             return [
-                'date' => $dateKey,
                 'login_at' => $day['login_at'],
                 'logout_at' => $day['logout_at'],
                 'present' => $hasLogin && $hasLogout && $onTime,

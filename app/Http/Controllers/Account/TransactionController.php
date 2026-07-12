@@ -16,7 +16,7 @@ class TransactionController extends Controller
 
     public function index(Request $request)
     {
-        $query = AccountTransaction::with(['ledgerAccount', 'toLedgerAccount', 'createdBy'])
+        $query = AccountTransaction::with(['ledgerAccount', 'toLedgerAccount', 'createdBy', 'studentPayment'])
             ->orderByDesc('transaction_date')
             ->orderByDesc('id');
 
@@ -32,16 +32,29 @@ class TransactionController extends Controller
         if ($request->filled('entry_type')) {
             $query->where('entry_type', $request->entry_type);
         }
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $totals = [
+            'credit' => (clone $query)->where('entry_type', 'credit')->sum('amount'),
+            'debit' => (clone $query)->where('entry_type', 'debit')->sum('amount'),
+        ];
+        $totals['net'] = (float) $totals['credit'] - (float) $totals['debit'];
 
         $transactions = $query->paginate(25)->withQueryString();
         $ledgerAccounts = LedgerAccount::where('status', 'Active')->orderBy('name')->get();
 
-        return view('account.transactions.index', compact('transactions', 'ledgerAccounts'));
+        return view('account.transactions.index', compact('transactions', 'ledgerAccounts', 'totals'));
     }
 
     public function create()
     {
-        return redirect(account_route('lead-payments.index', ['add' => 1]));
+        $this->authorizeAccountManage();
+
+        $ledgerAccounts = LedgerAccount::where('status', 'Active')->orderBy('name')->get();
+
+        return view('account.transactions.create', compact('ledgerAccounts'));
     }
 
     public function store(Request $request)
@@ -52,7 +65,7 @@ class TransactionController extends Controller
             'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'to_ledger_account_id' => 'nullable|exists:ledger_accounts,id|different:ledger_account_id',
             'transaction_date' => 'required|date',
-            'entry_type' => 'required|in:credit,debit',
+            'entry_type' => 'nullable|in:credit,debit',
             'category' => 'required|in:income,expense,transfer,other',
             'reference_no' => 'nullable|string|max:100',
             'party_name' => 'nullable|string|max:255',
@@ -63,6 +76,15 @@ class TransactionController extends Controller
 
         if ($data['category'] === 'transfer' && empty($data['to_ledger_account_id'])) {
             return back()->withErrors(['to_ledger_account_id' => 'Target account is required for transfers.'])->withInput();
+        }
+
+        // Income increases bank balance; expense reduces it.
+        if ($data['category'] === 'income') {
+            $data['entry_type'] = 'credit';
+        } elseif ($data['category'] === 'expense') {
+            $data['entry_type'] = 'debit';
+        } elseif (empty($data['entry_type'])) {
+            $data['entry_type'] = 'debit';
         }
 
         DB::transaction(function () use ($data) {
@@ -84,14 +106,14 @@ class TransactionController extends Controller
                     'ledger_account_id' => $data['ledger_account_id'],
                     'to_ledger_account_id' => $data['to_ledger_account_id'],
                     'entry_type' => 'debit',
-                    'description' => ($data['description'] ?? '') . ' (Transfer out)',
+                    'description' => trim(($data['description'] ?? '') . ' (Transfer out)'),
                 ]));
 
                 AccountTransaction::create(array_merge($base, [
                     'ledger_account_id' => $data['to_ledger_account_id'],
                     'to_ledger_account_id' => $data['ledger_account_id'],
                     'entry_type' => 'credit',
-                    'description' => ($data['description'] ?? '') . ' (Transfer in)',
+                    'description' => trim(($data['description'] ?? '') . ' (Transfer in)'),
                 ]));
             } else {
                 AccountTransaction::create(array_merge($base, [
@@ -109,7 +131,7 @@ class TransactionController extends Controller
             $data
         );
 
-        return redirect()->route('account.transactions.index')->with('success', 'Transaction recorded successfully.');
+        return redirect(account_route('transactions.index'))->with('success', 'Transaction recorded successfully.');
     }
 
     public function destroy($id)

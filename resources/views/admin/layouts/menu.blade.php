@@ -131,6 +131,12 @@
                 <li class="menu-item {{ request()->is('admin/accounts/lead-payments*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.lead-payments.index') }}" class="menu-link"><span>Lead Payments</span></a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/accounts/student-fees*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.accounts.student-fees.index') }}" class="menu-link"><span>Student Fees</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/accounts/student-fee-payments*') || request()->is('admin/student-fee-payments*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.student-fee-payments.index') }}" class="menu-link"><span>Student Fee Payments</span></a>
+                </li>
                 <li class="menu-item {{ request()->is('admin/accounts/counselor-salaries*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.counselor-salaries.index') }}" class="menu-link"><span>Counselor Salaries</span></a>
                 </li>

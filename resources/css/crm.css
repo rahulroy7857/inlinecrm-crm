@@ -1337,6 +1337,20 @@ table.crm-table {
     @apply border-b-2 border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100/80 px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-600;
 }
 
+.crm-table thead th.text-end,
+.crm-table tbody td.text-end,
+.crm-table tfoot td.text-end,
+.crm-table tfoot th.text-end {
+    text-align: right !important;
+}
+
+.crm-table thead th.text-center,
+.crm-table tbody td.text-center,
+.crm-table tfoot td.text-center,
+.crm-table tfoot th.text-center {
+    text-align: center !important;
+}
+
 .crm-table tbody td {
     @apply border-b border-slate-100 px-4 py-3 text-sm text-slate-700;
 }
@@ -2209,4 +2223,607 @@ table.crm-table {
     @apply grid-cols-2 xl:grid-cols-4;
 }
 
+/* Student portal fees on counselor lead profile */
+.student-fees-panel .student-fees-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.875rem;
+}
+
+.student-fees-panel .student-fees-summary__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: 100%;
+    padding: 1rem 1.1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.85rem;
+    background: #f8fafc;
+}
+
+.student-fees-panel .student-fees-summary__item--total {
+    background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+    border-color: #bfdbfe;
+}
+
+.student-fees-panel .student-fees-summary__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.student-fees-panel .student-fees-summary__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.student-fees-panel .student-fees-summary__meta {
+    font-size: 0.8125rem;
+    color: #64748b;
+}
+
+.student-fees-panel .student-fees-summary__remain {
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.student-fees-panel .student-fees-summary__remain.is-due {
+    color: #b45309;
+}
+
+.student-fees-panel .student-fees-summary__remain.is-done {
+    color: #15803d;
+}
+
+.student-fees-panel .student-fees-block {
+    margin-top: 0.25rem;
+    padding: 1.1rem 1.15rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    background: #fff;
+}
+
+.student-fees-panel .student-fees-block + .student-fees-block {
+    margin-top: 1rem;
+}
+
+.student-fees-panel .student-fees-block--reminder {
+    background: #f8fafc;
+}
+
+.student-fees-panel .student-fees-block__title {
+    margin-bottom: 0.9rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.student-fees-panel .student-fees-actions {
+    padding-top: 0.35rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 767.98px) {
+    .student-fees-panel .student-fees-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Account summary cards (transactions + reports) */
+.account-txn-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.875rem;
+}
+
+.account-txn-summary__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem 1.15rem;
+    border-radius: 0.9rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+.account-txn-summary__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.account-txn-summary__value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+    word-break: break-word;
+}
+
+.account-txn-summary__item--credit {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.account-txn-summary__item--credit .account-txn-summary__value {
+    color: #15803d;
+}
+
+.account-txn-summary__item--debit {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.account-txn-summary__item--debit .account-txn-summary__value {
+    color: #b91c1c;
+}
+
+.account-txn-summary__item--net {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.account-txn-summary__item--net .account-txn-summary__value {
+    color: #1d4ed8;
+}
+
+.account-transactions-page .account-txn-table th {
+    white-space: nowrap;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+    background: #f8fafc;
+}
+
+.account-transactions-page .account-txn-table td {
+    vertical-align: top;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+.account-txn-desc {
+    max-width: 340px;
+    margin-top: 0.15rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #64748b;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 767.98px) {
+    .account-txn-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+.account-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.85rem 0.75rem;
+    align-items: end;
+}
+
+.account-filter-grid__field,
+.account-filter-grid__actions {
+    min-width: 0;
+}
+
+.account-filter-grid__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.account-filter-grid .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+}
+
+@media (max-width: 1199.98px) {
+    .account-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .account-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .account-filter-grid__actions {
+        grid-column: 1 / -1;
+    }
+}
+
+.account-reports-page .account-report-card {
+    display: flex;
+    gap: 1rem;
+    height: 100%;
+    padding: 1.15rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.account-reports-page .account-report-card:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    transform: translateY(-2px);
+    color: inherit;
+}
+
+.account-reports-page .account-report-card__icon {
+    flex: 0 0 3rem;
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    font-size: 1.35rem;
+}
+
+.account-reports-page .account-report-card__icon--statement {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.account-reports-page .account-report-card__icon--cashflow {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.account-reports-page .account-report-card__icon--ledger {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.account-reports-page .account-report-card__body {
+    min-width: 0;
+}
+
+.account-reports-page .account-report-card__title {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.account-reports-page .account-report-card__text {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+.account-reports-page .account-report-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4f46e5;
+}
+
+.account-reports-page .account-report-toolbar .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+}
+
+.account-reports-page .account-cashflow-table {
+    width: 100%;
+}
+
+.account-reports-page .account-cashflow-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+    background: #f8fafc;
+    white-space: nowrap;
+}
+
+.account-reports-page .account-cashflow-table td,
+.account-reports-page .account-cashflow-table th {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+}
+
+.account-reports-page .account-cashflow-table tfoot td {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.account-reports-page .account-cashflow-table th.text-end,
+.account-reports-page .account-cashflow-table td.text-end {
+    text-align: right !important;
+}
+
+.account-reports-page .account-cashflow-table th.text-center,
+.account-reports-page .account-cashflow-table td.text-center {
+    text-align: center !important;
+}
+
+/* ─── Leads / report filter toolbar ──────────────────────── */
+.crm-report-page .crm-report-hero {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.crm-report-page .crm-report-hero__title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.crm-report-page .crm-report-hero__sub {
+    margin: 0.25rem 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.crm-report-filter {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.crm-report-filter__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1.2rem;
+    border-bottom: 1px solid #eef2f7;
+    background: linear-gradient(180deg, #f8fafc, #fff);
+}
+
+.crm-report-filter__head-title {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #1e293b;
+}
+
+.crm-report-filter__head-title i {
+    width: 1.85rem;
+    height: 1.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+    background: rgba(105, 108, 255, 0.12);
+    color: #696cff;
+    font-size: 1rem;
+}
+
+.crm-report-filter__body {
+    padding: 1.2rem;
+}
+
+.crm-report-filter__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 1rem;
+    align-items: start;
+}
+
+.crm-report-filter__field {
+    min-width: 0;
+}
+
+.crm-report-filter__field .form-label {
+    margin-bottom: 0.45rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #475569;
+}
+
+.crm-report-filter__field .form-control,
+.crm-report-filter__field .form-select {
+    min-height: 2.65rem;
+    border-radius: 0.7rem;
+    border-color: #dbe3ef;
+    background: #fff;
+    box-shadow: none;
+}
+
+.crm-report-filter__field .form-control:focus,
+.crm-report-filter__field .form-select:focus {
+    border-color: #a5b4fc;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.crm-report-filter__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.crm-report-filter__hint {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.8125rem;
+}
+
+.crm-report-filter__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+    margin-left: auto;
+}
+
+.crm-report-filter__actions .btn {
+    min-height: 2.55rem;
+    min-width: 8.5rem;
+    border-radius: 0.7rem;
+    padding-inline: 1.25rem;
+    font-weight: 600;
+}
+
+.crm-report-filter__actions .btn-primary {
+    box-shadow: 0 6px 14px rgba(105, 108, 255, 0.22);
+}
+
+.crm-report-filter .select2-container {
+    width: 100% !important;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple {
+    position: relative;
+    min-height: 2.65rem;
+    border: 1px solid #dbe3ef !important;
+    border-radius: 0.7rem !important;
+    padding: 0.3rem 2.2rem 0.3rem 0.55rem !important;
+    background: #fff;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0.9rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid #64748b;
+    border-bottom: 2px solid #64748b;
+    transform: translateY(-65%) rotate(45deg);
+    pointer-events: none;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.crm-report-filter .select2-container--default.select2-container--open .select2-selection--multiple::after {
+    border-color: #696cff;
+    transform: translateY(-20%) rotate(225deg);
+}
+
+.crm-report-filter .select2-container--default.select2-container--focus .select2-selection--multiple,
+.crm-report-filter .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: #a5b4fc !important;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0;
+    width: 100%;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    margin: 0.15rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(105, 108, 255, 0.12);
+    color: #4f46e5;
+    font-size: 0.78rem;
+    padding: 0.15rem 0.5rem;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #6366f1;
+    margin-right: 0.25rem;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+    color: #94a3b8;
+    margin: 0.15rem 0 0;
+    line-height: 1.7;
+    font-size: 0.875rem;
+}
+
+.crm-report-filter .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    margin-top: 0.15rem;
+    height: 1.7rem;
+}
+
+.crm-report-results {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.crm-report-results__meta {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.crm-report-results__meta strong {
+    color: #0f172a;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-report-filter__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-report-filter__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .crm-report-filter__footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crm-report-filter__actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .crm-report-filter__actions .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
 

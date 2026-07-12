@@ -10,6 +10,8 @@ class AccountTransaction extends Model
         'ledger_account_id',
         'to_ledger_account_id',
         'lead_payment_id',
+        'student_payment_id',
+        'counselor_salary_payment_id',
         'academic_year_id',
         'created_by',
         'transaction_date',
@@ -42,6 +44,16 @@ class AccountTransaction extends Model
     public function leadPayment()
     {
         return $this->belongsTo(LeadPayment::class);
+    }
+
+    public function studentPayment()
+    {
+        return $this->belongsTo(StudentPayment::class);
+    }
+
+    public function counselorSalaryPayment()
+    {
+        return $this->belongsTo(CounselorSalaryPayment::class);
     }
 
     public function academicYear()

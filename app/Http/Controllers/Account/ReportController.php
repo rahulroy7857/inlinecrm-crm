@@ -11,7 +11,23 @@ class ReportController extends Controller
 {
     public function index()
     {
-        return view('account.reports.index');
+        $yearId = session('academic_year_id');
+
+        $stats = [
+            'total_balance' => LedgerAccount::where('status', 'Active')->get()->sum(fn ($a) => $a->current_balance),
+            'income' => AccountTransaction::query()
+                ->where('entry_type', 'credit')
+                ->where('category', 'income')
+                ->when($yearId, fn ($q) => $q->where('academic_year_id', $yearId))
+                ->sum('amount'),
+            'expense' => AccountTransaction::query()
+                ->where('entry_type', 'debit')
+                ->where('category', 'expense')
+                ->when($yearId, fn ($q) => $q->where('academic_year_id', $yearId))
+                ->sum('amount'),
+        ];
+
+        return view('account.reports.index', compact('stats'));
     }
 
     public function accountStatement(Request $request)

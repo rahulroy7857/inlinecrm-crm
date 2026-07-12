@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Account\Concerns\ManagesAccountPortal;
 use App\Models\Counselor;
+use App\Models\LedgerAccount;
+use App\Services\ActivityLogger;
 use App\Services\CounselorSalaryService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,10 +43,68 @@ class CounselorSalaryController extends Controller
             (int) $monthDate->month
         );
 
+        $ledgerAccounts = LedgerAccount::where('status', 'Active')->orderBy('name')->get();
+
         return view('account.counselor-salaries.show', array_merge(
             $this->monthViewData($monthDate),
-            ['salary' => $salary, 'counselor' => $counselor]
+            [
+                'salary' => $salary,
+                'counselor' => $counselor,
+                'ledgerAccounts' => $ledgerAccounts,
+            ]
         ));
+    }
+
+    public function pay(Request $request, int $id, CounselorSalaryService $salaryService)
+    {
+        $this->authorizeAccountManage();
+
+        $counselor = Counselor::findOrFail($id);
+        $monthDate = $this->resolveMonth($request->get('month') ?: $request->input('month'));
+
+        $validated = $request->validate([
+            'month' => ['required', 'regex:/^\d{4}-\d{2}$/'],
+            'ledger_account_id' => ['required', 'exists:ledger_accounts,id'],
+            'paid_at' => ['required', 'date'],
+            'payment_mode' => ['nullable', 'string', 'max:50'],
+            'reference_no' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            $payment = $salaryService->paySalary(
+                $counselor,
+                (int) $monthDate->year,
+                (int) $monthDate->month,
+                [
+                    'ledger_account_id' => $validated['ledger_account_id'],
+                    'paid_at' => $validated['paid_at'],
+                    'payment_mode' => $validated['payment_mode'] ?? null,
+                    'reference_no' => $validated['reference_no'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                ],
+                $this->accountCreatedById()
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+
+        ActivityLogger::log(
+            'Paid counselor salary',
+            'Create',
+            $this->accountActor(),
+            [
+                'counselor_id' => $counselor->id,
+                'month' => $monthDate->format('Y-m'),
+                'amount' => $payment->amount,
+                'payment_id' => $payment->id,
+            ]
+        );
+
+        return redirect(account_route('counselor-salaries.show', [
+            'id' => $counselor->id,
+            'month' => $monthDate->format('Y-m'),
+        ]))->with('success', 'Salary marked as paid and expense recorded in ledger.');
     }
 
     private function monthViewData(Carbon $monthDate): array

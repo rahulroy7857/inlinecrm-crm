@@ -1646,6 +1646,91 @@
                 </div>
             </div>
 
+            @if($lead->student)
+            @php
+                $feeStudent = $lead->student;
+                $feeSummary = app(\App\Services\StudentFeeService::class)->feeSummary($feeStudent);
+            @endphp
+            <div class="card mt-3 student-fees-panel" id="student-fees-card">
+                <div class="card-header border-bottom">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-0">Student Portal Fees</h5>
+                            <small class="text-muted">View-only — fees are set by the Accounts team for {{ $feeStudent->name }}</small>
+                        </div>
+                        <a href="{{ route('counselor.student-fee-payments.index', ['q' => $feeStudent->lead_ref]) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bx bx-list-ul me-1"></i>View Payments
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="student-fees-summary mb-4" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">Registration Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['registration_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">{{ $feeSummary['registration_plan']['label'] ?? 'Not set' }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['registration_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['registration_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">Admission Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['counselor_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">Paid ₹{{ number_format($feeSummary['counselor_paid'], 2) }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['counselor_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['counselor_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">College Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['college_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">Paid ₹{{ number_format($feeSummary['college_paid'], 2) }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['college_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['college_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item student-fees-summary__item--total">
+                            <span class="student-fees-summary__label">Total Remaining</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['total_remaining'], 2) }}</span>
+                            @if($feeSummary['total_remaining'] <= 0 && $feeSummary['fees_set'])
+                                <span class="badge bg-success mt-2 align-self-start">Settlement Completed</span>
+                            @else
+                                <span class="student-fees-summary__meta">All fee types</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @unless($feeSummary['fees_set'])
+                        <div class="alert alert-warning mb-3">Accounts team has not set fees for this student yet.</div>
+                    @endunless
+
+                    <div class="student-fees-block student-fees-block--reminder">
+                        <div class="student-fees-block__title">Send due reminder</div>
+                        <form method="POST" action="{{ route('counselor.leads.student-fees.remind', $lead->id) }}" class="row g-3 align-items-end">
+                            @csrf
+                            <div class="col-md-3">
+                                <label class="form-label">Fee type</label>
+                                <select name="purpose" class="form-control" required>
+                                    <option value="registration_fee">Registration Fee</option>
+                                    <option value="counselor_fee">Admission Fee</option>
+                                    <option value="college_fee">College Fee</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Message <span class="text-muted fw-normal">(optional)</span></label>
+                                <input type="text" name="message" class="form-control" placeholder="Please pay the due installment" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="bx bx-envelope me-1"></i>Email Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="card" id="payments-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">

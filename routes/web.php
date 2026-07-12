@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AccountBreakSettingController;
 use App\Http\Controllers\Admin\AccountUserController;
 use App\Http\Controllers\Admin\StudentUserController;
+use App\Http\Controllers\Admin\StudentFeePaymentController;
 use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
 use App\Http\Controllers\Account\LedgerAccountController as AccountLedgerController;
 use App\Http\Controllers\Account\TransactionController as AccountTransactionController;
@@ -198,6 +199,8 @@ Route::prefix('admin')->name('admin.')->group(function() {
             });
         });
 
+        Route::get('student-fee-payments', [StudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
+
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('dashboard', [AccountDashboardController::class, 'index'])->name('dashboard');
 
@@ -230,9 +233,18 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::post('lead-payments', 'store')->name('lead-payments.store');
             });
 
+            Route::get('student-fee-payments', [\App\Http\Controllers\Account\StudentFeePaymentController::class, 'index'])
+                ->name('student-fee-payments.index');
+
+            Route::get('student-fees', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'index'])
+                ->name('student-fees.index');
+            Route::put('student-fees/{id}', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'update'])
+                ->name('student-fees.update');
+
             Route::controller(AccountCounselorSalaryController::class)->group(function () {
                 Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');
                 Route::get('counselor-salaries/{id}', 'show')->name('counselor-salaries.show');
+                Route::post('counselor-salaries/{id}/pay', 'pay')->name('counselor-salaries.pay');
             });
 
             Route::controller(AccountReportController::class)->group(function () {

@@ -27,71 +27,95 @@
                     @elseif($lead)
                         @include('student.partials.alerts')
 
-                        <form method="POST" action="{{ route('student.registration.lead.store', $leadRef) }}">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name"
-                                    value="{{ old('name', $lead->name) }}" required />
+                        @if(!empty($otpPending))
+                            <div class="alert alert-info">
+                                OTP sent to <strong>{{ $otpEmail }}</strong>. Enter the 6-digit code to open your student panel.
                             </div>
 
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    value="{{ old('email', $lead->personal_email) }}" required />
-                            </div>
+                            <form method="POST" action="{{ route('student.registration.verify-otp', $leadRef) }}">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="otp" class="form-label">Email OTP</label>
+                                    <input type="text" class="form-control text-center tracking-[0.4em] text-xl"
+                                           id="otp" name="otp" maxlength="6" pattern="\d{6}"
+                                           inputmode="numeric" autocomplete="one-time-code" required autofocus
+                                           placeholder="••••••" />
+                                </div>
+                                <button class="btn btn-primary d-grid w-100" type="submit">Verify OTP & Continue</button>
+                            </form>
 
-                            <div class="mb-3">
-                                <label for="mobile" class="form-label">Mobile Number</label>
-                                <input type="text" class="form-control" id="mobile" name="mobile"
-                                    value="{{ old('mobile', $lead->mobile) }}" required />
-                            </div>
+                            <form method="POST" action="{{ route('student.registration.resend-otp', $leadRef) }}" class="mt-3">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary d-grid w-100">Resend OTP</button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('student.registration.lead.store', $leadRef) }}">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ old('name', $lead->name) }}" required />
+                                </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="country" class="form-label">Country</label>
-                                    <select class="form-control" id="country" name="country" required>
-                                        <option value="">Select Country</option>
-                                        @foreach($countries as $country)
-                                            <option value="{{ $country }}" {{ old('country', $lead->country) == $country ? 'selected' : '' }}>{{ $country }}</option>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="{{ old('email', $lead->personal_email) }}" required />
+                                    <small class="text-muted">A 6-digit OTP will be sent to this email.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="mobile" class="form-label">Mobile Number</label>
+                                    <input type="text" class="form-control" id="mobile" name="mobile"
+                                        value="{{ old('mobile', $lead->mobile) }}" required />
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="country" class="form-label">Country</label>
+                                        <select class="form-control" id="country" name="country" required>
+                                            <option value="">Select Country</option>
+                                            @foreach($countries as $country)
+                                                <option value="{{ $country }}" {{ old('country', $lead->country) == $country ? 'selected' : '' }}>{{ $country }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="state" class="form-label">State</label>
+                                        <select class="form-control" id="state" name="state" required>
+                                            <option value="">Select State</option>
+                                            @foreach($states as $state)
+                                                @if($state !== 'Any')
+                                                <option value="{{ $state }}" {{ old('state', $lead->state) == $state ? 'selected' : '' }}>{{ $state }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="course_id" class="form-label">Course</label>
+                                    <select class="form-control" id="course_id" name="course_id" required>
+                                        <option value="">Select Course</option>
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ old('course_id', $lead->course_id) == $course->id ? 'selected' : '' }}>{{ $course->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="state" class="form-label">State</label>
-                                    <select class="form-control" id="state" name="state" required>
-                                        <option value="">Select State</option>
-                                        @foreach($states as $state)
-                                            @if($state !== 'Any')
-                                            <option value="{{ $state }}" {{ old('state', $lead->state) == $state ? 'selected' : '' }}>{{ $state }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required />
                                 </div>
-                            </div>
 
-                            <div class="mb-3">
-                                <label for="course_id" class="form-label">Course</label>
-                                <select class="form-control" id="course_id" name="course_id" required>
-                                    <option value="">Select Course</option>
-                                    @foreach($courses as $course)
-                                        <option value="{{ $course->id }}" {{ old('course_id', $lead->course_id) == $course->id ? 'selected' : '' }}>{{ $course->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <div class="mb-4">
+                                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required />
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password_confirmation" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
-                            </div>
-
-                            <button class="btn btn-primary d-grid w-100" type="submit">Create Account</button>
-                        </form>
+                                <button class="btn btn-primary d-grid w-100" type="submit">Send OTP & Continue</button>
+                            </form>
+                        @endif
 
                         <p class="mt-4 mb-0 text-center text-sm text-slate-500">
                             Already registered? <a href="{{ route('student.login') }}">Sign in</a>

@@ -62,4 +62,9 @@ class Counselor extends Authenticatable
     {
         return $this->hasMany(CounselorBreak::class);
     }
+
+    public function salaryPayments()
+    {
+        return $this->hasMany(CounselorSalaryPayment::class);
+    }
 }

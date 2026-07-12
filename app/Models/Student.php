@@ -16,6 +16,7 @@ class Student extends Authenticatable
         'course_id',
         'name',
         'email',
+        'email_verified_at',
         'mobile',
         'country',
         'state',
@@ -28,6 +29,16 @@ class Student extends Authenticatable
         'payment_amount',
         'payment_reference',
         'paid_at',
+        'counselor_fee',
+        'college_fee',
+        'counselor_fee_due_date',
+        'college_fee_due_date',
+        'fees_set_at',
+        'fees_set_by',
+        'fees_set_by_account_id',
+        'fee_ledger_account_id',
+        'registration_fee_plan',
+        'registration_fee',
         'father_name',
         'father_occupation',
         'mother_name',
@@ -56,7 +67,14 @@ class Student extends Authenticatable
         'profile_completed_at' => 'datetime',
         'submitted_at' => 'datetime',
         'paid_at' => 'datetime',
+        'email_verified_at' => 'datetime',
+        'fees_set_at' => 'datetime',
+        'counselor_fee_due_date' => 'date',
+        'college_fee_due_date' => 'date',
         'payment_amount' => 'decimal:2',
+        'counselor_fee' => 'decimal:2',
+        'college_fee' => 'decimal:2',
+        'registration_fee' => 'decimal:2',
     ];
 
     public function lead()
@@ -67,6 +85,35 @@ class Student extends Authenticatable
     public function counselor()
     {
         return $this->belongsTo(Counselor::class);
+    }
+
+    public function feesSetBy()
+    {
+        return $this->belongsTo(Counselor::class, 'fees_set_by');
+    }
+
+    public function feesSetByAccount()
+    {
+        return $this->belongsTo(Account::class, 'fees_set_by_account_id');
+    }
+
+    public function feeLedgerAccount()
+    {
+        return $this->belongsTo(LedgerAccount::class, 'fee_ledger_account_id');
+    }
+
+    public function hasPaid(): bool
+    {
+        if ((float) ($this->registration_fee ?? 0) > 0) {
+            $paid = (float) $this->payments()
+                ->where('purpose', \App\Services\StudentFeeService::PURPOSE_REGISTRATION)
+                ->where('status', 'paid')
+                ->sum('amount');
+
+            return $paid >= (float) $this->registration_fee;
+        }
+
+        return $this->payment_status === 'paid';
     }
 
     public function course()
@@ -147,10 +194,5 @@ class Student extends Authenticatable
     public function isProfileComplete(): bool
     {
         return (bool) $this->profile_completed;
-    }
-
-    public function hasPaid(): bool
-    {
-        return $this->payment_status === 'paid';
     }
 }

@@ -84,6 +84,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->is('counselor/student-fee-payments*') ? 'active' : '' }}">
+            <a href="{{ route('counselor.student-fee-payments.index') }}" class="menu-link">
+                <i class="menu-icon bx bx-credit-card"></i>
+                <span>Student Fee Payments</span>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->is('counselor/reports*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon bx bx-bar-chart-alt-2"></i>
