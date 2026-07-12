@@ -116,6 +116,36 @@ class Student extends Authenticatable
         return $this->payment_status === 'paid';
     }
 
+    public function hasFeesSet(): bool
+    {
+        return (float) ($this->registration_fee ?? 0) > 0
+            || (float) ($this->counselor_fee ?? 0) > 0
+            || (float) ($this->college_fee ?? 0) > 0;
+    }
+
+    public function totalFeeRemaining(): float
+    {
+        $summary = app(\App\Services\StudentFeeService::class)->feeSummary($this);
+
+        return (float) ($summary['total_remaining'] ?? 0);
+    }
+
+    public function hasAllFeesPaid(): bool
+    {
+        return $this->hasFeesSet() && $this->totalFeeRemaining() <= 0;
+    }
+
+    public function feeCompletionStatusLabel(): string
+    {
+        if (!$this->hasFeesSet()) {
+            return 'Fees Not Set';
+        }
+
+        return $this->hasAllFeesPaid()
+            ? 'Completed'
+            : 'Incomplete';
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class);

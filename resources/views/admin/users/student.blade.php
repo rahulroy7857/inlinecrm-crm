@@ -54,8 +54,8 @@
                             <td>{{ $student->course?->name ?? '—' }}</td>
                             <td><span class="badge bg-label-primary">{{ $student->applicationStatusLabel() }}</span></td>
                             <td>
-                                <span class="badge bg-{{ $student->hasPaid() ? 'success' : 'warning' }}">
-                                    {{ $student->hasPaid() ? 'Paid' : 'Pending' }}
+                                <span class="badge bg-{{ $student->hasAllFeesPaid() ? 'success' : ($student->hasFeesSet() ? 'warning' : 'secondary') }}">
+                                    {{ $student->feeCompletionStatusLabel() }}
                                 </span>
                             </td>
                             <td>

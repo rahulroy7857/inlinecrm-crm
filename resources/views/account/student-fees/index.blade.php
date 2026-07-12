@@ -37,6 +37,7 @@
                     <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Name, email, or lead ID">
                 </div>
                 <div class="col-auto">
+                    <label class="form-label">&nbsp;</label>
                     <button class="btn btn-primary" type="submit">Search</button>
                     @if(request('q'))
                         <a href="{{ account_route('student-fees.index') }}" class="btn btn-outline-secondary">Clear</a>
@@ -117,7 +118,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12">
+                <div class="col-12 mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i>Save Fees</button>
                 </div>
             </form>
