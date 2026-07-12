@@ -7,11 +7,15 @@ use App\Http\Controllers\Counselor\LeadController;
 use App\Http\Controllers\Counselor\LeadEducationController;
 use App\Http\Controllers\Counselor\LeadExamController;
 use App\Http\Controllers\Counselor\LeadPaymentController;
+use App\Http\Controllers\Counselor\StudentFeeController;
+use App\Http\Controllers\Counselor\StudentFeePaymentController;
 use App\Http\Controllers\Counselor\LeadContactLogController;
 use App\Http\Controllers\Counselor\DashboardController;
 use App\Http\Controllers\Counselor\ChangePasswordController;
 use App\Http\Controllers\Counselor\ReportController;
 use App\Http\Controllers\Counselor\AcademicYearController;
+use App\Http\Controllers\Counselor\WorkingHoursController;
+use App\Http\Middleware\EnsureCounselorBreakCompliance;
 
 // Public routes
 Route::get('login', function() {
@@ -21,18 +25,22 @@ Route::get('login', function() {
     return app(CounselorAuthController::class)->login();
 })->name('login');
 
-Route::post('logout', [CounselorAuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], 'logout', [CounselorAuthController::class, 'logout'])->name('logout');
 Route::post('login', [CounselorAuthController::class, 'authenticate'])->name('authenticate');
 
 // Protected routes
-Route::middleware(['auth:counselor'])->group(function () {
+Route::middleware(['auth:counselor', EnsureCounselorBreakCompliance::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('working-hours/status', [WorkingHoursController::class, 'status'])->name('working-hours.status');
+    Route::post('working-hours/break/start', [WorkingHoursController::class, 'startBreak'])->name('working-hours.break.start');
+    Route::post('working-hours/break/end', [WorkingHoursController::class, 'endBreak'])->name('working-hours.break.end');
     
     // Leads management
     Route::get('leads/{status}', [LeadController::class, 'statusWiseLeads'])->name('leads.status');
     Route::get('new-leads', [LeadController::class, 'newLeads'])->name('new-leads');
     Route::get('leads-basket', [LeadController::class, 'leadsBasket'])->name('leads-basket');
-    Route::get('pick-lead/{id}', [LeadController::class, 'pickLead']);
+    Route::get('pick-lead/{id}', [LeadController::class, 'pickLead'])->name('pick-lead');
     Route::get('search', [LeadController::class, 'search'])->name('search');
     Route::get('lead-profile/{id}', [LeadController::class, 'show'])->name('leads.show');
     Route::post('leads/{id}/update', [LeadController::class, 'update'])->name('leads.update');
@@ -55,7 +63,8 @@ Route::middleware(['auth:counselor'])->group(function () {
     // Lead payments
     Route::post('leads/payments', [LeadPaymentController::class, 'store'])->name('lead.payments.store');
 
-    // Lead contact logs
+    Route::post('leads/{leadId}/student-fees/remind', [StudentFeeController::class, 'sendDueReminder'])->name('leads.student-fees.remind');
+    Route::get('student-fee-payments', [StudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
     Route::get('leads/contact-logs/{id}/delete', [LeadContactLogController::class, 'destroy'])->name('lead.contact_logs.destroy');
     Route::post('leads/contact-logs', [LeadContactLogController::class, 'store'])->name('lead.contact_logs.store');
     Route::post('leads/contact-logs/{id}/update', [LeadContactLogController::class, 'update'])->name('lead.contact_logs.update');

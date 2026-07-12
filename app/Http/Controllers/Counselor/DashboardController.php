@@ -9,10 +9,14 @@ use App\Models\Counselor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\LeadStatus; // Add this import
+use App\Services\CounselorWorkingHoursService;
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
+    protected $academicYear;
+
+    public function __construct(
+        private CounselorWorkingHoursService $workingHoursService
+    ) {
         $this->academicYear = session('academic_year_id');
     }
 
@@ -151,6 +155,10 @@ class DashboardController extends Controller
             LeadStatus::getColor('Admission')  // For admission
         ];
 
+        $workingHours = $this->workingHoursService->getTodaySummary(
+            auth()->guard('counselor')->user()
+        );
+
         return view('counselor.dashboard', compact(
             'leadsCount',
             'topCounselor',
@@ -163,7 +171,8 @@ class DashboardController extends Controller
             'leadsPercentageDiff',
             'statusColors',
             'funnelColors',
-            'months' // Pass months for followups chart
+            'months',
+            'workingHours'
         ));
     }
 }

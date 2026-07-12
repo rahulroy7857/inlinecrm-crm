@@ -5,7 +5,7 @@
 
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y crm-page">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
             <div class="card">
@@ -43,7 +43,7 @@
                         <div class="col-md-12">
                             <h6 class="text-center">Sales Report</h6>
                             <div class="table-responsive">
-                                <table class="table table-bordered">
+                                <table class="table crm-table">
                                     <thead>
                                         <tr>
                                             <th>#</th>

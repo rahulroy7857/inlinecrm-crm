@@ -12,15 +12,29 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\CollegeController;
 use App\Http\Controllers\Admin\ChangePasswordController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\CounselorBreakSettingController;
 use App\Http\Controllers\Admin\CounselorController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\LeadEducationController;
 use App\Http\Controllers\Admin\LeadExamController;
-use App\Http\Controllers\Admin\LeadPaymentController;
 use App\Http\Controllers\Admin\LeadContactLogController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AccountBreakSettingController;
+use App\Http\Controllers\Admin\AccountUserController;
+use App\Http\Controllers\Admin\StudentUserController;
+use App\Http\Controllers\Admin\StudentFeePaymentController;
+use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
+use App\Http\Controllers\Account\LedgerAccountController as AccountLedgerController;
+use App\Http\Controllers\Account\TransactionController as AccountTransactionController;
+use App\Http\Controllers\Account\DaybookController as AccountDaybookController;
+use App\Http\Controllers\Account\ProfitLossController as AccountProfitLossController;
+use App\Http\Controllers\Account\CrmSyncController as AccountCrmSyncController;
+use App\Http\Controllers\Account\ReportController as AccountReportController;
+use App\Http\Controllers\Account\FinancialYearController as AccountFinancialYearController;
+use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
+use App\Http\Controllers\Account\CounselorSalaryController as AccountCounselorSalaryController;
 
 
 Route::get('/', function () {
@@ -55,7 +69,7 @@ Route::prefix('admin')->name('admin.')->group(function() {
         }
         return app(AdminAuthController::class)->login();
     })->name('login');
-    Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::match(['get', 'post'], 'logout', [AdminAuthController::class, 'logout'])->name('logout');
     Route::post('login', [AdminAuthController::class, 'authenticate'])->name('authenticate');
     
     // Protected routes
@@ -130,6 +144,20 @@ Route::prefix('admin')->name('admin.')->group(function() {
             Route::delete('settings/agents/{id}', 'destroy')->name('settings.agents.destroy');
         });
 
+        Route::controller(CounselorBreakSettingController::class)->group(function () {
+            Route::get('settings/counselor-breaks', 'index')->name('settings.counselor-breaks');
+            Route::put('settings/counselor-breaks', 'update')->name('settings.counselor-breaks.update');
+            Route::post('settings/counselor-breaks/requests/{id}/approve', 'approveRequest')->name('settings.counselor-breaks.approve');
+            Route::post('settings/counselor-breaks/requests/{id}/reject', 'rejectRequest')->name('settings.counselor-breaks.reject');
+        });
+
+        Route::controller(AccountBreakSettingController::class)->group(function () {
+            Route::get('settings/account-breaks', 'index')->name('settings.account-breaks');
+            Route::put('settings/account-breaks', 'update')->name('settings.account-breaks.update');
+            Route::post('settings/account-breaks/requests/{id}/approve', 'approveRequest')->name('settings.account-breaks.approve');
+            Route::post('settings/account-breaks/requests/{id}/reject', 'rejectRequest')->name('settings.account-breaks.reject');
+        });
+
         Route::get('users/admin', function() {
             return view('admin.users.admin');
         })->name('users.admin');
@@ -152,8 +180,81 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 Route::get('/', 'index')->name('index');
                 Route::post('/', 'store')->name('store');
                 Route::put('/{id}', 'update')->name('update');
+                Route::post('/{id}/unlock-break-login', 'unlockBreakLogin')->name('unlock-break-login');
                 Route::delete('/{id}', 'destroy')->name('destroy');
             });
+
+            Route::controller(AccountUserController::class)->prefix('account')->name('account.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'store')->name('store');
+                Route::put('/{id}', 'update')->name('update');
+                Route::post('/{id}/unlock-break-login', 'unlockBreakLogin')->name('unlock-break-login');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+
+            Route::controller(StudentUserController::class)->prefix('student')->name('student.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::put('/{id}/status', 'updateStatus')->name('status');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
+        });
+
+        Route::get('student-fee-payments', [StudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
+
+        Route::prefix('accounts')->name('accounts.')->group(function () {
+            Route::get('dashboard', [AccountDashboardController::class, 'index'])->name('dashboard');
+
+            Route::controller(AccountLedgerController::class)->group(function () {
+                Route::get('ledger-accounts', 'index')->name('ledger-accounts.index');
+                Route::post('ledger-accounts', 'store')->name('ledger-accounts.store');
+                Route::put('ledger-accounts/{id}', 'update')->name('ledger-accounts.update');
+                Route::delete('ledger-accounts/{id}', 'destroy')->name('ledger-accounts.destroy');
+            });
+
+            Route::controller(AccountTransactionController::class)->group(function () {
+                Route::get('transactions', 'index')->name('transactions.index');
+                Route::get('transactions/create', 'create')->name('transactions.create');
+                Route::post('transactions', 'store')->name('transactions.store');
+                Route::delete('transactions/{id}', 'destroy')->name('transactions.destroy');
+            });
+
+            Route::get('daybook', [AccountDaybookController::class, 'index'])->name('daybook.index');
+            Route::get('profit-loss', [AccountProfitLossController::class, 'index'])->name('profit-loss.index');
+
+            Route::controller(AccountCrmSyncController::class)->group(function () {
+                Route::get('crm-sync', 'index')->name('crm-sync.index');
+                Route::post('crm-sync', 'sync')->name('crm-sync.sync');
+                Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
+            });
+
+            Route::controller(AccountLeadPaymentController::class)->group(function () {
+                Route::get('lead-payments', 'index')->name('lead-payments.index');
+                Route::get('lead-payments/search-leads', 'searchLeads')->name('lead-payments.search-leads');
+                Route::post('lead-payments', 'store')->name('lead-payments.store');
+            });
+
+            Route::get('student-fee-payments', [\App\Http\Controllers\Account\StudentFeePaymentController::class, 'index'])
+                ->name('student-fee-payments.index');
+
+            Route::get('student-fees', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'index'])
+                ->name('student-fees.index');
+            Route::put('student-fees/{id}', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'update'])
+                ->name('student-fees.update');
+
+            Route::controller(AccountCounselorSalaryController::class)->group(function () {
+                Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');
+                Route::get('counselor-salaries/{id}', 'show')->name('counselor-salaries.show');
+                Route::post('counselor-salaries/{id}/pay', 'pay')->name('counselor-salaries.pay');
+            });
+
+            Route::controller(AccountReportController::class)->group(function () {
+                Route::get('reports', 'index')->name('reports.index');
+                Route::get('reports/account-statement', 'accountStatement')->name('reports.account-statement');
+                Route::get('reports/cash-flow', 'cashFlow')->name('reports.cash-flow');
+                Route::get('reports/ledger-summary', 'ledgerSummary')->name('reports.ledger-summary');
+            });
+
+            Route::post('change-financial-year', [AccountFinancialYearController::class, 'change'])->name('change-financial-year');
         });
 
         Route::get('users/role', function() {
@@ -181,8 +282,6 @@ Route::prefix('admin')->name('admin.')->group(function() {
         Route::get('leads/exams/{id}/destroy', [LeadExamController::class, 'destroy'])->name('lead.exams.destroy');
         Route::post('leads/exams', [LeadExamController::class, 'store'])->name('lead.exams.store');
         Route::post('leads/exams/{id}/update', [LeadExamController::class, 'update'])->name('lead.exams.update');
-
-        Route::post('leads/payments', [LeadPaymentController::class, 'store'])->name('lead.payments.store');
 
         Route::get('leads/contact-logs/{id}/delete', [LeadContactLogController::class, 'destroy'])->name('lead.contact_logs.destroy');
         Route::post('leads/contact-logs', [LeadContactLogController::class, 'store'])->name('lead.contact_logs.store');

@@ -77,6 +77,8 @@ class Lead extends Model
     protected $casts = [
         'dob' => 'date',
         'next_follow_up' => 'datetime',
+        'picked_at' => 'datetime',
+        'received_at' => 'datetime',
         'languages' => 'array',
     ];
 
@@ -123,7 +125,7 @@ class Lead extends Model
 
     public function payments(): HasMany
     {
-        return $this->hasMany(LeadPayment::class);
+        return $this->hasMany(LeadPayment::class)->orderByDesc('payment_date')->orderByDesc('id');
     }
 
     public function contactLogs(): HasMany
@@ -144,5 +146,32 @@ class Lead extends Model
     public function timeline()
     {
         return $this->hasMany(Timeline::class)->orderBy('event_date', 'desc');
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    public static function findDuplicateByContact(string $mobile, ?string $email = null): ?self
+    {
+        $query = static::where(function ($q) use ($mobile) {
+            $q->where('mobile', $mobile)
+                ->orWhere('alternative_mobile', $mobile)
+                ->orWhere('father_mobile', $mobile)
+                ->orWhere('mother_mobile', $mobile)
+                ->orWhere('guardian_mobile', $mobile);
+        });
+
+        if (!empty($email)) {
+            $query->orWhere(function ($q) use ($email) {
+                $q->where('personal_email', $email)
+                    ->orWhere('father_email', $email)
+                    ->orWhere('mother_email', $email)
+                    ->orWhere('guardian_email', $email);
+            });
+        }
+
+        return $query->first();
     }
 }

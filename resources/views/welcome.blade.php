@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Under Construction</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.golos-text-font')
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -14,7 +14,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            font-family: 'Public Sans', sans-serif;
+            font-family: 'Golos Text', sans-serif;
         }
         .coming-soon-container {
             max-width: 600px;

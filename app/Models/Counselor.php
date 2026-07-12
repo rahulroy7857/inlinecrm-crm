@@ -14,7 +14,17 @@ class Counselor extends Authenticatable
         'mobile',
         'password',
         'languages',
-        'status'
+        'status',
+        'break_login_locked',
+        'break_login_locked_at',
+        'break_login_lock_reason',
+        'break_login_unlocked_by',
+        'break_login_unlocked_at',
+        'joining_date',
+        'office_start_time',
+        'office_end_time',
+        'working_days',
+        'salary',
     ];
 
     protected $hidden = [
@@ -24,11 +34,37 @@ class Counselor extends Authenticatable
 
     protected $casts = [
         'languages' => 'array',
-        'status' => 'boolean'
+        'working_days' => 'array',
+        'status' => 'boolean',
+        'break_login_locked' => 'boolean',
+        'break_login_locked_at' => 'datetime',
+        'break_login_unlocked_at' => 'datetime',
+        'joining_date' => 'date',
+        'salary' => 'decimal:2',
     ];
+
+    public function unlockedByAdmin()
+    {
+        return $this->belongsTo(Admin::class, 'break_login_unlocked_by');
+    }
+
+    public function isBreakLoginLocked(): bool
+    {
+        return (bool) $this->break_login_locked;
+    }
 
     public function leads()
     {
         return $this->hasMany(Lead::class);
+    }
+
+    public function breaks()
+    {
+        return $this->hasMany(CounselorBreak::class);
+    }
+
+    public function salaryPayments()
+    {
+        return $this->hasMany(CounselorSalaryPayment::class);
     }
 }

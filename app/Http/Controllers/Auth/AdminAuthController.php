@@ -12,8 +12,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use App\Services\ActivityLogger;
+use App\Http\Controllers\Auth\Concerns\LogsOutGuard;
+
 class AdminAuthController extends Controller
 {
+    use LogsOutGuard;
     public function create(): View
     {
         return view('auth.admin.register');
@@ -88,21 +91,13 @@ class AdminAuthController extends Controller
 
     public function logout(Request $request)
     {
-        $admin = Auth::guard('admin')->user();
-        
-        // Log logout activity
-        if ($admin) {
+        return $this->performGuardLogout($request, 'admin', 'admin.login', function ($admin) use ($request) {
             ActivityLogger::log(
                 "Admin logged out: {$admin->name}",
                 'Logout',
                 $admin,
                 ['ip' => $request->ip()]
             );
-        }
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/admin/login');
+        });
     }
 }

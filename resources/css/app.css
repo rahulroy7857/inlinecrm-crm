@@ -1,1 +1,8 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap');
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+
+@theme {
+    --font-sans: 'Golos Text', ui-sans-serif, system-ui, sans-serif;
+}

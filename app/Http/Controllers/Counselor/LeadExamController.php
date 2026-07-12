@@ -44,7 +44,7 @@ class LeadExamController extends Controller
             'title'       => "Added exam: {$validated['exam_name']}",
             'description' => "Score: {$validated['score']}, Year: {$validated['year']}" . ($validated['remarks'] ? ", Remarks: {$validated['remarks']}" : ""),
             'event_type'  => 'exam',
-            'performed_by'=> auth()->guard('counselor')->id(),
+            ...Timeline::performerAttributes(auth()->guard('counselor')->user()),
             'event_date'  => now(),
         ]);
 
@@ -98,7 +98,7 @@ class LeadExamController extends Controller
             'title'       => "Deleted exam: {$exam->exam_name}",
             'description' => "Score: {$exam->score}, Year: {$exam->year}" . ($exam->remarks ? ", Remarks: {$exam->remarks}" : ""),
             'event_type'  => 'exam',
-            'performed_by'=> auth()->guard('counselor')->id(),
+            ...Timeline::performerAttributes(auth()->guard('counselor')->user()),
             'event_date'  => now(),
         ]);
 

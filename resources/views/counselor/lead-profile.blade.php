@@ -199,180 +199,25 @@
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
-
-    .card-header {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 20px 20px 0 0;
-        padding: 1.5rem;
-    }
-    /* Editable Styling */
-    .editable {
-        padding: 0.5rem 1rem;
-        color: #645c5e;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        background: rgba(212, 54, 97, 0.05) !important;
-        border: 1px solid transparent;
-    }
-    
-    .editable:hover {
-        background: rgba(212, 54, 97, 0.1);
-        border-color: #d43661;
-        color: #d43661;
-        text-decoration: none;
-    }
-    /* Section Headers */
-    .section-header {
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        font-size: 1rem;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .section-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-        z-index: 1;
-    }
-    
-    .section-header span {
-        position: relative;
-        z-index: 2;
-    }
-
-    /* Navigation Pills */
-    .nav-pills-custom {
-        border: none;
-        /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); */
-        /* border-radius: 15px; */
-        /* padding: 1rem; */
-        /* margin-top: 1.5rem; */
-        text-align: left;
-    }
-    
-    .nav-pills-custom .nav-link {
-        border: none;
-        border-radius: 10px;
-        margin: 0.25rem;
-        padding: 0.75rem 1.25rem;
-        color: #6c757d;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .nav-pills-custom .nav-link::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #d43661 0%, #764ba2 100%);
-        transition: left 0.3s ease;
-        z-index: -1;
-    }
-    
-    .nav-pills-custom .nav-link:hover::before,
-    .nav-pills-custom .nav-link.active::before {
-        left: 0;
-    }
-    
-    .nav-pills-custom .nav-link:hover,
-    .nav-pills-custom .nav-link.active {
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(212, 54, 97, 0.3);
-    }
 </style>
 @endsection
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-            @if(session('success'))
-            <div class="bs-toast toast bg-success" 
-                role="alert" 
-                aria-live="assertive" 
-                aria-atomic="true" 
-                style="position: fixed; top: 20px; right: 20px; z-index: 1080;">
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Success</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    {{ session('success') }}
-                </div>
-            </div>
-            @endif
-
-            @if(session('error'))
-            <div class="bs-toast toast bg-danger" 
-                role="alert" 
-                aria-live="assertive" 
-                aria-atomic="true" 
-                style="position: fixed; top: 20px; right: 20px; z-index: 1080;">
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Error</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    {{ session('error') }}
-                </div>
-            </div>
-            @endif
-            @if ($errors->any())
-            <div
-                class="bs-toast toast fade show bg-danger auto-hide-toast"
-                role="alert"
-                aria-live="assertive"
-                aria-atomic="true"
-                style="position: absolute; top: 20px; right: 20px; z-index: 1080;"
-            >
-                <div class="toast-header">
-                    <i class="bx bx-bell me-2"></i>
-                    <div class="me-auto fw-semibold">Error</div>
-                    <small>Now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-            @endif
-        <div class="col-lg-3 mb-4 order-0">
-            <div class="card text-center">
+<div class="container-xxl flex-grow-1 container-p-y lead-profile-page px-3 px-lg-4">
+    <div class="lead-profile-layout">
+        <div class="lead-profile-sidebar-col">
+            <div class="card lead-profile-sidebar">
             <div class="card-body">
-                <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
+                <div class="lead-profile-header">
+                <div class="dropdown">
                 <button
-                  class="btn p-0"
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
                   type="button"
                   id="cardOpt3"
                   data-bs-toggle="dropdown"
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i class="bx bx-dots-vertical-rounded"></i>
+                  <i class="bx bx-dots-vertical-rounded text-lg"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#followupModal">Add Contact Log</a>
@@ -394,104 +239,129 @@
                         @if(in_array($lead->status, ['Reservation', 'Admission']))
                             <!-- <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#cancelModal">Cancel</a> -->
                         @endif
-                        <!-- <a class="dropdown-item" href="javascript:void(0);">WhatsApp</a>
-                        <a class="dropdown-item" href="javascript:void(0);">SMS</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Mail</a> -->
                     </div>
                 </div>
-                <!-- <img src="{{ url('/crm/assets/img/avatars/1.png') }}" alt="Lead Photo" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;"> -->
 
-                <div class="position-relative" style="width: 100px; margin: 0 auto;">
+                <div class="lead-photo-wrap">
                     <form id="photoForm" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <img src="{{ $lead->photo ? url('storage/leads/' . $lead->photo) : url('/crm/assets/img/avatars/1.png') }}" 
-                            alt="Lead Photo" 
-                            class="rounded-circle mb-3" 
-                            style="width: 100px; height: 100px; object-fit: cover;"
-                            id="leadPhoto">
-                        <label for="photoInput" 
-                            class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle"
-                            style="cursor: pointer;padding: 1px 5px 5px 5px;">
-                            <i class="bx bx-camera"></i>
+                        @php
+                            $leadPhotoUrl = ($lead->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists('leads/' . $lead->photo))
+                                ? asset('storage/leads/' . $lead->photo)
+                                : null;
+                        @endphp
+                        @if($leadPhotoUrl)
+                            <img src="{{ $leadPhotoUrl }}" alt="Lead Photo" class="mb-0" id="leadPhoto">
+                        @else
+                            <div class="lead-photo-placeholder mb-0" id="leadPhotoPlaceholder" aria-hidden="true">
+                                <i class="bx bx-user"></i>
+                            </div>
+                            <img src="" alt="Lead Photo" class="mb-0 d-none" id="leadPhoto">
+                        @endif
+                        <label for="photoInput">
+                            <i class="bx bx-camera text-sm"></i>
                             <input type="file" 
                                 id="photoInput" 
                                 name="photo"
-                                style="display: none;" 
+                                class="hidden" 
                                 accept="image/*"
                                 onchange="updatePhoto(this)">
                         </label>
                     </form>
                 </div>
 
-                <h5 class="card-title mt-1">{{ $lead->name ?? 'Unknown' }}</h5>
-                <p class="card-text text-muted mb-1"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}</p>
-                <p class="card-text text-muted mb-1"><strong>Status:</strong> <span class="badge bg-{!! \App\Helpers\LeadStatus::getColor($lead->status) !!} mb-2">{{$lead->status}}</span></p>
-                <p class="card-text text-muted mb-1"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
-                <p class="card-text text-muted mb-1"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
-                <div class="d-flex justify-content-center mt-3">
-                    <a href="#" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#followupModal" title="Follow Up">
-                        <i class="bx bx-phone"></i>
+                <h5 class="mb-2 text-lg font-semibold text-slate-900">{{ $lead->name ?? 'Unknown' }}</h5>
+                <div class="lead-meta">
+                    <p class="mb-0"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}
+                        @if($lead->lead_id)
+                        <a href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}"
+                           class="btn btn-sm btn-outline-primary lead-register-btn ms-1"
+                           title="{{ $lead->student ? 'Open student login' : 'Open student registration' }}">
+                            <i class="bx bx-link-external" aria-hidden="true"></i>
+                        </a>
+                        @endif
+                    </p>
+                    <p class="mb-0"><strong>Status:</strong> <span class="badge bg-{!! \App\Helpers\LeadStatus::getColor($lead->status) !!}">{{ $lead->status }}</span></p>
+                    <p class="mb-0"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
+                    <p class="mb-0"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
+                </div>
+                </div>
+
+                <div class="lead-quick-actions">
+                    <div class="flex flex-wrap justify-center gap-2">
+                    <a href="#" class="btn btn-primary lead-action-btn" data-bs-toggle="modal" data-bs-target="#followupModal" title="Follow Up" aria-label="Follow Up">
+                        <i class="bx bx-phone" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#transferModal" title="Transfer">
-                        <i class="bx bx-transfer"></i>
+                    <a href="#" class="btn btn-warning lead-action-btn" data-bs-toggle="modal" data-bs-target="#transferModal" title="Transfer" aria-label="Transfer">
+                        <i class="bx bx-transfer-alt" aria-hidden="true"></i>
                     </a>
                     @if(!in_array($lead->status, ['Application', 'Reservation', 'Admission', 'Cancelled']))
-                    <a href="#" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#applicationModal" title="Application">
-                        <i class="bx bx-file"></i>
+                    <a href="#" class="btn btn-info lead-action-btn" data-bs-toggle="modal" data-bs-target="#applicationModal" title="Application" aria-label="Application">
+                        <i class="bx bx-file" aria-hidden="true"></i>
                     </a>
                     @endif
                     @if(!in_array($lead->status, ['Cancelled', 'Admission']))
-                    <!-- <a href="#" class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#admissionModal" title="Admission">
+                    <!-- <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#admissionModal" title="Admission">
                         <i class="bx bx-building"></i>
                     </a> -->
                     @endif
                     @if(in_array($lead->status, ['Reservation', 'Admission']))
                     @if($lead->status != 'Cancelled')
-                    <!-- <a href="#" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal" data-bs-target="#cancelModal" title="Cancel">
+                    <!-- <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal" title="Cancel">
                         <i class="bx bx-x"></i>
                     </a> -->
                     @endif
                     @endif
+                    </div>
                 </div>
-                <hr>
-                <div class="nav-pills-custom">
-                        <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+
+                <nav class="lead-profile-nav" aria-label="Lead sections">
+                        <div class="nav flex-column" role="tablist" aria-orientation="vertical">
                             <a class="nav-link active" href="#overview" role="tab" onclick="activateMenu(this); showContent('overview')">
-                                <i class="bx bx-user me-2"></i>Overview
+                                <i class="bx bx-user"></i><span>Overview</span>
                             </a>
                             <a class="nav-link" href="#contacts" role="tab" onclick="activateMenu(this); showContent('contacts')">
-                                <i class="bx bx-phone me-2"></i>Contact Details
+                                <i class="bx bx-phone"></i><span>Contact Details</span>
                             </a>
                             <a class="nav-link" href="#timeline" role="tab" onclick="activateMenu(this); showContent('timeline')">
-                                <i class="bx bx-time me-2"></i>Timeline
+                                <i class="bx bx-time"></i><span>Timeline</span>
                             </a>
                             <a class="nav-link" href="#call-log" role="tab" onclick="activateMenu(this); showContent('call-log')">
-                                <i class="bx bx-log-in me-2"></i>Contact Log
+                                <i class="bx bx-log-in"></i><span>Contact Log</span>
                             </a>
                             <a class="nav-link" href="#education" role="tab" onclick="activateMenu(this); showContent('education')">
-                                <i class="bx bx-book me-2"></i>Education
+                                <i class="bx bx-book"></i><span>Education</span>
                             </a>
                             <a class="nav-link" href="#exams" role="tab" onclick="activateMenu(this); showContent('exams')">
-                                <i class="bx bx-test-tube me-2"></i>Exams
+                                <i class="bx bx-test-tube"></i><span>Exams</span>
                             </a>
+                            @if($lead->lead_id)
+                            <a class="nav-link lead-student-link" href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}" target="_blank" rel="noopener"
+                               title="{{ $lead->student ? 'Student registered — open login' : 'Open student registration' }}">
+                                <i class="bx bx-user"></i><span>Student</span>
+                                @if($lead->student)
+                                    <span class="badge bg-success ms-1" style="font-size:10px;">Registered</span>
+                                @endif
+                                <i class="bx bx-link-external ms-auto small opacity-75"></i>
+                            </a>
+                            @endif
                         </div>
-                    </div>
+                </nav>
             </div>
             </div>
         </div>
-        <div class="col-lg-9 mb-4 order-0">
-            <div class="card" id="overview-card">
+        <div class="lead-profile-content-col">
+            <div class="card lead-content-card" id="overview-card">
                 <div class="card-header border-bottom">
-                    <h5><i class="bx bx-user me-2"></i>Lead Overview</h5>
+                    <h5><i class="bx bx-user"></i>Lead Overview</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 631px;min-height: 631px;overflow-y: auto;">
-                    <div class="row mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
+                <div class="card-body lead-content-body">
+                    <div class="overview-grid mb-4">
+                            <div class="overview-section">
                                 <div class="section-header">
                                     <span><i class="bx bx-info-circle me-2"></i>Lead Information</span>
                                 </div>                                
-                                <table class="table table-borderless table-first-section">
+                                <table class="table table-borderless table-first-section w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 17%;">Name</th>
@@ -616,11 +486,11 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="col-md-6">
+                            <div class="overview-section">
                                 <div class="section-header">
                                     <span><i class="bx bx-group me-2"></i>Parent Details</span>
                                 </div>                                
-                                <table class="table table-borderless">
+                                <table class="table table-borderless w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 30%;">Father's Name</th>
@@ -702,10 +572,12 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="section-header mt-4">
+                            </div>
+                            <div class="overview-section">
+                                <div class="section-header">
                                     <span><i class="bx bx-detail me-2"></i>Other Details</span>
                                 </div>
-                                <table class="table table-borderless table-third-section">
+                                <table class="table table-borderless table-third-section w-100">
                                     <tbody>
                                         <tr>
                                             <th style="width: 30%;">Gender</th>
@@ -729,9 +601,10 @@
                                                     class="editable"
                                                     data-name="dob"
                                                     data-type="combodate"
-                                                    data-format="DD-m-YYYY"
-                                                    data-viewformat="DD-m-YYYY"
-                                                    data-template="D / m / YYYY"
+                                                    data-format="DD-MM-YYYY"
+                                                    data-viewformat="DD-MM-YYYY"
+                                                    data-template="DD / MM / YYYY"
+                                                    data-combodate='{"minYear":1970,"maxYear":{{ date("Y") }}}'
                                                     data-pk="{{ $lead->id }}"
                                                     data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                     data-title="Select Date of Birth"
@@ -760,9 +633,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
                     </div>
-                    <div class="row mb-4">
+                    <div class="row mb-4 g-0">
                         <div class="col-12">
                             <div class="section-header">
                                 <span><i class="bx bx-note me-2"></i>Notes</span>
@@ -1079,11 +951,11 @@
                 </div>
             </div>
 
-            <div class="card" id="contacts-card" style="display: none;">
+            <div class="card lead-content-card" id="contacts-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <h5><i class="bx bx-phone me-2"></i>Contact Details</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 631px;min-height: 631px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="section-header">
@@ -1094,6 +966,9 @@
                                     <tr>
                                         <th style="width: 20%;">Mobile</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="mobile"
@@ -1103,7 +978,7 @@
                                                data-title="Edit Mobile"
                                                data-placement="right"
                                                data-value="{{ $lead->mobile ?? '' }}"
-                                               style="margin-left: 5px;">
+                                               style="{{ $lead->mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1111,6 +986,9 @@
                                     <tr>
                                         <th style="width: 20%;">Alternative</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->alternative_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="alternative_mobile"
@@ -1119,7 +997,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Alternative Mobile"
                                                data-value="{{ $lead->alternative_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->alternative_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->alternative_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1127,6 +1006,9 @@
                                     <tr>
                                         <th style="width: 20%;">Father</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->father_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="father_mobile"
@@ -1135,7 +1017,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Father's Contact"
                                                data-value="{{ $lead->father_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->father_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->father_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1143,6 +1026,9 @@
                                     <tr>
                                         <th style="width: 20%;">Mother</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->mother_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="mother_mobile"
@@ -1151,7 +1037,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Mother's Contact"
                                                data-value="{{ $lead->mother_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->mother_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->mother_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1159,6 +1046,9 @@
                                     <tr>
                                         <th style="width: 20%;">Guardian</th>
                                         <td style="display: flex; align-items: center;">:
+                                            @if($lead->guardian_mobile)
+                                                <span style="margin-left: 5px;">{{ lead_phone_prefix($lead->country) }}</span>
+                                            @endif
                                             <a href="#"
                                                class="editable"
                                                data-name="guardian_mobile"
@@ -1167,7 +1057,8 @@
                                                data-url="{{ route('counselor.leads.update', $lead->id) }}"
                                                data-title="Edit Guardian's Contact"
                                                data-value="{{ $lead->guardian_mobile ?? '' }}"
-                                               data-placement="right">
+                                               data-placement="right"
+                                               style="{{ $lead->guardian_mobile ? '' : 'margin-left: 5px;' }}">
                                                 {{ $lead->guardian_mobile ?? 'Not Available' }}
                                             </a>
                                         </td>
@@ -1464,11 +1355,11 @@
                 </div>
             </div>
 
-            <div class="card" id="timeline-card" style="display: none;">
+            <div class="card lead-content-card" id="timeline-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <h5><i class="bx bx-time me-2"></i>Timeline</h5>
                 </div>
-                <div class="card-body mt-4" style="max-height: 631px;min-height: 631px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="section-header">
                         <span><i class="bx bx-time me-2"></i>Lead Timeline</span>
                     </div>                    
@@ -1503,19 +1394,19 @@
                 </div>
             </div>
 
-            <div class="card" id="call-log-card" style="display: none;">
+            <div class="card lead-content-card" id="call-log-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-log-in me-2"></i>Contact Log</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#followupModal">Add Contact Log</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 619px;min-height: 619px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="section-header">
                         <span><i class="bx bx-log-in me-2"></i>Contact Logs</span>
                     </div>                    
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>Date & Time</th>
@@ -1587,10 +1478,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('counselor.lead.contact_logs.destroy', $contactLog->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this contact log?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this contact log?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1601,19 +1492,19 @@
                 </div>
             </div>
 
-            <div class="card" id="education-card" style="display: none;">
+            <div class="card lead-content-card" id="education-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-book me-2"></i>Education</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#educationModal">Add Education</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 619px;min-height: 619px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="section-header">
                         <span><i class="bx bx-book me-2"></i>Education Qualifications</span>
                     </div>                    
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>Qualification</th>
@@ -1664,10 +1555,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('counselor.lead.education.destroy', $education->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this education record?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this education record?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1678,19 +1569,19 @@
                 </div>
             </div>
 
-            <div class="card" id="exams-card" style="display: none;">
+            <div class="card lead-content-card" id="exams-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="bx bx-test-tube me-2"></i>Exams</h5>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#examModal">Add Exam</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 619px;min-height: 619px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="section-header">
                         <span><i class="bx bx-test-tube me-2"></i>Competitive Exams</span>
                     </div>                    
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>Exam Name</th>
@@ -1741,10 +1632,10 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('counselor.lead.exams.destroy', $exam->id) }}"
-                                            onclick="return confirm('Are you sure you want to delete this exam record?');">
-                                             <button type="button" class="btn btn-icon btn-outline-danger delete-lead" >
-                                                <span class="tf-icons bx bx-trash"></span>
-                                            </button>
+                                           class="btn btn-icon btn-outline-danger"
+                                           data-confirm-delete="Are you sure you want to delete this exam record?"
+                                           title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -1755,6 +1646,91 @@
                 </div>
             </div>
 
+            @if($lead->student)
+            @php
+                $feeStudent = $lead->student;
+                $feeSummary = app(\App\Services\StudentFeeService::class)->feeSummary($feeStudent);
+            @endphp
+            <div class="card mt-3 student-fees-panel" id="student-fees-card">
+                <div class="card-header border-bottom">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-0">Student Portal Fees</h5>
+                            <small class="text-muted">View-only — fees are set by the Accounts team for {{ $feeStudent->name }}</small>
+                        </div>
+                        <a href="{{ route('counselor.student-fee-payments.index', ['q' => $feeStudent->lead_ref]) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bx bx-list-ul me-1"></i>View Payments
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="student-fees-summary mb-4" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">Registration Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['registration_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">{{ $feeSummary['registration_plan']['label'] ?? 'Not set' }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['registration_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['registration_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">Admission Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['counselor_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">Paid ₹{{ number_format($feeSummary['counselor_paid'], 2) }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['counselor_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['counselor_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item">
+                            <span class="student-fees-summary__label">College Fee</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['college_fee'], 2) }}</span>
+                            <span class="student-fees-summary__meta">Paid ₹{{ number_format($feeSummary['college_paid'], 2) }}</span>
+                            <span class="student-fees-summary__remain {{ $feeSummary['college_remaining'] > 0 ? 'is-due' : 'is-done' }}">
+                                Remaining ₹{{ number_format($feeSummary['college_remaining'], 2) }}
+                            </span>
+                        </div>
+                        <div class="student-fees-summary__item student-fees-summary__item--total">
+                            <span class="student-fees-summary__label">Total Remaining</span>
+                            <span class="student-fees-summary__value">₹{{ number_format($feeSummary['total_remaining'], 2) }}</span>
+                            @if($feeSummary['total_remaining'] <= 0 && $feeSummary['fees_set'])
+                                <span class="badge bg-success mt-2 align-self-start">Settlement Completed</span>
+                            @else
+                                <span class="student-fees-summary__meta">All fee types</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @unless($feeSummary['fees_set'])
+                        <div class="alert alert-warning mb-3">Accounts team has not set fees for this student yet.</div>
+                    @endunless
+
+                    <div class="student-fees-block student-fees-block--reminder">
+                        <div class="student-fees-block__title">Send due reminder</div>
+                        <form method="POST" action="{{ route('counselor.leads.student-fees.remind', $lead->id) }}" class="row g-3 align-items-end">
+                            @csrf
+                            <div class="col-md-3">
+                                <label class="form-label">Fee type</label>
+                                <select name="purpose" class="form-control" required>
+                                    <option value="registration_fee">Registration Fee</option>
+                                    <option value="counselor_fee">Admission Fee</option>
+                                    <option value="college_fee">College Fee</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Message <span class="text-muted fw-normal">(optional)</span></label>
+                                <input type="text" name="message" class="form-control" placeholder="Please pay the due installment" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="bx bx-envelope me-1"></i>Email Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="card" id="payments-card" style="display: none;">
                 <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
@@ -1762,18 +1738,19 @@
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Add Payment</button>
                     </div>
                 </div>
-                <div class="card-body mt-4" style="max-height: 529px;min-height: 529px;overflow-y: auto;">
+                <div class="card-body lead-content-body">
                     <div class="section-header">
                         <span><i class="bx bx-dollar-sign me-2"></i>Payment History</span>
                     </div>                      
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table crm-table">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Transaction Type</th>
                                     <th>Payment Type</th>
                                     <th>Mode</th>
+                                    <th>Bank / Cash Account</th>
                                     <th>Remark</th>
                                     <th>Amount</th>
                                 </tr>
@@ -1790,6 +1767,7 @@
                                     <td>{{ transaction_types($payment->transaction_type) }}</td>
                                     <td>{{ $payment->payment_type }}</td>
                                     <td>{{ $payment->payment_mode }}</td>
+                                    <td>{{ $payment->accountTransaction?->ledgerAccount?->name ?? '—' }}</td>
                                     <td>{{ $payment->remark }}</td>
                                     <td>{{ number_format($payment->amount, 2) }}</td>
                                 </tr>
@@ -2052,80 +2030,13 @@
           aria-label="Close"
         ></button>
       </div>
-    <div class="modal-body">
-      <div class="row">
-        <div class="col-12 mb-3">
-          <label for="paymentDate" class="form-label">Payment Date</label>
-          <input
-            type="date"
-            id="paymentDate"
-            name="payment_date"
-            class="form-control"
-            placeholder="Select Payment Date"
-            onfocus="this.showPicker()"
-            max="{{ date('Y-m-d') }}"
-            required
-          />
-        </div>
-        <div class="col-12 mb-3">
-          <label for="transactionType" class="form-label">Transaction Type</label>
-          <select id="transactionType" class="form-select" name="transaction_type" required>
-            <option value="1">Received From Student</option>
-            <option value="2">Received From Agent</option>
-            <option value="3">Received From College</option>
-            <option value="4">Paid To Student</option>
-            <option value="5">Paid To Agent</option>
-            <option value="6">Paid To College</option>
-            <option value="7">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="type" class="form-label">Type</label>
-          <select id="type" class="form-select" name="payment_type" required>
-            <option value="Application Fee">Application Fee</option>
-            <option value="Reservation Fee">Reservation Fee</option>
-            <option value="Admission Fee">Admission Fee</option>
-            <option value="Commission">Commission</option>
-            <option value="Refund">Refund</option>
-            <option value="Tution Fee">Tution Fee</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentMode" class="form-label">Payment Mode</label>
-          <select id="paymentMode" class="form-select" name="payment_mode" required>
-            <option value="Cash">Cash</option>
-            <option value="Card">Card</option>
-            <option value="UPI">UPI</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cheque">Cheque</option>
-            <option value="RazorPay">RazorPay</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentAmount" class="form-label">Amount</label>
-          <input
-            type="number"
-            id="paymentAmount"
-            class="form-control"
-            name="amount"
-            placeholder="Enter Payment Amount"
-            require
-          />
-        </div>
-        <div class="col-12 mb-3">
-          <label for="paymentRemark" class="form-label">Remark</label>
-          <textarea
-            id="paymentRemark"
-            class="form-control"
-            rows="3"
-            placeholder="Enter Remark"
-            name="remarks"
-          ></textarea>
+      <div class="modal-body">
+        <div class="row">
+          @include('partials.lead-payment-form-fields', [
+              'ledgerAccounts' => $ledgerAccounts ?? collect(),
+          ])
         </div>
       </div>
-    </div>
       <div class="modal-footer border-top">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
           Close
@@ -2710,7 +2621,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hash = window.location.hash.substring(1);
         if (hash) {
             // Activate the corresponding menu and show the content
-            const activeLink = document.querySelector(`.nav-link[href="#${hash}"]`);
+            const activeLink = document.querySelector(`.lead-profile-nav .nav-link[href="#${hash}"]`);
             if (activeLink) {
                 activateMenu(activeLink);
                 showContent(hash);
@@ -2720,14 +2631,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function activateMenu(element) {
         // Remove 'active' class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.lead-profile-nav .nav-link').forEach(link => link.classList.remove('active'));
         // Add 'active' class to the clicked link
         element.classList.add('active');
     }
 
     function showContent(section) {
         // Hide all target cards except the menu card
-        document.querySelectorAll('.col-lg-9 .card').forEach(card => card.style.display = 'none');
+        document.querySelectorAll('.lead-profile-content-col .card').forEach(card => card.style.display = 'none');
         // Show the selected card
         const selectedCard = document.getElementById(`${section}-card`);
         if (selectedCard) {
@@ -2740,14 +2651,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
     function activateMenu(element) {
         // Remove 'active' class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.lead-profile-nav .nav-link').forEach(link => link.classList.remove('active'));
         // Add 'active' class to the clicked link
         element.classList.add('active');
     }
 
     function showContent(section) {
         // Hide all target cards except the menu card
-        document.querySelectorAll('.col-lg-9 .card').forEach(card => card.style.display = 'none');
+        document.querySelectorAll('.lead-profile-content-col .card').forEach(card => card.style.display = 'none');
         // Show the selected card
         const selectedCard = document.getElementById(`${section}-card`);
         if (selectedCard) {
@@ -2889,7 +2800,8 @@ function updatePhoto(input) {
             contentType: false,
             success: function(response) {
                 if (response.success) {
-                    $('#leadPhoto').attr('src', response.photo);
+                    $('#leadPhoto').attr('src', response.photo).removeClass('d-none');
+                    $('#leadPhotoPlaceholder').addClass('d-none');
                     toastr.success('Photo updated successfully');
                 } else {
                     toastr.error('Failed to update photo');

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ActivityLogger;
+use App\Http\Controllers\Auth\Concerns\LogsOutGuard;
+
 class CounselorAuthController extends Controller
 {
+    use LogsOutGuard;
     public function login()
     {
         return view('counselor.auth.login');
@@ -24,8 +27,23 @@ class CounselorAuthController extends Controller
         $credentials['status'] = 1;
 
         if (Auth::guard('counselor')->attempt($credentials)) {
+            $counselor = Auth::guard('counselor')->user();
+
+            if ($counselor->isBreakLoginLocked()) {
+                Auth::guard('counselor')->logout();
+
+                return back()
+                    ->with('break_login_locked', true)
+                    ->with(
+                        'break_login_lock_message',
+                        $counselor->break_login_lock_reason
+                            ?: 'Your break time has exceeded the allowed limit. Admin permission is required to login again.'
+                    )
+                    ->onlyInput('email');
+            }
+
             $request->session()->regenerate();
-            \Log::info('Counselor logged in', ['user' => Auth::guard('counselor')->user()]);
+            \Log::info('Counselor logged in', ['user' => $counselor]);
             $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
             if ($activeYear) {
                 session([
@@ -43,7 +61,7 @@ class CounselorAuthController extends Controller
 
             // Log login activity
             ActivityLogger::log(
-                "Admin logged in: {$counselor->name}",
+                "Counselor logged in: {$counselor->name}",
                 'Login',
                 $counselor,
                 ['ip' => $request->ip()]
@@ -59,20 +77,13 @@ class CounselorAuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Log the logout activity
-        if (Auth::guard('counselor')->check()) {
+        return $this->performGuardLogout($request, 'counselor', 'counselor.login', function ($counselor) {
             ActivityLogger::log(
-                "Counselor logged out: " . Auth::guard('counselor')->user()->name,
+                'Counselor logged out: ' . $counselor->name,
                 'Logout',
-                Auth::guard('counselor')->user(),
+                $counselor,
                 []
             );
-        }
-
-        Auth::guard('counselor')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('counselor.login');
+        });
     }
 }

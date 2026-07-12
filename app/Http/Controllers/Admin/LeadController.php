@@ -28,6 +28,15 @@ class LeadController extends Controller
         $this->academicYear = session('academic_year_id');
     }
 
+    protected function scopeAcademicYear($query)
+    {
+        if ($this->academicYear) {
+            $query->where('academic_year_id', $this->academicYear);
+        }
+
+        return $query;
+    }
+
     public function show($id)
     {
         $lead = Lead::with([
@@ -38,8 +47,9 @@ class LeadController extends Controller
             'college',
             'education',
             'exams',
-            'payments',
+            'payments.accountTransaction.ledgerAccount',
             'timeline',
+            'student',
             'contactLogs' => function($query) {
                 $query->orderBy('contact_date', 'desc');
             }
@@ -138,8 +148,11 @@ class LeadController extends Controller
     
         // Get countries list
         $countries = countries();
+        $country_codes = country_codes();
 
-        return view('admin.new-leads', compact('leads', 'sources', 'countries', 'courses', 'academicYears'));
+        // exit;
+
+        return view('admin.new-leads', compact('leads', 'sources', 'countries','country_codes', 'courses', 'academicYears'));
     }
 
     public function store(Request $request)
@@ -154,9 +167,10 @@ class LeadController extends Controller
                 'source_id' => 'required|exists:sources,id',
                 'country' => 'required|string',
                 'state' => 'required|string',
+                'existing_lead_id' => 'nullable|exists:leads,id',
             ]);
 
-            $lead = Lead::create([
+            $leadData = [
                 'name' => $request->name,
                 'mobile' => $request->mobile,
                 'personal_email' => $request->email,
@@ -165,6 +179,36 @@ class LeadController extends Controller
                 'source_id' => $request->source_id,
                 'country' => $request->country,
                 'state' => $request->state,
+            ];
+
+            $existingLead = $request->existing_lead_id
+                ? Lead::find($request->existing_lead_id)
+                : Lead::findDuplicateByContact($request->mobile, $request->email);
+
+            if ($existingLead) {
+                $existingLead->update($leadData);
+
+                Timeline::create([
+                    'lead_id' => $existingLead->id,
+                    'title' => 'Lead Updated',
+                    'description' => "Lead updated with name: {$existingLead->name} (duplicate match)",
+                    'event_type' => 'manual',
+                    ...Timeline::performerAttributes(),
+                    'event_date' => now(),
+                ]);
+
+                ActivityLogger::log(
+                    "Updated existing lead: {$existingLead->name} ({$existingLead->lead_id})",
+                    'Update',
+                    auth()->guard('admin')->user(),
+                    ['lead' => $existingLead->id]
+                );
+
+                return redirect()->back()->with('success', "Lead updated successfully ({$existingLead->lead_id}).");
+            }
+
+            $lead = Lead::create([
+                ...$leadData,
                 'status' => 'New',
                 'next_follow_up' => now()->addDays(1),
             ]);
@@ -174,11 +218,10 @@ class LeadController extends Controller
                 'title' => 'New Lead Created',
                 'description' => "Lead created with name: {$lead->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
-            // Log the activity
             ActivityLogger::log(
                 "Created new lead: {$lead->name}",
                 'Create',
@@ -199,6 +242,11 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         $field = $request->name;
         $value = $request->value;
+
+        $dateFields = ['dob', 'application_date', 'reservation_date', 'admission_date', 'cancel_date'];
+        if (in_array($field, $dateFields, true) && $value) {
+            $value = parse_editable_date($value);
+        }
 
         $oldValue = $lead->$field;
         $lead->$field = $value;
@@ -236,7 +284,7 @@ class LeadController extends Controller
             'title' => 'Deleted Lead',
             'description' => "Lead deleted with name: {$lead->name}",
             'event_type' => 'manual',
-            'performed_by' => auth()->id(),
+            ...Timeline::performerAttributes(),
             'event_date' => now(),
         ]);
 
@@ -249,14 +297,15 @@ class LeadController extends Controller
 
     public function pendingFollowups()
     {
-        $leads = Lead::with(['source', 'course'])
-            ->where('academic_year_id', $this->academicYear)
-            ->where('next_follow_up', '<', now()->startOfDay())
-            ->where('status', '!=', 'Bin')
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course'])
+            ->where('next_follow_up', '<', today())
+            ->whereNotIn('status', ['Converted', 'Bin'])
             ->orderBy('next_follow_up')
             ->get();
+        $country_codes = country_codes();
 
-        return view('admin.followups.pending', compact('leads'));
+        return view('admin.followups.pending', compact('leads', 'country_codes'));
     }
 
     public function todayFollowups()
@@ -287,34 +336,16 @@ class LeadController extends Controller
         ]);
 
         $duplicates = [];
-        
-        // Check all phone and email fields in a single query
-        $existingLead = Lead::where(function($query) use ($request) {
-            // Check all phone numbers
-            $query->where('mobile', $request->mobile)
-                ->orWhere('alternative_mobile', $request->mobile)
-                ->orWhere('father_mobile', $request->mobile)
-                ->orWhere('mother_mobile', $request->mobile)
-                ->orWhere('guardian_mobile', $request->mobile);
-        })
-        ->orWhere(function($query) use ($request) {
-            // Check all email addresses
-            $query->where('personal_email', $request->email)
-                ->orWhere('father_email', $request->email)
-                ->orWhere('mother_email', $request->email)
-                ->orWhere('guardian_email', $request->email);
-        })
-        ->first();
+        $existingLead = Lead::findDuplicateByContact($request->mobile, $request->email);
 
         if ($existingLead) {
-            // Determine which field matched
             if (in_array($request->mobile, [
                 $existingLead->mobile,
                 $existingLead->alternative_mobile,
                 $existingLead->father_mobile,
                 $existingLead->mother_mobile,
                 $existingLead->guardian_mobile
-            ])) {
+            ], true)) {
                 $duplicates['mobile'] = [
                     'lead_id' => $existingLead->lead_id,
                     'name' => $existingLead->name,
@@ -327,7 +358,7 @@ class LeadController extends Controller
                 $existingLead->father_email,
                 $existingLead->mother_email,
                 $existingLead->guardian_email
-            ])) {
+            ], true)) {
                 $duplicates['email'] = [
                     'lead_id' => $existingLead->lead_id,
                     'name' => $existingLead->name,
@@ -336,13 +367,14 @@ class LeadController extends Controller
             }
 
             ActivityLogger::log(
-                "Duplicate lead verification attempted",
+                "Duplicate lead verification — will update existing record",
                 'Verify',
                 auth()->guard('admin')->user(),
                 [
                     'mobile' => $request->mobile,
                     'email' => $request->email,
-                    'duplicates' => $duplicates
+                    'duplicates' => $duplicates,
+                    'existing_lead_id' => $existingLead->id,
                 ]
             );
         } else {
@@ -360,7 +392,9 @@ class LeadController extends Controller
         return response()->json([
             'success' => true,
             'duplicates' => $duplicates,
-            'can_proceed' => empty($duplicates)
+            'can_proceed' => true,
+            'is_update' => !empty($duplicates),
+            'existing_lead_id' => $existingLead?->id,
         ]);
     }
 
@@ -442,17 +476,23 @@ class LeadController extends Controller
     public function getCounts()
     {
         $counts = [
-            'new_leads' => Lead::where('status', 'New')->whereNull('counselor_id')->count(),
-            'today_followups' => Lead::whereDate('next_follow_up', today())
+            'new_leads' => $this->scopeAcademicYear(Lead::query())
+                ->where('status', 'New')->whereNull('counselor_id')->count(),
+            'today_followups' => $this->scopeAcademicYear(Lead::query())
+                ->whereDate('next_follow_up', today())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'tomorrow_followups' => Lead::whereDate('next_follow_up', today()->addDay())
+            'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
+                ->whereDate('next_follow_up', today()->addDay())
                 ->where('status', '!=', 'Converted')
                 ->count(),
-            'pending_followups' => Lead::where('next_follow_up', '<', today())
-                ->whereNotIN('status', ['Converted', 'Bin'])
+            'pending_followups' => $this->scopeAcademicYear(Lead::query())
+                ->where('next_follow_up', '<', today())
+                ->whereNotIn('status', ['Converted', 'Bin'])
                 ->count(),
-            'bin' => Lead::where('status', 'Bin')->count()
+            'bin' => $this->scopeAcademicYear(Lead::query())
+                ->where('status', 'Bin')
+                ->count(),
         ];
 
         return response()->json($counts);
@@ -470,7 +510,7 @@ class LeadController extends Controller
         try {
             $request->validate([
                 'source_id' => 'required|exists:sources,id',
-                'leads_file' => 'required|file|mimes:xlsx,xls|max:5120'
+                'leads_file' => 'required|file|mimes:xlsx,xls,csv|max:5120'
             ]);
             
             // Validate mandatory columns in the uploaded Excel file
@@ -479,7 +519,7 @@ class LeadController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $header = $sheet->rangeToArray('A1:' . $sheet->getHighestColumn() . '1')[0];
 
-            $requiredFields = ['name', 'email', 'mobile', 'country', 'state', 'course'];
+            $requiredFields = ['name', 'mobile'];
             $missingFields = array_diff($requiredFields, array_map('strtolower', $header));
 
             if (!empty($missingFields)) {
@@ -543,7 +583,7 @@ class LeadController extends Controller
                 'title' => 'Transferred Lead',
                 'description' => "Lead transferred to counselor: {$lead->counselor->name}, from counselor: {$fromCounselorName}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
         ]);
 
@@ -629,7 +669,7 @@ class LeadController extends Controller
                 'title' => 'Admission Processed',
                 'description' => "Admission processed for lead: {$lead->name}, Admission No: {$lead->admission_no}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -689,7 +729,7 @@ class LeadController extends Controller
                 'title' => 'Application Processed',
                 'description' => "Application processed for lead: {$lead->name}, Application No: {$lead->id}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -750,7 +790,7 @@ class LeadController extends Controller
                 'title' => 'Reservation Processed',
                 'description' => "Reservation processed for lead: {$lead->name}, College: {$lead->college->name}, Course: {$lead->course->name}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -808,7 +848,7 @@ class LeadController extends Controller
                 'title' => 'Lead Cancelled',
                 'description' => "Lead cancelled: {$lead->name}, Reason: {$validated['cancel_reason']}",
                 'event_type' => 'manual',
-                'performed_by' => auth()->id(),
+                ...Timeline::performerAttributes(),
                 'event_date' => now(),
             ]);
 
@@ -896,7 +936,7 @@ class LeadController extends Controller
                         'title' => 'Transferred Lead',
                         'description' => "Lead transferred to counselor: {$toCounselor->name}, from counselor: {$fromCounselorName}",
                         'event_type' => 'manual',
-                        'performed_by' => auth()->id(),
+                        ...Timeline::performerAttributes(),
                         'event_date' => now(),
                     ]);
 
