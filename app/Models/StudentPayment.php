@@ -11,6 +11,7 @@ class StudentPayment extends Model
         'purpose',
         'counselor_id',
         'ledger_account_id',
+        'lead_payment_id',
         'amount',
         'gateway',
         'transaction_id',
@@ -47,6 +48,11 @@ class StudentPayment extends Model
     public function accountTransaction()
     {
         return $this->hasOne(AccountTransaction::class);
+    }
+
+    public function leadPayment()
+    {
+        return $this->belongsTo(LeadPayment::class);
     }
 
     public function purposeLabel(): string

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\StudentPaymentDueMail;
 use App\Mail\StudentPaymentReceiptMail;
 use App\Models\AccountTransaction;
+use App\Models\LeadPayment;
 use App\Models\LedgerAccount;
 use App\Models\Student;
 use App\Models\StudentPayment;
@@ -272,6 +273,107 @@ class StudentFeeService
         $student = $payment->student()->first();
         $this->syncPortalPaymentStatus($student);
         $this->syncToLedgerAccount($payment->fresh(['student', 'counselor']));
+
+        return $payment->fresh(['student', 'counselor', 'ledgerAccount']);
+    }
+
+    /**
+     * Map CRM lead payment types to student fee purposes.
+     * Application / Admission / Reservation reduce Admission Fee (counselor_fee).
+     */
+    public static function mapLeadPaymentTypeToPurpose(?string $paymentType): ?string
+    {
+        return match ($paymentType) {
+            'Admission Fee', 'Application Fee', 'Reservation Fee' => self::PURPOSE_COUNSELOR,
+            'Tuition Fee' => self::PURPOSE_COLLEGE,
+            default => null,
+        };
+    }
+
+    /**
+     * Apply a lead payment to the linked student's fee balance and payment history.
+     * Does not create a second ledger entry when the lead payment is already booked.
+     */
+    public function recordFromLeadPayment(LeadPayment $leadPayment, ?int $ledgerAccountId = null): ?StudentPayment
+    {
+        if (StudentPayment::where('lead_payment_id', $leadPayment->id)->exists()) {
+            return StudentPayment::where('lead_payment_id', $leadPayment->id)->first();
+        }
+
+        if (! in_array((string) $leadPayment->transaction_type, ['1', '2', '3'], true)) {
+            return null;
+        }
+
+        $purpose = self::mapLeadPaymentTypeToPurpose($leadPayment->payment_type);
+        if (! $purpose) {
+            return null;
+        }
+
+        $student = Student::where('lead_id', $leadPayment->lead_id)->first();
+        if (! $student) {
+            return null;
+        }
+
+        $feeAmount = match ($purpose) {
+            self::PURPOSE_REGISTRATION => (float) ($student->registration_fee ?? 0),
+            self::PURPOSE_COUNSELOR => (float) ($student->counselor_fee ?? 0),
+            self::PURPOSE_COLLEGE => (float) ($student->college_fee ?? 0),
+            default => 0.0,
+        };
+
+        if ($feeAmount <= 0) {
+            return null;
+        }
+
+        $remaining = $this->remainingFor($student, $purpose);
+        $amount = min((float) $leadPayment->amount, $remaining);
+
+        if ($amount <= 0) {
+            return null;
+        }
+
+        $resolvedLedgerId = $ledgerAccountId
+            ?? AccountTransaction::where('lead_payment_id', $leadPayment->id)->value('ledger_account_id')
+            ?? $student->fee_ledger_account_id
+            ?? $this->resolveDefaultLedgerAccountId();
+
+        $gateway = match (strtolower((string) $leadPayment->payment_mode)) {
+            'cash' => 'cash',
+            'upi' => 'upi',
+            'razorpay' => 'razorpay',
+            default => strtolower((string) $leadPayment->payment_mode) ?: 'other',
+        };
+
+        $paidAt = $leadPayment->payment_date
+            ? $leadPayment->payment_date->copy()->setTimeFromTimeString(now()->format('H:i:s'))
+            : now();
+
+        $payment = StudentPayment::create([
+            'student_id' => $student->id,
+            'purpose' => $purpose,
+            'counselor_id' => $student->counselor_id,
+            'ledger_account_id' => $resolvedLedgerId,
+            'lead_payment_id' => $leadPayment->id,
+            'amount' => $amount,
+            'gateway' => $gateway,
+            'transaction_id' => 'LEADPAY' . $leadPayment->id,
+            'status' => 'paid',
+            'remark' => $leadPayment->remark,
+            'paid_at' => $paidAt,
+            'metadata' => [
+                'source' => 'lead_payment',
+                'lead_payment_id' => $leadPayment->id,
+                'lead_payment_type' => $leadPayment->payment_type,
+                'payment_mode' => $leadPayment->payment_mode,
+            ],
+        ]);
+
+        $this->syncPortalPaymentStatus($student->fresh());
+
+        $existingTxn = AccountTransaction::where('lead_payment_id', $leadPayment->id)->first();
+        if ($existingTxn && ! $existingTxn->student_payment_id) {
+            $existingTxn->update(['student_payment_id' => $payment->id]);
+        }
 
         return $payment->fresh(['student', 'counselor', 'ledgerAccount']);
     }

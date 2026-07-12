@@ -8,6 +8,7 @@ use App\Models\AccountTransaction;
 use App\Models\LeadPayment;
 use App\Models\LedgerAccount;
 use App\Services\ActivityLogger;
+use App\Services\StudentFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,6 +51,8 @@ class CrmSyncController extends Controller
         $skipped = 0;
 
         DB::transaction(function () use ($request, &$synced, &$skipped) {
+            $feeService = app(StudentFeeService::class);
+
             foreach ($request->lead_payment_ids as $paymentId) {
                 if (AccountTransaction::where('lead_payment_id', $paymentId)->exists()) {
                     $skipped++;
@@ -74,6 +77,8 @@ class CrmSyncController extends Controller
                     'description' => "{$payment->payment_type} — {$payment->remark}",
                     'is_crm_synced' => true,
                 ]);
+
+                $feeService->recordFromLeadPayment($payment, (int) $request->ledger_account_id);
 
                 $synced++;
             }

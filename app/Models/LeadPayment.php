@@ -30,4 +30,9 @@ class LeadPayment extends Model
     {
         return $this->hasOne(AccountTransaction::class);
     }
+
+    public function studentPayment()
+    {
+        return $this->hasOne(StudentPayment::class);
+    }
 }

@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class LeadPaymentService
 {
+    public function __construct(
+        private StudentFeeService $studentFeeService
+    ) {
+    }
+
     public function create(array $data, ?int $ledgerAccountId = null, ?int $createdById = null): LeadPayment
     {
         return DB::transaction(function () use ($data, $ledgerAccountId, $createdById) {
@@ -24,6 +29,8 @@ class LeadPaymentService
             if ($ledgerAccountId) {
                 $this->syncToLedgerAccount($payment, $ledgerAccountId, $createdById);
             }
+
+            $this->studentFeeService->recordFromLeadPayment($payment, $ledgerAccountId);
 
             return $payment;
         });
@@ -53,5 +60,29 @@ class LeadPaymentService
             'description' => "{$payment->payment_type} — {$payment->remark}",
             'is_crm_synced' => true,
         ]);
+    }
+
+    /**
+     * Apply existing lead payments to student fee balances (idempotent).
+     */
+    public function applyExistingToStudentFees(?int $leadPaymentId = null): int
+    {
+        $query = LeadPayment::query()->orderBy('id');
+
+        if ($leadPaymentId) {
+            $query->where('id', $leadPaymentId);
+        }
+
+        $applied = 0;
+
+        $query->chunkById(100, function ($payments) use (&$applied) {
+            foreach ($payments as $payment) {
+                if ($this->studentFeeService->recordFromLeadPayment($payment)) {
+                    $applied++;
+                }
+            }
+        });
+
+        return $applied;
     }
 }
