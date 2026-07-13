@@ -58,18 +58,6 @@
         </div>
     </div>
 
-    @if(session()->has('academic_year_check'))
-    <div id="yearToast" class="bs-toast toast bg-info" role="alert" data-bs-delay="3000"
-         style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
-        <div class="toast-header">
-            <i class="bx bx-check-circle me-2 text-sky-600"></i>
-            <div class="me-auto fw-semibold">Financial Year</div>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body">Financial year updated successfully.</div>
-    </div>
-    @endif
-
     @include('account.layouts.scripts')
     @include('counselor.partials.toast-stack')
     @include('admin.partials.delete-confirm-modal')
@@ -92,14 +80,6 @@
 
     @yield('scripts')
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session()->has('academic_year_check'))
-            new bootstrap.Toast(document.getElementById('yearToast')).show();
-            {{ session()->forget('academic_year_check') }}
-        @endif
-    });
-    </script>
     <script>
     (function () {
         var loginUrl = @json(route('account.login'));
