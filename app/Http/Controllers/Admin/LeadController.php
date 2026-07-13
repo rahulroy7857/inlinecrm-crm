@@ -119,17 +119,21 @@ class LeadController extends Controller
 
     public function newLeads()
     {
-        $leads = Lead::with([
-            'source',
-            'academicYear',
-            'counselor',
-            'course',
-            'college',
-            'education',
-            'exams',
-            'payments'
-        ])->where('status', 'New')->whereNull('counselor_id')
-        ->orderBy('created_at', 'desc')->get();
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with([
+                'source',
+                'academicYear',
+                'counselor',
+                'course',
+                'college',
+                'education',
+                'exams',
+                'payments'
+            ])
+            ->where('status', 'New')
+            ->whereNull('counselor_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $sources = Source::select('id', 'name')->get()->map(function($item) {
             return ['value' => $item->id, 'text' => $item->name];
@@ -149,8 +153,6 @@ class LeadController extends Controller
         // Get countries list
         $countries = countries();
         $country_codes = country_codes();
-
-        // exit;
 
         return view('admin.new-leads', compact('leads', 'sources', 'countries','country_codes', 'courses', 'academicYears'));
     }
@@ -479,25 +481,30 @@ class LeadController extends Controller
 
     public function getCounts()
     {
-        $counts = [
-            'new_leads' => $this->scopeAcademicYear(Lead::query())
-                ->where('status', 'New')->whereNull('counselor_id')->count(),
-            'today_followups' => $this->scopeAcademicYear(Lead::query())
-                ->whereDate('next_follow_up', today())
-                ->where('status', '!=', 'Converted')
-                ->count(),
-            'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
-                ->whereDate('next_follow_up', today()->addDay())
-                ->where('status', '!=', 'Converted')
-                ->count(),
-            'pending_followups' => $this->scopeAcademicYear(Lead::query())
-                ->where('next_follow_up', '<', today())
-                ->whereNotIn('status', ['Converted', 'Bin'])
-                ->count(),
-            'bin' => $this->scopeAcademicYear(Lead::query())
-                ->where('status', 'Bin')
-                ->count(),
-        ];
+        $yearKey = $this->academicYear ?: 'all';
+        $cacheKey = "admin.lead_counts.{$yearKey}";
+
+        $counts = cache()->remember($cacheKey, 15, function () {
+            return [
+                'new_leads' => $this->scopeAcademicYear(Lead::query())
+                    ->where('status', 'New')->whereNull('counselor_id')->count(),
+                'today_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->whereDate('next_follow_up', today())
+                    ->where('status', '!=', 'Converted')
+                    ->count(),
+                'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->whereDate('next_follow_up', today()->addDay())
+                    ->where('status', '!=', 'Converted')
+                    ->count(),
+                'pending_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->where('next_follow_up', '<', today())
+                    ->whereNotIn('status', ['Converted', 'Bin'])
+                    ->count(),
+                'bin' => $this->scopeAcademicYear(Lead::query())
+                    ->where('status', 'Bin')
+                    ->count(),
+            ];
+        });
 
         return response()->json($counts);
     }
@@ -883,9 +890,9 @@ class LeadController extends Controller
 
     public function statusWiseLeads($status)
     {
-        $leads = Lead::with(['source', 'course', 'college'])
+        $leads = $this->scopeAcademicYear(Lead::query())
+            ->with(['source', 'course', 'college'])
             ->where('status', $status)
-            ->where('academic_year_id', $this->academicYear)
             ->orderBy('created_at', 'desc')
             ->get();
         $status = Str::title($status);

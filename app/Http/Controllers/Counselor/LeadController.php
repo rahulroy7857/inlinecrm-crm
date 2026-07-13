@@ -583,30 +583,34 @@ class LeadController extends Controller
     public function getCounts()
     {
         $counselorId = auth()->guard('counselor')->user()->id;
+        $yearKey = $this->academicYear ?: 'all';
+        $cacheKey = "counselor.{$counselorId}.lead_counts.{$yearKey}";
 
-        $counts = [
-            'basket_leads' => Lead::whereNull('counselor_id')->count(),
-            'new_leads' => Lead::where('transfer_seen', false)->where('counselor_id', $counselorId)->count(),
-            'today_followups' => $this->scopeAcademicYear(Lead::query())
-                ->where('counselor_id', $counselorId)
-                ->where('transfer_seen', true)
-                ->whereDate('next_follow_up', today())
-                ->where('status', '!=', 'Converted')
-                ->count(),
-            'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
-                ->where('counselor_id', $counselorId)
-                ->where('transfer_seen', true)
-                ->whereDate('next_follow_up', today()->addDay())
-                ->where('status', '!=', 'Converted')
-                ->count(),
-            'pending_followups' => $this->scopeAcademicYear(Lead::query())
-                ->where('counselor_id', $counselorId)
-                ->where('transfer_seen', true)
-                ->where('next_follow_up', '<', today())
-                ->whereNotIn('status', ['Converted', 'Bin'])
-                ->count(),
-            'bin' => Lead::where('counselor_id', $counselorId)->where('status', 'Bin')->count(),
-        ];
+        $counts = cache()->remember($cacheKey, 15, function () use ($counselorId) {
+            return [
+                'basket_leads' => Lead::whereNull('counselor_id')->count(),
+                'new_leads' => Lead::where('transfer_seen', false)->where('counselor_id', $counselorId)->count(),
+                'today_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->where('counselor_id', $counselorId)
+                    ->where('transfer_seen', true)
+                    ->whereDate('next_follow_up', today())
+                    ->where('status', '!=', 'Converted')
+                    ->count(),
+                'tomorrow_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->where('counselor_id', $counselorId)
+                    ->where('transfer_seen', true)
+                    ->whereDate('next_follow_up', today()->addDay())
+                    ->where('status', '!=', 'Converted')
+                    ->count(),
+                'pending_followups' => $this->scopeAcademicYear(Lead::query())
+                    ->where('counselor_id', $counselorId)
+                    ->where('transfer_seen', true)
+                    ->where('next_follow_up', '<', today())
+                    ->whereNotIn('status', ['Converted', 'Bin'])
+                    ->count(),
+                'bin' => Lead::where('counselor_id', $counselorId)->where('status', 'Bin')->count(),
+            ];
+        });
 
         return response()->json($counts);
     }

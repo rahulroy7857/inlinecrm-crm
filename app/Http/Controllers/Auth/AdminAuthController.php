@@ -57,7 +57,6 @@ class AdminAuthController extends Controller
 
         if (Auth::guard('admin')->attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            \Log::info('Admin logged in', ['user' => Auth::guard('admin')->user()]);
             // Get active academic year
             $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
             if ($activeYear) {

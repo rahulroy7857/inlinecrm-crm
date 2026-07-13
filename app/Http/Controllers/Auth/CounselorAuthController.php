@@ -43,7 +43,6 @@ class CounselorAuthController extends Controller
             }
 
             $request->session()->regenerate();
-            \Log::info('Counselor logged in', ['user' => $counselor]);
             $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
             if ($activeYear) {
                 session([

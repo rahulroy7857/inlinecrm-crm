@@ -84,7 +84,7 @@
 
     $(document).ready(function() {
         updateCounts();
-        setInterval(updateCounts, 30000);
+        setInterval(updateCounts, 60000);
         document.addEventListener('leadAdded', updateCounts);
         document.addEventListener('leadUpdated', updateCounts);
         document.addEventListener('leadDeleted', updateCounts);

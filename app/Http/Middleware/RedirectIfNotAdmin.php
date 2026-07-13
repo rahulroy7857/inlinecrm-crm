@@ -11,14 +11,7 @@ class RedirectIfNotAdmin
 {
     public function handle(Request $request, Closure $next, $guard = 'admin'): Response
     {
-        \Log::info('Admin middleware triggered', [
-            'isAuthenticated' => Auth::guard($guard)->check(),
-            'user' => Auth::guard($guard)->user()
-        ]);
-    
-        // Check if admin is authenticated
-        if (!Auth::guard('admin')->check()) {
-            \Log::info('Redirecting to login');
+        if (!Auth::guard($guard)->check()) {
             return redirect()->route('admin.login');
         }
 
