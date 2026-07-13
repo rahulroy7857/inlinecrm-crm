@@ -27,7 +27,7 @@
         <li class="menu-item {{ request()->is('student/payment*') ? 'active' : '' }}">
             <a href="{{ route('student.payment.index') }}" class="menu-link">
                 <i class="menu-icon bx bx-credit-card"></i>
-                <span>Payment</span>
+                <span>Payments</span>
             </a>
         </li>
     </ul>

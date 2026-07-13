@@ -19,7 +19,7 @@
             <p style="background: #f8fafc; padding: 12px; border-radius: 8px;">{{ $customMessage }}</p>
         @endif
         @if($recipientType !== 'counselor')
-            <p><a href="{{ route('student.payment.index') }}">Pay now in Student Portal</a></p>
+            <p>Please contact the <strong>Accounts</strong> team to complete your payment. You can view transaction history in the <a href="{{ route('student.payment.index') }}">Student Portal</a>.</p>
         @endif
         <p style="margin-top: 24px;">— Inline CRM</p>
     </div>

@@ -8,7 +8,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
             <h4 class="mb-1">Student Fees</h4>
-            <p class="text-muted mb-0">Set registration plan, admission fee, and college fee. Counselors can only view these amounts.</p>
+            <p class="text-muted mb-0">Set fees and record student payments (Pay Now). Students can only view transaction history.</p>
         </div>
     </div>
 
@@ -122,6 +122,51 @@
                     <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i>Save Fees</button>
                 </div>
             </form>
+
+            @if($summary['fees_set'] && $summary['total_remaining'] > 0)
+            <hr class="my-4 mt-4">
+           
+            <form method="POST" action="{{ account_route('student-fees.pay', $student->id) }}" class="row g-3 align-items-end account-pay-form">
+                @csrf
+                <div class="col-md-3">
+                    <label class="form-label">Fee Type</label>
+                    <select name="purpose" class="form-control pay-purpose" required>
+                        @if($summary['registration_remaining'] > 0)
+                            <option value="registration_fee" data-max="{{ $summary['registration_remaining'] }}" data-fixed="1">
+                                Registration Fee — {{ $summary['registration_plan']['label'] ?? '' }} (₹{{ number_format($summary['registration_remaining'], 2) }})
+                            </option>
+                        @endif
+                        @if(!$summary['registration_required_first'])
+                            @if($summary['counselor_remaining'] > 0)
+                                <option value="counselor_fee" data-max="{{ $summary['counselor_remaining'] }}">
+                                    Admission Fee (₹{{ number_format($summary['counselor_remaining'], 2) }} left)
+                                </option>
+                            @endif
+                            @if($summary['college_remaining'] > 0)
+                                <option value="college_fee" data-max="{{ $summary['college_remaining'] }}">
+                                    College Fee (₹{{ number_format($summary['college_remaining'], 2) }} left)
+                                </option>
+                            @endif
+                        @endif
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" step="0.01" min="1" name="amount" class="form-control pay-amount" required>
+                    <small class="text-muted pay-amount-hint"></small>
+                </div>
+               
+                <div class="col-md-2">
+                    <span class="text-muted">&nbsp;</span>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bx bx-credit-card me-1"></i> Pay Now
+                    </button>
+                </div>
+            </form>
+            @elseif($summary['fees_set'] && $summary['total_remaining'] <= 0)
+            <hr class="my-4">
+            <div class="alert alert-success mb-0 py-2">All fees paid for this student.</div>
+            @endif
             @else
                 <div class="row g-3">
                     <div class="col-md-4"><strong>Registration:</strong> {{ $summary['registration_plan']['label'] ?? '—' }} · ₹{{ number_format($summary['registration_fee'], 2) }}</div>
@@ -135,4 +180,35 @@
 
     <div class="mt-3">{{ $students->links() }}</div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.account-pay-form').forEach(function (form) {
+    const purpose = form.querySelector('.pay-purpose');
+    const amount = form.querySelector('.pay-amount');
+    const hint = form.querySelector('.pay-amount-hint');
+    if (!purpose || !amount) return;
+
+    function syncMax() {
+      const option = purpose.options[purpose.selectedIndex];
+      if (!option) return;
+      const max = option.getAttribute('data-max');
+      const fixed = option.getAttribute('data-fixed') === '1';
+      amount.max = max;
+      amount.value = max;
+      amount.readOnly = fixed;
+      if (hint) {
+        hint.textContent = fixed
+          ? 'Registration fee must be paid in full (non-refundable).'
+          : 'Partial installment allowed.';
+      }
+    }
+
+    purpose.addEventListener('change', syncMax);
+    syncMax();
+  });
+});
+</script>
 @endsection

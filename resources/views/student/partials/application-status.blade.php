@@ -16,12 +16,12 @@
         [
             'key' => 'payment',
             'label' => 'Payment',
-            'title' => 'Pay application fee',
-            'description' => 'Secure your seat by completing the fee payment.',
+            'title' => 'Fee payment status',
+            'description' => 'Track amounts paid and transaction IDs. Payments are collected by Accounts.',
             'icon' => 'bx-credit-card',
             'done' => $student->hasPaid(),
             'action_url' => route('student.payment.index'),
-            'action_label' => 'Pay now',
+            'action_label' => 'View payments',
         ],
         [
             'key' => 'documents',
@@ -203,7 +203,7 @@
                                     @endif
                                     @if (! $student->hasPaid())
                                         @if (! $student->isProfileComplete()) · @endif
-                                        <a href="{{ route('student.payment.index') }}">Make payment</a>
+                                        <a href="{{ route('student.payment.index') }}">View payments</a>
                                     @endif
                                     @if (! $student->hasRequiredDocuments())
                                         @if (! $student->isProfileComplete() || ! $student->hasPaid()) · @endif

@@ -78,4 +78,79 @@ class StudentFeeManageController extends Controller
 
         return back()->with('success', 'Student fees updated successfully.');
     }
+
+    public function recordPayment(Request $request, int $id)
+    {
+        $this->authorizeAccountManage();
+
+        $student = Student::findOrFail($id);
+
+        $validated = $request->validate([
+            'purpose' => ['required', Rule::in([
+                StudentFeeService::PURPOSE_REGISTRATION,
+                StudentFeeService::PURPOSE_COUNSELOR,
+                StudentFeeService::PURPOSE_COLLEGE,
+            ])],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'transaction_id' => ['nullable', 'string', 'max:100'],
+            'remark' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $summary = $this->feeService->feeSummary($student);
+
+        if (!$summary['fees_set']) {
+            return back()->with('error', 'Set student fees before recording a payment.');
+        }
+
+        if ($summary['registration_required_first'] && $validated['purpose'] !== StudentFeeService::PURPOSE_REGISTRATION) {
+            return back()->with('error', 'Please collect the Registration Fee first.');
+        }
+
+        $extra = [
+            'gateway' => 'account',
+            'metadata' => [
+                'mode' => 'account',
+                'recorded_via' => is_admin_account_portal() ? 'admin' : 'account',
+            ],
+        ];
+
+        if (!empty($validated['transaction_id'])) {
+            $extra['transaction_id'] = $validated['transaction_id'];
+        }
+
+        if (!empty($validated['remark'])) {
+            $extra['remark'] = $validated['remark'];
+        }
+
+        try {
+            $payment = $this->feeService->recordInstallment(
+                $student,
+                $validated['purpose'],
+                round((float) $validated['amount'], 2),
+                $extra
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $this->feeService->markPaid($payment, [
+            'mode' => 'account',
+            'recorded_by_account_id' => $this->accountCreatedById(),
+        ]);
+        $this->feeService->sendReceipt($payment->fresh(['student', 'counselor']));
+
+        ActivityLogger::log(
+            "Recorded student fee payment for {$student->name} (₹{$validated['amount']})",
+            'Create',
+            $this->accountActor(),
+            [
+                'student_id' => $student->id,
+                'purpose' => $validated['purpose'],
+                'amount' => $validated['amount'],
+                'transaction_id' => $payment->transaction_id,
+            ]
+        );
+
+        return back()->with('success', 'Payment recorded successfully. Receipt emailed to the student.');
+    }
 }

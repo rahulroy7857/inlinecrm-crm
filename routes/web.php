@@ -240,6 +240,8 @@ Route::prefix('admin')->name('admin.')->group(function() {
                 ->name('student-fees.index');
             Route::put('student-fees/{id}', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'update'])
                 ->name('student-fees.update');
+            Route::post('student-fees/{id}/pay', [\App\Http\Controllers\Account\StudentFeeManageController::class, 'recordPayment'])
+                ->name('student-fees.pay');
 
             Route::controller(AccountCounselorSalaryController::class)->group(function () {
                 Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');

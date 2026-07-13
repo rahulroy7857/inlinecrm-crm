@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </li>
           @endforeach
         </ul>
-        <a href="{{ route('student.payment.index') }}" class="btn btn-primary w-100">Pay Installment</a>
+        <a href="{{ route('student.payment.index') }}" class="btn btn-primary w-100">View Payment History</a>
       </div>
     </div>
   </div>

@@ -68,6 +68,7 @@ Route::middleware(['auth:account', EnsureAccountBreakCompliance::class])->group(
 
     Route::get('student-fees', [AccountStudentFeeManageController::class, 'index'])->name('student-fees.index');
     Route::put('student-fees/{id}', [AccountStudentFeeManageController::class, 'update'])->name('student-fees.update');
+    Route::post('student-fees/{id}/pay', [AccountStudentFeeManageController::class, 'recordPayment'])->name('student-fees.pay');
 
     Route::controller(CounselorSalaryController::class)->group(function () {
         Route::get('counselor-salaries', 'index')->name('counselor-salaries.index');

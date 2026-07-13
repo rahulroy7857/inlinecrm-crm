@@ -42,6 +42,4 @@ Route::middleware(['auth:student'])->group(function () {
     Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
     Route::get('payment', [PaymentController::class, 'index'])->name('payment.index');
-    Route::post('payment/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
-    Route::get('payment/callback/{payment}', [PaymentController::class, 'callback'])->name('payment.callback');
 });
