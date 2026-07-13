@@ -40,8 +40,6 @@ class AcademicYearController extends Controller
             ['academic_year' => $academicYear->toArray()]
         );
 
-        session(['academic_year_check' => true]);
-
-        return redirect()->back()->with('success', 'Academic year changed successfully!');
+        return redirect()->back()->with('success', 'Academic year updated successfully.');
     }
 }

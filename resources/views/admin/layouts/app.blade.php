@@ -61,26 +61,6 @@
         </div>
     </div>
 
-    @if(session()->has('academic_year_check'))
-    <div id="academicYearToast"
-         class="bs-toast toast bg-info"
-         role="alert"
-         aria-live="assertive"
-         aria-atomic="true"
-         data-bs-delay="3000"
-         style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
-        <div class="toast-header">
-            <i class="bx bx-check-circle me-2 text-sky-600"></i>
-            <div class="me-auto fw-semibold">Academic Year</div>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Academic year updated successfully.
-        </div>
-    </div>
-    @endif
-
     @include('admin.layouts.scripts')
     @include('admin.partials.toast-stack')
     @include('admin.partials.delete-confirm-modal')
