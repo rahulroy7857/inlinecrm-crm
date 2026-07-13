@@ -21,7 +21,7 @@
                             <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                             Consolidated Counselor Report
                         </h5>
-                        <small class="text-muted">Current Academic Year: {{ $academicYear->name }}</small>
+                        <small class="text-muted">Current Academic Year: {{ $academicYear?->name ?? 'Not set' }}</small>
                     </div>
                 </div>
 

@@ -423,21 +423,33 @@ class ReportController extends Controller
         return view('admin.reports.agent-commission', compact('agentCommissions', 'summary'));
     }
     
-        public function consolidated(Request $request)
+    public function consolidated(Request $request)
     {
-        // Get all counselors
+        // Resolve academic year from session, falling back to active / latest
+        $academicYear = AcademicYear::find($this->academicYear)
+            ?? AcademicYear::where('is_active', true)->first()
+            ?? AcademicYear::orderByDesc('id')->first();
+
+        if ($academicYear && !$this->academicYear) {
+            session([
+                'academic_year_id' => $academicYear->id,
+                'academic_year_name' => $academicYear->name,
+            ]);
+            $this->academicYear = $academicYear->id;
+        }
+
         $counselors = Counselor::select('id', 'name')->where('status', 1)->orderBy('name')->get();
-        
+
         $consolidatedData = [];
         $today = \Carbon\Carbon::today();
         $tomorrow = \Carbon\Carbon::tomorrow();
+        $academicYearId = $academicYear?->id;
 
-        $academicYear = AcademicYear::where('id', $this->academicYear)->first();
-        
         foreach ($counselors as $counselor) {
-            // Base query for current academic year
-            $baseQuery = Lead::where('academic_year_id', $this->academicYear)
-                            ->where('counselor_id', $counselor->id);
+            $baseQuery = Lead::where('counselor_id', $counselor->id);
+            if ($academicYearId) {
+                $baseQuery->where('academic_year_id', $academicYearId);
+            }
             
             // Total leads
             $totalLeads = (clone $baseQuery)->count();

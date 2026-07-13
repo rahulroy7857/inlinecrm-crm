@@ -36,7 +36,8 @@
     </form>
 
     <div class="table-responsive">
-      <table class="table crm-table" id="{{ $tableId }}">
+      {{-- data-crm-dt-manual: this page uses server-side filters/pagination; auto DataTables init breaks on the empty colspan row (tn/18). --}}
+      <table class="table crm-table" id="{{ $tableId }}" data-crm-dt-manual="1">
         <thead>
           <tr>
             <th>Date</th>
