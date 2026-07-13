@@ -18,9 +18,8 @@ class FinancialYearController extends Controller
         session([
             'academic_year_id' => $year->id,
             'academic_year_name' => $year->name,
-            'academic_year_check' => true,
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Financial year updated successfully.');
     }
 }
