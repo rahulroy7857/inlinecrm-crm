@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($students as $student)
+                        @foreach($students as $student)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
@@ -77,13 +77,7 @@
                                 </form>
                             </td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="10" class="text-center text-muted py-4">
-                                No student accounts yet. Share a registration link from a lead profile.
-                            </td>
-                        </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
