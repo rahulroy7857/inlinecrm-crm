@@ -67,7 +67,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small">Admission Fee Remaining</div>
+                            <div class="text-muted small">Processing Fee Remaining</div>
                             <h4 class="mb-1">₹{{ number_format($feeSummary['counselor_remaining'] ?? 0, 2) }}</h4>
                             <small class="text-muted">Total ₹{{ number_format($feeSummary['counselor_fee'] ?? 0, 2) }} · Paid ₹{{ number_format($feeSummary['counselor_paid'] ?? 0, 2) }}</small>
                         </div>

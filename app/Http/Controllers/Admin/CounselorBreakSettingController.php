@@ -28,9 +28,14 @@ class CounselorBreakSettingController extends Controller
     {
         $request->validate([
             'settings' => 'required|array',
-            'settings.*.type' => 'required|string',
+            'settings.*.type' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9_]+$/', 'distinct'],
             'settings.*.label' => 'required|string|max:255',
             'settings.*.duration_minutes' => 'nullable|integer|min:1|max:480',
+            'settings.*.requires_admin_approval' => 'required|boolean',
+            'settings.*.is_active' => 'required|boolean',
+        ], [
+            'settings.*.type.regex' => 'Break types may contain only lowercase letters, numbers, and underscores.',
+            'settings.*.type.distinct' => 'Each break type must be unique.',
         ]);
 
         $this->breakSettings->updateSettings($request->input('settings'));

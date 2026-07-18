@@ -46,10 +46,10 @@ return [
     ],
 
     'payment' => [
-        'gateway' => env('STUDENT_PAYMENT_GATEWAY', 'razorpay'),
+        'gateway' => env('STUDENT_PAYMENT_GATEWAY', 'cashfree'),
         'test_mode' => env('STUDENT_PAYMENT_TEST_MODE', true),
-        'razorpay_key' => env('RAZORPAY_KEY', ''),
-        'razorpay_secret' => env('RAZORPAY_SECRET', ''),
+        'cashfree_key' => env('CASHFREE_KEY', ''),
+        'cashfree_secret' => env('CASHFREE_SECRET', ''),
     ],
 
     'default_ledger_account_id' => env('STUDENT_DEFAULT_LEDGER_ACCOUNT_ID'),

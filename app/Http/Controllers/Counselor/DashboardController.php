@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\LeadPayment;
 use App\Models\Counselor;
+use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\LeadStatus; // Add this import
 use App\Services\CounselorWorkingHoursService;
+
 class DashboardController extends Controller
 {
     protected $academicYear;
@@ -159,6 +161,41 @@ class DashboardController extends Controller
             auth()->guard('counselor')->user()
         );
 
+        $counselor = auth()->guard('counselor')->user();
+
+        $registrationFees = Student::query()
+            ->select([
+                'students.course_id',
+                DB::raw('SUM(COALESCE(students.registration_fee, 0)) as registration_fee'),
+            ])
+            ->leftJoin('leads', 'leads.id', '=', 'students.lead_id')
+            ->where('students.counselor_id', $counselor->id)
+            ->whereNotNull('students.course_id')
+            ->when($this->academicYear, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('leads.academic_year_id', $this->academicYear)
+                        ->orWhereNull('students.lead_id');
+                });
+            })
+            ->groupBy('students.course_id')
+            ->pluck('registration_fee', 'course_id');
+
+        $courseTargets = \App\Models\CounselorTarget::query()
+            ->with('course')
+            ->where('counselor_id', $counselor->id)
+            ->when($this->academicYear, fn ($query) => $query->where('academic_year_id', $this->academicYear))
+            ->get()
+            ->sortBy(fn ($target) => $target->course->name ?? '')
+            ->values()
+            ->map(function ($target) use ($counselor, $registrationFees) {
+                return (object) [
+                    'counselor_name' => $counselor->name,
+                    'course_name' => $target->course->name ?? '—',
+                    'target_amount' => $target->amount,
+                    'registration_fee' => (float) ($registrationFees[$target->course_id] ?? 0),
+                ];
+            });
+
         return view('counselor.dashboard', compact(
             'leadsCount',
             'topCounselor',
@@ -172,7 +209,8 @@ class DashboardController extends Controller
             'statusColors',
             'funnelColors',
             'months',
-            'workingHours'
+            'workingHours',
+            'courseTargets'
         ));
     }
 }

@@ -7,7 +7,6 @@ use App\Http\Controllers\Account\LedgerAccountController;
 use App\Http\Controllers\Account\TransactionController;
 use App\Http\Controllers\Account\DaybookController;
 use App\Http\Controllers\Account\ProfitLossController;
-use App\Http\Controllers\Account\CrmSyncController;
 use App\Http\Controllers\Account\ReportController;
 use App\Http\Controllers\Account\ChangePasswordController;
 use App\Http\Controllers\Account\FinancialYearController;
@@ -51,12 +50,6 @@ Route::middleware(['auth:account', EnsureAccountBreakCompliance::class])->group(
 
     Route::get('daybook', [DaybookController::class, 'index'])->name('daybook.index');
     Route::get('profit-loss', [ProfitLossController::class, 'index'])->name('profit-loss.index');
-
-    Route::controller(CrmSyncController::class)->group(function () {
-        Route::get('crm-sync', 'index')->name('crm-sync.index');
-        Route::post('crm-sync', 'sync')->name('crm-sync.sync');
-        Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
-    });
 
     Route::controller(AccountLeadPaymentController::class)->group(function () {
         Route::get('lead-payments', 'index')->name('lead-payments.index');

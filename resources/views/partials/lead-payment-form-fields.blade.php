@@ -40,7 +40,7 @@
 <div class="col-12 mb-3">
     <label for="type" class="form-label">Type</label>
     <select id="type" class="form-select" name="payment_type" required>
-        @foreach(['Application Fee', 'Reservation Fee', 'Admission Fee', 'Commission', 'Refund', 'Tuition Fee', 'Other'] as $paymentType)
+        @foreach(['Application Fee', 'Reservation Fee', 'Processing Fee', 'Commission', 'Refund', 'Tuition Fee', 'Other'] as $paymentType)
         <option value="{{ $paymentType }}" {{ old('payment_type') === $paymentType ? 'selected' : '' }}>{{ $paymentType }}</option>
         @endforeach
     </select>

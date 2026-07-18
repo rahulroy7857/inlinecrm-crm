@@ -1917,13 +1917,15 @@
         ></textarea>
         </div>
         <div class="col-6 mb-3">
-        <label for="contactDuration" class="form-label">Duration (mins)</label>
+        <label for="contactDuration" class="form-label">Duration (mins or seconds)</label>
         <input
           type="number"
           id="contactDuration"
           class="form-control"
-          placeholder="Enter Duration"
+          placeholder="e.g. 1.23"
           name="duration"
+          min="0.01"
+          step="0.01"
           required
         />
         </div>

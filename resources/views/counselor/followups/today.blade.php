@@ -63,12 +63,80 @@
             </div>    
     </div>
 </div>
+
+<div class="modal fade" id="followupModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">Follow-up Reminder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" id="reminderMessage"></p>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 @section('scripts')   
 @include('admin.partials.datatables-scripts')
+@php
+    $followupReminders = $leads->map(function ($lead) {
+        return [
+            'id' => $lead->id,
+            'lead_id' => $lead->lead_id,
+            'name' => $lead->name,
+            'status' => $lead->status,
+            'due_at' => $lead->next_follow_up->timestamp * 1000,
+            'due_label' => $lead->next_follow_up->format('d M Y h:i A'),
+        ];
+    })->values();
+@endphp
 <script>
     $(document).ready(function() {
         initCrmDataTable('#leadsTable');
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const followups = @json($followupReminders);
+        const modalElement = document.getElementById('followupModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        const fiveMinutes = 5 * 60 * 1000;
+
+        function checkFollowupReminders() {
+            if (modalElement.classList.contains('show')) {
+                return;
+            }
+
+            const now = Date.now();
+            const followup = followups.find(function (item) {
+                const timeUntilDue = item.due_at - now;
+                const reminderKey = `counselor-followup-reminder-${item.id}-${item.due_at}`;
+
+                return timeUntilDue >= 0
+                    && timeUntilDue <= fiveMinutes
+                    && !sessionStorage.getItem(reminderKey);
+            });
+
+            if (!followup) {
+                return;
+            }
+
+            const reminderKey = `counselor-followup-reminder-${followup.id}-${followup.due_at}`;
+            sessionStorage.setItem(reminderKey, 'shown');
+
+            document.getElementById('reminderMessage').textContent =
+                `Follow-up for ${followup.name} (${followup.lead_id}) is due at ${followup.due_label}. Please follow up now.`;
+
+            modal.show();
+        }
+
+        checkFollowupReminders();
+        setInterval(checkFollowupReminders, 30000);
     });
 </script>
 @endsection

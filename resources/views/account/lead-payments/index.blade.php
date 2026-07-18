@@ -28,7 +28,7 @@
         <div class="card-header border-bottom d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Lead Payments</h5>
             @if(account_can_manage())
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Add Payment</button>
+            {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Add Payment</button> --}}
             @endif
         </div>
         <div class="card-body">

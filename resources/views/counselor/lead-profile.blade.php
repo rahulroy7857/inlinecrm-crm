@@ -285,6 +285,27 @@
                     <p class="mb-0"><strong>Counselor:</strong> {{ $lead->counselor->name ?? 'Not Assigned' }}</p>
                     <p class="mb-0"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
                 </div>
+
+                @php
+                    $regPlans = \App\Services\StudentFeeService::registrationPlans();
+                    $selectedPlan = $lead->registration_fee_plan ?? optional($lead->student)->registration_fee_plan;
+                @endphp
+                <form method="POST" action="{{ route('counselor.leads.registration-plan', $lead->id) }}" class="lead-reg-plan mt-3 w-100">
+                    @csrf
+                    <label class="form-label mb-1"><strong>Registration Plan</strong></label>
+                    <div class="d-flex gap-2">
+                        <select name="registration_fee_plan" class="form-control form-control-sm">
+                            <option value="">Not set</option>
+                            @foreach($regPlans as $key => $plan)
+                                <option value="{{ $key }}" {{ $selectedPlan === $key ? 'selected' : '' }}>
+                                    {{ $plan['label'] }} — ₹{{ number_format($plan['total'], 2) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <small class="text-muted">Chosen by counselor and sent with the student registration.</small>
+                </form>
                 </div>
 
                 <div class="lead-quick-actions">
@@ -1656,11 +1677,16 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div>
                             <h5 class="mb-0">Student Portal Fees</h5>
-                            <small class="text-muted">View-only — fees are set by the Accounts team for {{ $feeStudent->name }}</small>
+                            <small class="text-muted">Set fees, collect payments, and send reminders for {{ $feeStudent->name }}</small>
                         </div>
-                        <a href="{{ route('counselor.student-fee-payments.index', ['q' => $feeStudent->lead_ref]) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bx bx-list-ul me-1"></i>View Payments
-                        </a>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ route('counselor.student-fees.index', ['q' => $feeStudent->lead_ref]) }}" class="btn btn-sm btn-primary">
+                                <i class="bx bx-wallet me-1"></i>Manage Fees
+                            </a>
+                            <a href="{{ route('counselor.student-fee-payments.index', ['q' => $feeStudent->lead_ref]) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bx bx-list-ul me-1"></i>View Payments
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -1674,7 +1700,7 @@
                             </span>
                         </div>
                         <div class="student-fees-summary__item">
-                            <span class="student-fees-summary__label">Admission Fee</span>
+                            <span class="student-fees-summary__label">Processing Fee</span>
                             <span class="student-fees-summary__value">₹{{ number_format($feeSummary['counselor_fee'], 2) }}</span>
                             <span class="student-fees-summary__meta">Paid ₹{{ number_format($feeSummary['counselor_paid'], 2) }}</span>
                             <span class="student-fees-summary__remain {{ $feeSummary['counselor_remaining'] > 0 ? 'is-due' : 'is-done' }}">
@@ -1712,7 +1738,7 @@
                                 <label class="form-label">Fee type</label>
                                 <select name="purpose" class="form-control" required>
                                     <option value="registration_fee">Registration Fee</option>
-                                    <option value="counselor_fee">Admission Fee</option>
+                                    <option value="counselor_fee">Processing Fee</option>
                                     <option value="college_fee">College Fee</option>
                                 </select>
                             </div>
@@ -2076,13 +2102,15 @@
         ></textarea>
         </div>
         <div class="col-6 mb-3">
-        <label for="contactDuration" class="form-label">Duration (mins)</label>
+        <label for="contactDuration" class="form-label">Duration (mins or seconds)</label>
         <input
           type="number"
           id="contactDuration"
           class="form-control"
-          placeholder="Enter Duration"
+          placeholder="e.g. 1.23"
           name="duration"
+          min="0.01"
+          step="0.01"
           required
         />
         </div>

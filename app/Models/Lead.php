@@ -62,6 +62,7 @@ class Lead extends Model
         'admission_no',
         'admission_date',
         'commission',
+        'registration_fee_plan',
         'photo',
         'reservation_date',
         'reservation_note',

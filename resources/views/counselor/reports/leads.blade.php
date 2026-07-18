@@ -121,7 +121,7 @@
                                 <th>
                                     <input type="checkbox" class="form-check-input" id="selectAll">
                                 </th>
-                                <th>SL.No</th>
+                                
                                 <th>Lead ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -138,7 +138,7 @@
                                 <td>
                                     <input type="checkbox" class="form-check-input lead-checkbox" value="{{ $lead->id }}">
                                 </td>
-                                <td>{{ $index + 1 }}</td>
+                               
                                 <td>
                                     <a href="{{ route('counselor.leads.show', $lead->id) }}"
                                         class="text-primary fw-bold"

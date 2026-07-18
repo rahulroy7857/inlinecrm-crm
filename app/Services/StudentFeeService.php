@@ -24,7 +24,7 @@ class StudentFeeService
         return [
             self::PURPOSE_REGISTRATION => 'Registration Fee',
             self::PURPOSE_APPLICATION => 'Application Fee',
-            self::PURPOSE_COUNSELOR => 'Admission Fee',
+            self::PURPOSE_COUNSELOR => 'Processing Fee',
             self::PURPOSE_COLLEGE => 'College Fee',
         ];
     }
@@ -106,9 +106,15 @@ class StudentFeeService
             'college_complete' => $collegeFee > 0 && $collegeRemaining <= 0,
             'registration_required_first' => $registrationFee > 0 && !$registrationComplete,
             'fees_set' => $registrationFee > 0 || $counselorFee > 0 || $collegeFee > 0,
+            'registration_fee_due_date' => $student->registration_fee_due_date,
             'counselor_fee_due_date' => $student->counselor_fee_due_date,
             'college_fee_due_date' => $student->college_fee_due_date,
-            'dues' => $this->dueItems($student, $counselorRemaining, $collegeRemaining),
+            'dues' => $this->dueItems(
+                $student,
+                $registrationRemaining,
+                $counselorRemaining,
+                $collegeRemaining
+            ),
         ];
     }
 
@@ -133,13 +139,20 @@ class StudentFeeService
         };
     }
 
-    public function dueItems(Student $student, ?float $counselorRemaining = null, ?float $collegeRemaining = null): array
+    public function dueItems(
+        Student $student,
+        ?float $registrationRemaining = null,
+        ?float $counselorRemaining = null,
+        ?float $collegeRemaining = null
+    ): array
     {
+        $summaryRegistration = $registrationRemaining;
         $summaryCounselor = $counselorRemaining;
         $summaryCollege = $collegeRemaining;
 
-        if ($summaryCounselor === null || $summaryCollege === null) {
+        if ($summaryRegistration === null || $summaryCounselor === null || $summaryCollege === null) {
             $summary = $this->feeSummary($student);
+            $summaryRegistration = $summary['registration_remaining'];
             $summaryCounselor = $summary['counselor_remaining'];
             $summaryCollege = $summary['college_remaining'];
         }
@@ -147,12 +160,25 @@ class StudentFeeService
         $dues = [];
         $today = now()->startOfDay();
 
+        if ($summaryRegistration > 0 && $student->registration_fee_due_date) {
+            $due = $student->registration_fee_due_date->copy()->startOfDay();
+            if ($due->lessThanOrEqualTo($today->copy()->addDays(7))) {
+                $dues[] = [
+                    'purpose' => self::PURPOSE_REGISTRATION,
+                    'label' => 'Registration Fee',
+                    'remaining' => $summaryRegistration,
+                    'due_date' => $student->registration_fee_due_date,
+                    'is_overdue' => $due->lessThan($today),
+                ];
+            }
+        }
+
         if ($summaryCounselor > 0 && $student->counselor_fee_due_date) {
             $due = $student->counselor_fee_due_date->copy()->startOfDay();
             if ($due->lessThanOrEqualTo($today->copy()->addDays(7))) {
                 $dues[] = [
                     'purpose' => self::PURPOSE_COUNSELOR,
-                    'label' => 'Admission Fee',
+                    'label' => 'Processing Fee',
                     'remaining' => $summaryCounselor,
                     'due_date' => $student->counselor_fee_due_date,
                     'is_overdue' => $due->lessThan($today),
@@ -178,31 +204,65 @@ class StudentFeeService
 
     public function setFees(Student $student, array $data, ?int $accountUserId = null, ?int $counselorId = null): Student
     {
-        $planKey = $data['registration_fee_plan'] ?? null;
-        $registrationFee = 0.0;
-
-        if ($planKey) {
-            $total = self::registrationPlanTotal($planKey);
-            if ($total === null) {
-                throw new \InvalidArgumentException('Invalid registration fee plan.');
-            }
-            $registrationFee = $total;
-        }
-
-        $student->update([
-            'registration_fee_plan' => $planKey,
-            'registration_fee' => $registrationFee,
-            'counselor_fee' => $data['counselor_fee'] ?? 0,
-            'college_fee' => $data['college_fee'] ?? 0,
-            'counselor_fee_due_date' => $data['counselor_fee_due_date'] ?? null,
-            'college_fee_due_date' => $data['college_fee_due_date'] ?? null,
-            'fee_ledger_account_id' => $data['fee_ledger_account_id'] ?? $student->fee_ledger_account_id,
+        $attributes = [
             'fees_set_at' => now(),
             'fees_set_by' => $counselorId,
             'fees_set_by_account_id' => $accountUserId,
+        ];
+
+        foreach ([
+            'counselor_fee',
+            'college_fee',
+            'registration_fee_due_date',
+            'counselor_fee_due_date',
+            'college_fee_due_date',
+            'fee_ledger_account_id',
+        ] as $field) {
+            if (array_key_exists($field, $data)) {
+                $attributes[$field] = $data[$field];
+            }
+        }
+
+        // The registration plan is owned by the counselor. Only touch it when
+        // it is explicitly provided; otherwise keep whatever the counselor set.
+        if (array_key_exists('registration_fee_plan', $data)) {
+            $planKey = $data['registration_fee_plan'] ?: null;
+            $attributes['registration_fee_plan'] = $planKey;
+            $attributes['registration_fee'] = $this->resolvePlanFee($planKey);
+        }
+
+        $student->update($attributes);
+
+        return $student->fresh();
+    }
+
+    /**
+     * Apply (or clear) the registration plan chosen by the counselor.
+     */
+    public function applyRegistrationPlan(Student $student, ?string $planKey): Student
+    {
+        $planKey = $planKey ?: null;
+
+        $student->update([
+            'registration_fee_plan' => $planKey,
+            'registration_fee' => $this->resolvePlanFee($planKey),
         ]);
 
         return $student->fresh();
+    }
+
+    private function resolvePlanFee(?string $planKey): float
+    {
+        if (!$planKey) {
+            return 0.0;
+        }
+
+        $total = self::registrationPlanTotal($planKey);
+        if ($total === null) {
+            throw new \InvalidArgumentException('Invalid registration fee plan.');
+        }
+
+        return (float) $total;
     }
 
     public function recordInstallment(
@@ -279,12 +339,12 @@ class StudentFeeService
 
     /**
      * Map CRM lead payment types to student fee purposes.
-     * Application / Admission / Reservation reduce Admission Fee (counselor_fee).
+     * Application / Admission / Reservation reduce Processing Fee (counselor_fee).
      */
     public static function mapLeadPaymentTypeToPurpose(?string $paymentType): ?string
     {
         return match ($paymentType) {
-            'Admission Fee', 'Application Fee', 'Reservation Fee' => self::PURPOSE_COUNSELOR,
+            'Processing Fee', 'Application Fee', 'Reservation Fee' => self::PURPOSE_COUNSELOR,
             'Tuition Fee' => self::PURPOSE_COLLEGE,
             default => null,
         };
@@ -514,6 +574,7 @@ class StudentFeeService
         };
 
         $dueDate = match ($purpose) {
+            self::PURPOSE_REGISTRATION => $student->registration_fee_due_date,
             self::PURPOSE_COUNSELOR => $student->counselor_fee_due_date,
             self::PURPOSE_COLLEGE => $student->college_fee_due_date,
             default => null,

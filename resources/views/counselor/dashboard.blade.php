@@ -106,6 +106,7 @@
         </details>
     </div>
 
+
     <div class="stats-grid portal-stats-grid mb-4">
         <div class="portal-stat-card portal-stat-card--warm">
             <div class="card-body">
@@ -152,6 +153,97 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-12">
+            <div class="portal-chart-card h-100">
+                <div class="card-header">
+                    <h5><span class="chart-icon chart-icon--leads"><i class="bx bx-target-lock"></i></span> Target {{ date('Y') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table crm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th class="text-end">Target Amount</th>
+                                    <th class="text-end">Registration Fee</th>
+                                    <th>Progress</th>
+                                    <th class="text-end">Remaining Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($courseTargets as $target)
+                                    @php
+                                        $targetAmount = (float) $target->target_amount;
+                                        $registrationFee = (float) $target->registration_fee;
+                                        $progress = $targetAmount > 0 ? ($registrationFee / $targetAmount) * 100 : 0;
+                                        $progressWidth = min(100, max(0, $progress));
+                                        $progressColor = $progress <= 49 ? '#dc3545' : ($progress <= 70 ? '#ffc107' : '#28a745');
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $target->course_name ?? '—' }}</td>
+                                        <td class="text-end">₹{{ number_format($targetAmount, 2) }}</td>
+                                        <td class="text-end">₹{{ number_format($registrationFee, 2) }}</td>
+                                        <td style="min-width: 190px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 10px;">
+                                                    <div class="progress-bar"
+                                                         role="progressbar"
+                                                         style="width: {{ $progressWidth }}%; background-color: {{ $progressColor }};"
+                                                         aria-valuenow="{{ round($progressWidth) }}"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100"></div>
+                                                </div>
+                                                <span class="fw-semibold">{{ number_format($progress, 1) }}%</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">₹{{ number_format($targetAmount - $registrationFee, 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">No course targets yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if($courseTargets->isNotEmpty())
+                                @php
+                                    $totalTarget = (float) $courseTargets->sum('target_amount');
+                                    $totalRegistrationFee = (float) $courseTargets->sum('registration_fee');
+                                    $totalProgress = $totalTarget > 0 ? ($totalRegistrationFee / $totalTarget) * 100 : 0;
+                                    $totalProgressWidth = min(100, max(0, $totalProgress));
+                                    $totalProgressColor = $totalProgress <= 49 ? '#dc3545' : ($totalProgress <= 70 ? '#ffc107' : '#28a745');
+                                @endphp
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th class="text-end">₹{{ number_format($totalTarget, 2) }}</th>
+                                        <th class="text-end">₹{{ number_format($totalRegistrationFee, 2) }}</th>
+                                        <th style="min-width: 190px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 10px;">
+                                                    <div class="progress-bar"
+                                                         role="progressbar"
+                                                         style="width: {{ $totalProgressWidth }}%; background-color: {{ $totalProgressColor }};"
+                                                         aria-valuenow="{{ round($totalProgressWidth) }}"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100"></div>
+                                                </div>
+                                                <span>{{ number_format($totalProgress, 1) }}%</span>
+                                            </div>
+                                        </th>
+                                        <th class="text-end">₹{{ number_format($totalTarget - $totalRegistrationFee, 2) }}</th>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
 
     <div class="row g-4 mb-4">
         <div class="col-lg-8">

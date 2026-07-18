@@ -11,6 +11,15 @@
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
     @endif
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if($pendingRequests->isNotEmpty())
     <div class="card mb-4">
@@ -79,7 +88,7 @@
                                 <th>Active</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="breakSettingsBody">
                             @foreach($settings as $index => $setting)
                             <tr>
                                 <td>
@@ -105,7 +114,12 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Save Settings</button>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-outline-primary" id="addBreakSetting">
+                        <i class="bx bx-plus"></i> Add Break
+                    </button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
             </form>
         </div>
     </div>
@@ -161,6 +175,49 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    let nextSettingIndex = {{ $settings->count() }};
+    const settingsBody = document.getElementById('breakSettingsBody');
+
+    document.getElementById('addBreakSetting').addEventListener('click', function () {
+        const index = nextSettingIndex++;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <input type="text" name="settings[${index}][type]" class="form-control form-control-sm"
+                       maxlength="100" pattern="[a-z0-9_]+" placeholder="e.g. personal_break" required>
+                <small class="text-muted">Lowercase letters, numbers and underscores</small>
+            </td>
+            <td>
+                <input type="text" name="settings[${index}][label]" class="form-control form-control-sm"
+                       maxlength="255" placeholder="Break label" required>
+            </td>
+            <td>
+                <input type="number" name="settings[${index}][duration_minutes]"
+                       class="form-control form-control-sm" min="1" max="480" placeholder="Empty = no limit">
+            </td>
+            <td>
+                <input type="hidden" name="settings[${index}][requires_admin_approval]" value="0">
+                <input type="checkbox" class="form-check-input"
+                       name="settings[${index}][requires_admin_approval]" value="1">
+            </td>
+            <td>
+                <input type="hidden" name="settings[${index}][is_active]" value="0">
+                <input type="checkbox" class="form-check-input"
+                       name="settings[${index}][is_active]" value="1" checked>
+                <button type="button" class="btn btn-sm btn-link text-danger ms-2 remove-break-setting"
+                        title="Remove this new break"><i class="bx bx-trash"></i></button>
+            </td>`;
+        settingsBody.appendChild(row);
+        row.querySelector('input[name$="[type]"]').focus();
+    });
+
+    settingsBody.addEventListener('click', function (event) {
+        const removeButton = event.target.closest('.remove-break-setting');
+        if (removeButton) {
+            removeButton.closest('tr').remove();
+        }
+    });
+
     document.querySelectorAll('.approve-break-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             document.getElementById('approveBreakName').textContent = btn.dataset.name;

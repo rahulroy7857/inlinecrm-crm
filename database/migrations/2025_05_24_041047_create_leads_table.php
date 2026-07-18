@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('country')->nullable();
             $table->string('state')->nullable();
             $table->boolean('transfer_seen')->nullable();
+            $table->string('registration_fee_plan')->nullable();
             // Parent Details
             $table->string('father_name')->nullable();
             $table->string('father_occupation')->nullable();

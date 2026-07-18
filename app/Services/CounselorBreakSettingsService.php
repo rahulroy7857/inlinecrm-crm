@@ -69,17 +69,23 @@ class CounselorBreakSettingsService
 
     public function updateSettings(array $settings): void
     {
+        $nextSortOrder = (int) CounselorBreakSetting::query()->max('sort_order');
+
         foreach ($settings as $row) {
-            CounselorBreakSetting::query()
-                ->where('type', $row['type'])
-                ->update([
-                    'label' => $row['label'],
-                    'duration_minutes' => $row['duration_minutes'] !== '' && $row['duration_minutes'] !== null
-                        ? (int) $row['duration_minutes']
-                        : null,
-                    'requires_admin_approval' => (bool) ($row['requires_admin_approval'] ?? false),
-                    'is_active' => (bool) ($row['is_active'] ?? true),
-                ]);
+            $setting = CounselorBreakSetting::query()->firstOrNew(['type' => $row['type']]);
+
+            if (! $setting->exists) {
+                $setting->sort_order = ++$nextSortOrder;
+            }
+
+            $setting->fill([
+                'label' => $row['label'],
+                'duration_minutes' => $row['duration_minutes'] !== '' && $row['duration_minutes'] !== null
+                    ? (int) $row['duration_minutes']
+                    : null,
+                'requires_admin_approval' => (bool) ($row['requires_admin_approval'] ?? false),
+                'is_active' => (bool) ($row['is_active'] ?? true),
+            ])->save();
         }
 
         Cache::forget('counselor_break_settings');

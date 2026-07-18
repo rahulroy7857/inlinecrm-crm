@@ -45,13 +45,6 @@
             </a>
         </li>
 
-        <li class="menu-item {{ request()->is('account/crm-sync*') ? 'active' : '' }}">
-            <a href="{{ route('account.crm-sync.index') }}" class="menu-link">
-                <i class="menu-icon bx bx-sync"></i>
-                <span>CRM Payment Sync</span>
-            </a>
-        </li>
-
         <li class="menu-item {{ request()->is('account/lead-payments*') ? 'active' : '' }}">
             <a href="{{ route('account.lead-payments.index') }}" class="menu-link">
                 <i class="menu-icon bx bx-dollar-circle"></i>

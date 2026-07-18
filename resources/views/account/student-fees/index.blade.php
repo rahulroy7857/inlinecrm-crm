@@ -8,7 +8,13 @@
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
             <h4 class="mb-1">Student Fees</h4>
-            <p class="text-muted mb-0">Set fees and record student payments (Pay Now). Students can only view transaction history.</p>
+            <p class="text-muted mb-0">
+                @if(is_admin_account_portal())
+                    Set fees and record student payments (Pay Now).
+                @else
+                    View student fee details and record payments (Pay Now). Fee edits are managed by Admin / Counselor.
+                @endif
+            </p>
         </div>
     </div>
 
@@ -50,7 +56,7 @@
     @foreach($students as $student)
     @php $summary = $feeService->feeSummary($student); @endphp
     <div class="card mt-3">
-        <div class="card-header border-bottom d-flex flex-wrap justify-content-between gap-2">
+        <div class="card-header border-bottom d-flex flex-wrap justify-content-between gap-2 student-fee-student-header">
             <div>
                 <h5 class="mb-0">{{ $student->name }}</h5>
                 <small class="text-muted">
@@ -66,35 +72,49 @@
             </div>
         </div>
         <div class="card-body">
-            @if(account_can_manage())
+            @php
+                $studentPlan = $student->registration_fee_plan ? ($plans[$student->registration_fee_plan] ?? null) : null;
+                $ledgerName = $student->feeLedgerAccount
+                    ? $student->feeLedgerAccount->name . ' · ' . ucfirst($student->feeLedgerAccount->type)
+                    : '—';
+                $canEditFees = is_admin_account_portal() && account_can_manage();
+            @endphp
+
+            @if($canEditFees)
             <form method="POST" action="{{ account_route('student-fees.update', $student->id) }}" class="row g-3">
                 @csrf
                 @method('PUT')
-                <div class="col-md-4">
-                    <label class="form-label">Registration Fee Plan *</label>
+                <div class="col-md-6">
+                    <label class="form-label">Registration Plan *</label>
                     <select name="registration_fee_plan" class="form-control" required>
                         <option value="">Select plan</option>
                         @foreach($plans as $key => $plan)
                             <option value="{{ $key }}" {{ old('registration_fee_plan', $student->registration_fee_plan) === $key ? 'selected' : '' }}>
-                                {{ $plan['label'] }} — ₹{{ number_format($plan['total'], 2) }} (₹{{ number_format($plan['base'], 0) }} + {{ $plan['gst_percent'] }}% GST)
+                                {{ $plan['label'] }} — ₹{{ number_format($plan['total'], 2) }}
+                                (₹{{ number_format($plan['base'], 0) }} + {{ $plan['gst_percent'] }}% GST)
                             </option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Admission Fee</label>
+                <div class="col-md-6">
+                    <label class="form-label">Registration Due Date *</label>
+                    <input type="date" name="registration_fee_due_date" class="form-control"
+                           value="{{ old('registration_fee_due_date', optional($student->registration_fee_due_date)->format('Y-m-d')) }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Processing Fee</label>
                     <div class="input-group">
                         <span class="input-group-text">₹</span>
                         <input type="number" step="0.01" min="0" name="counselor_fee" class="form-control"
                                value="{{ old('counselor_fee', $student->counselor_fee ?? 0) }}" required>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Admission Due Date</label>
+                <div class="col-md-6">
+                    <label class="form-label">Processing Fee Due Date</label>
                     <input type="date" name="counselor_fee_due_date" class="form-control"
                            value="{{ old('counselor_fee_due_date', optional($student->counselor_fee_due_date)->format('Y-m-d')) }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">College Fee</label>
                     <div class="input-group">
                         <span class="input-group-text">₹</span>
@@ -102,12 +122,12 @@
                                value="{{ old('college_fee', $student->college_fee ?? 0) }}" required>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">College Due Date</label>
                     <input type="date" name="college_fee_due_date" class="form-control"
                            value="{{ old('college_fee_due_date', optional($student->college_fee_due_date)->format('Y-m-d')) }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Receive In (Bank / Cash) *</label>
                     <select name="fee_ledger_account_id" class="form-control" required>
                         <option value="">Select account</option>
@@ -118,12 +138,51 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12 mt-4">
-                    <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i>Save Fees</button>
+                <div class="col-md-6 d-flex align-items-end mt-4">
+                    {{-- <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i>Save Fees</button> --}}
+                    <button type="submit" class="btn btn-primary ">
+                        <i class="bx bx-save me-1"></i> Save Fees
+                    </button>
                 </div>
             </form>
+            @else
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Registration Plan</label>
+                    <input type="text" class="form-control" readonly
+                           value="{{ $studentPlan ? $studentPlan['label'] . ' — ₹' . number_format($studentPlan['total'], 2) : 'Not set' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Registration Due Date</label>
+                    <input type="text" class="form-control" readonly
+                           value="{{ optional($student->registration_fee_due_date)->format('d-m-Y') ?? 'Not set' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Processing Fee</label>
+                    <input type="text" class="form-control" readonly value="₹{{ number_format((float) ($student->counselor_fee ?? 0), 2) }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Processing Fee Due Date</label>
+                    <input type="text" class="form-control" readonly
+                           value="{{ optional($student->counselor_fee_due_date)->format('d-m-Y') ?? '—' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">College Fee</label>
+                    <input type="text" class="form-control" readonly value="₹{{ number_format((float) ($student->college_fee ?? 0), 2) }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">College Due Date</label>
+                    <input type="text" class="form-control" readonly
+                           value="{{ optional($student->college_fee_due_date)->format('d-m-Y') ?? '—' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Receive In (Bank / Cash)</label>
+                    <input type="text" class="form-control" readonly value="{{ $ledgerName }}">
+                </div>
+            </div>
+            @endif
 
-            @if($summary['fees_set'] && $summary['total_remaining'] > 0)
+            @if(account_can_manage() && $summary['fees_set'] && $summary['total_remaining'] > 0)
             <hr class="my-4 mt-4">
            
             <form method="POST" action="{{ account_route('student-fees.pay', $student->id) }}" class="row g-3 align-items-end account-pay-form">
@@ -138,13 +197,13 @@
                         @endif
                         @if(!$summary['registration_required_first'])
                             @if($summary['counselor_remaining'] > 0)
-                                <option value="counselor_fee" data-max="{{ $summary['counselor_remaining'] }}">
-                                    Admission Fee (₹{{ number_format($summary['counselor_remaining'], 2) }} left)
+                                <option value="counselor_fee" class="text-danger" data-max="{{ $summary['counselor_remaining'] }}">
+                                    Processing Fee (₹{{ number_format($summary['counselor_remaining'], 2) }} pending)
                                 </option>
                             @endif
                             @if($summary['college_remaining'] > 0)
-                                <option value="college_fee" data-max="{{ $summary['college_remaining'] }}">
-                                    College Fee (₹{{ number_format($summary['college_remaining'], 2) }} left)
+                                <option value="college_fee" class="text-danger" data-max="{{ $summary['college_remaining'] }}">
+                                    College Fee (₹{{ number_format($summary['college_remaining'], 2) }} pending)
                                 </option>
                             @endif
                         @endif
@@ -163,16 +222,9 @@
                     </button>
                 </div>
             </form>
-            @elseif($summary['fees_set'] && $summary['total_remaining'] <= 0)
+            @elseif(account_can_manage() && $summary['fees_set'] && $summary['total_remaining'] <= 0)
             <hr class="my-4">
             <div class="alert alert-success mb-0 py-2">All fees paid for this student.</div>
-            @endif
-            @else
-                <div class="row g-3">
-                    <div class="col-md-4"><strong>Registration:</strong> {{ $summary['registration_plan']['label'] ?? '—' }} · ₹{{ number_format($summary['registration_fee'], 2) }}</div>
-                    <div class="col-md-4"><strong>Admission:</strong> ₹{{ number_format($summary['counselor_fee'], 2) }}</div>
-                    <div class="col-md-4"><strong>College:</strong> ₹{{ number_format($summary['college_fee'], 2) }}</div>
-                </div>
             @endif
         </div>
     </div>
@@ -180,11 +232,42 @@
 
     <div class="mt-3">{{ $students->links() }}</div>
 </div>
+
+<div class="modal fade" id="confirmPayModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to prcoceed this payment?</p>
+                <div class="border rounded p-3 bg-light">
+                    <div class="mb-1"><span class="text-muted">Fee Type:</span> <strong id="confirmPayFeeType">—</strong></div>
+                    <div><span class="text-muted">Amount:</span> <strong id="confirmPayAmount" class="text-primary">—</strong></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmPayYesBtn">
+                    <i class="bx bx-check me-1"></i>Yes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  let pendingPayForm = null;
+  const confirmModalEl = document.getElementById('confirmPayModal');
+  const confirmModal = confirmModalEl ? bootstrap.Modal.getOrCreateInstance(confirmModalEl) : null;
+  const confirmFeeType = document.getElementById('confirmPayFeeType');
+  const confirmAmount = document.getElementById('confirmPayAmount');
+  const confirmYesBtn = document.getElementById('confirmPayYesBtn');
+
   document.querySelectorAll('.account-pay-form').forEach(function (form) {
     const purpose = form.querySelector('.pay-purpose');
     const amount = form.querySelector('.pay-amount');
@@ -196,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!option) return;
       const max = option.getAttribute('data-max');
       const fixed = option.getAttribute('data-fixed') === '1';
+      purpose.classList.toggle('text-danger', !fixed);
       amount.max = max;
       amount.value = max;
       amount.readOnly = fixed;
@@ -208,7 +292,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
     purpose.addEventListener('change', syncMax);
     syncMax();
+
+    form.addEventListener('submit', function (event) {
+      if (form.dataset.confirmed === '1') {
+        form.dataset.confirmed = '0';
+        return;
+      }
+
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const option = purpose.options[purpose.selectedIndex];
+      const amountValue = parseFloat(amount.value || '0');
+      if (!option || !(amountValue > 0)) {
+        form.reportValidity();
+        return;
+      }
+
+      pendingPayForm = form;
+      if (confirmFeeType) {
+        confirmFeeType.textContent = option.textContent.trim();
+      }
+      if (confirmAmount) {
+        confirmAmount.textContent = '₹' + amountValue.toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+      if (confirmModal) {
+        confirmModal.show();
+      }
+    });
   });
+
+  if (confirmYesBtn) {
+    confirmYesBtn.addEventListener('click', function () {
+      if (!pendingPayForm) return;
+      const form = pendingPayForm;
+      pendingPayForm = null;
+      form.dataset.confirmed = '1';
+      if (confirmModal) {
+        confirmModal.hide();
+      }
+      form.submit();
+    });
+  }
+
+  if (confirmModalEl) {
+    confirmModalEl.addEventListener('hidden.bs.modal', function () {
+      pendingPayForm = null;
+    });
+  }
 });
 </script>
 @endsection

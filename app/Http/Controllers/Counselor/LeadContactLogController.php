@@ -17,7 +17,7 @@ class LeadContactLogController extends Controller
             'lead_id'      => 'required|exists:leads,id', // Assuming you have a leads table
             'contact_date' => 'required|date',
             'remark'       => 'nullable|string|max:1000',
-            'duration'     => 'nullable|integer|min:1',
+            'duration'     => 'nullable|numeric|min:0.01',
             'type'        => 'required|string|in:Call,Email,SMS,WhatsApp,In-Person,Other',
             'contacted_by' => 'nullable|string|max:255',
             'status'      => 'required|string|max:30',

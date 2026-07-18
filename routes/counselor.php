@@ -63,6 +63,9 @@ Route::middleware(['auth:counselor', EnsureCounselorBreakCompliance::class])->gr
     // Lead payments
     Route::post('leads/payments', [LeadPaymentController::class, 'store'])->name('lead.payments.store');
 
+    Route::get('student-fees', [StudentFeeController::class, 'index'])->name('student-fees.index');
+    Route::put('student-fees/{id}', [StudentFeeController::class, 'update'])->name('student-fees.update');
+    Route::post('leads/{leadId}/registration-plan', [StudentFeeController::class, 'updateRegistrationPlan'])->name('leads.registration-plan');
     Route::post('leads/{leadId}/student-fees/remind', [StudentFeeController::class, 'sendDueReminder'])->name('leads.student-fees.remind');
     Route::get('student-fee-payments', [StudentFeePaymentController::class, 'index'])->name('student-fee-payments.index');
     Route::get('leads/contact-logs/{id}/delete', [LeadContactLogController::class, 'destroy'])->name('lead.contact_logs.destroy');

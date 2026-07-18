@@ -77,6 +77,7 @@
                                     <th>Languages</th>
                                     <th>Joining Date</th>
                                     <th>Salary</th>
+                                    <th>Target Amount</th>
                                     <th>Status</th>
                                     <th>Break Lock</th>
                                     <th>Action</th>
@@ -92,6 +93,7 @@
                                     <td>{{ implode(', ', $counselor->languages ?? []) }}</td>
                                     <td>{{ $counselor->joining_date?->format('d-m-Y') ?? '—' }}</td>
                                     <td>₹{{ number_format($counselor->salary ?? 0, 2) }}</td>
+                                    <td>₹{{ number_format($counselor->target_amount ?? 0, 2) }}</td>
                                     <td>
                                         <span class="badge bg-{{ $counselor->status ? 'success' : 'danger' }}">
                                             {{ $counselor->status ? 'Active' : 'Inactive' }}

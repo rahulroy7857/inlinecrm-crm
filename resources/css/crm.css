@@ -2224,6 +2224,10 @@ table.crm-table {
 }
 
 /* Student portal fees on counselor lead profile */
+.student-fee-student-header {
+    background-color: #4f46e5 !important;
+}
+
 .student-fees-panel .student-fees-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

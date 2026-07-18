@@ -25,6 +25,7 @@ class Counselor extends Authenticatable
         'office_end_time',
         'working_days',
         'salary',
+        'target_amount',
     ];
 
     protected $hidden = [
@@ -41,6 +42,7 @@ class Counselor extends Authenticatable
         'break_login_unlocked_at' => 'datetime',
         'joining_date' => 'date',
         'salary' => 'decimal:2',
+        'target_amount' => 'decimal:2',
     ];
 
     public function unlockedByAdmin()
@@ -66,5 +68,10 @@ class Counselor extends Authenticatable
     public function salaryPayments()
     {
         return $this->hasMany(CounselorSalaryPayment::class);
+    }
+
+    public function targets()
+    {
+        return $this->hasMany(CounselorTarget::class);
     }
 }

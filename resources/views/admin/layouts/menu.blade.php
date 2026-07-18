@@ -125,9 +125,6 @@
                 <li class="menu-item {{ request()->is('admin/accounts/profit-loss*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.profit-loss.index') }}" class="menu-link"><span>Profit & Loss</span></a>
                 </li>
-                <li class="menu-item {{ request()->is('admin/accounts/crm-sync*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.accounts.crm-sync.index') }}" class="menu-link"><span>CRM Sync</span></a>
-                </li>
                 <li class="menu-item {{ request()->is('admin/accounts/lead-payments*') ? 'active' : '' }}">
                     <a href="{{ route('admin.accounts.lead-payments.index') }}" class="menu-link"><span>Lead Payments</span></a>
                 </li>
@@ -226,6 +223,9 @@
                 </li>
                 <li class="menu-item {{ request()->is('admin/settings/agents') ? 'active' : '' }}">
                     <a href="{{ url('/admin/settings/agents') }}" class="menu-link"><span>Agents</span></a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/settings/set-target') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/settings/set-target') }}" class="menu-link"><span>Set Target</span></a>
                 </li>
                 <li class="menu-item {{ request()->is('admin/settings/counselor-breaks') ? 'active' : '' }}">
                     <a href="{{ url('/admin/settings/counselor-breaks') }}" class="menu-link"><span>Counselor Breaks</span></a>

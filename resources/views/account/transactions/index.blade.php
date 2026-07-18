@@ -14,9 +14,9 @@
             <a href="{{ account_route('transactions.create') }}" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i>Add Expense / Income
             </a>
-            <a href="{{ account_route('lead-payments.index', ['add' => 1]) }}" class="btn btn-outline-primary">
+            {{-- <a href="{{ account_route('lead-payments.index', ['add' => 1]) }}" class="btn btn-outline-primary">
                 <i class="bx bx-receipt me-1"></i>Add Lead Payment
-            </a>
+            </a> --}}
         </div>
         @endif
     </div>

@@ -27,6 +27,9 @@
           @if($summary['registration_complete'])
             <div class="mt-2"><span class="badge bg-success">Completed</span></div>
           @endif
+          @if($summary['registration_fee_due_date'])
+            <small class="text-muted">Due: {{ $summary['registration_fee_due_date']->format('d M Y') }}</small>
+          @endif
           <div class="small text-muted mt-1">Non-refundable</div>
         </div>
       </div>
@@ -34,7 +37,7 @@
     <div class="col-md-3">
       <div class="card h-100">
         <div class="card-body">
-          <div class="text-muted small">Admission Fee</div>
+          <div class="text-muted small">Processing Fee</div>
           <h4 class="mb-1">₹{{ number_format($summary['counselor_fee'], 2) }}</h4>
           <div>Paid: ₹{{ number_format($summary['counselor_paid'], 2) }}</div>
           <div class="fw-semibold {{ $summary['counselor_remaining'] > 0 ? 'text-warning' : 'text-success' }}">

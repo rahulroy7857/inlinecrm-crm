@@ -7,6 +7,7 @@ use App\Mail\StudentWelcomeMail;
 use App\Models\Lead;
 use App\Models\Student;
 use App\Models\StudentOtp;
+use App\Services\StudentFeeService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -69,7 +70,12 @@ class StudentRegistrationOtpService
 
         $plainPassword = $payload['password'];
 
-        $student = DB::transaction(function () use ($lead, $payload, $plainPassword, $record) {
+        $planKey = $lead->registration_fee_plan ?: null;
+        $registrationFee = $planKey
+            ? (StudentFeeService::registrationPlanTotal($planKey) ?? 0)
+            : 0;
+
+        $student = DB::transaction(function () use ($lead, $payload, $plainPassword, $record, $planKey, $registrationFee) {
             $student = Student::create([
                 'lead_id' => $lead->id,
                 'lead_ref' => $lead->lead_id,
@@ -83,6 +89,8 @@ class StudentRegistrationOtpService
                 'password' => Hash::make($plainPassword),
                 'email_verified_at' => now(),
                 'application_status' => 'registered',
+                'registration_fee_plan' => $planKey,
+                'registration_fee' => $registrationFee,
                 'status' => true,
             ]);
 

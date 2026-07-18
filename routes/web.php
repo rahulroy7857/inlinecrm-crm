@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\LeadContactLogController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\CounselorTargetController;
 use App\Http\Controllers\Admin\AccountBreakSettingController;
 use App\Http\Controllers\Admin\AccountUserController;
 use App\Http\Controllers\Admin\StudentUserController;
@@ -30,7 +31,6 @@ use App\Http\Controllers\Account\LedgerAccountController as AccountLedgerControl
 use App\Http\Controllers\Account\TransactionController as AccountTransactionController;
 use App\Http\Controllers\Account\DaybookController as AccountDaybookController;
 use App\Http\Controllers\Account\ProfitLossController as AccountProfitLossController;
-use App\Http\Controllers\Account\CrmSyncController as AccountCrmSyncController;
 use App\Http\Controllers\Account\ReportController as AccountReportController;
 use App\Http\Controllers\Account\FinancialYearController as AccountFinancialYearController;
 use App\Http\Controllers\Account\LeadPaymentController as AccountLeadPaymentController;
@@ -144,6 +144,13 @@ Route::prefix('admin')->name('admin.')->group(function() {
             Route::delete('settings/agents/{id}', 'destroy')->name('settings.agents.destroy');
         });
 
+        Route::controller(CounselorTargetController::class)->group(function () {
+            Route::get('settings/set-target', 'index')->name('settings.set-target');
+            Route::post('settings/set-target', 'store')->name('settings.set-target.store');
+            Route::put('settings/set-target/{id}', 'update')->name('settings.set-target.update');
+            Route::delete('settings/set-target/{id}', 'destroy')->name('settings.set-target.destroy');
+        });
+
         Route::controller(CounselorBreakSettingController::class)->group(function () {
             Route::get('settings/counselor-breaks', 'index')->name('settings.counselor-breaks');
             Route::put('settings/counselor-breaks', 'update')->name('settings.counselor-breaks.update');
@@ -220,12 +227,6 @@ Route::prefix('admin')->name('admin.')->group(function() {
 
             Route::get('daybook', [AccountDaybookController::class, 'index'])->name('daybook.index');
             Route::get('profit-loss', [AccountProfitLossController::class, 'index'])->name('profit-loss.index');
-
-            Route::controller(AccountCrmSyncController::class)->group(function () {
-                Route::get('crm-sync', 'index')->name('crm-sync.index');
-                Route::post('crm-sync', 'sync')->name('crm-sync.sync');
-                Route::post('crm-sync/all', 'syncAll')->name('crm-sync.sync-all');
-            });
 
             Route::controller(AccountLeadPaymentController::class)->group(function () {
                 Route::get('lead-payments', 'index')->name('lead-payments.index');
