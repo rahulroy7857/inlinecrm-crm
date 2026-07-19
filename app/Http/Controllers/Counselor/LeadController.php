@@ -255,6 +255,8 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         try {
+            $counselor = auth()->guard('counselor')->user();
+
             $request->validate([
                 'name' => 'required|string|max:255',
                 'mobile' => 'required|string',
@@ -301,33 +303,68 @@ class LeadController extends Controller
                     ['lead' => $existingLead->id]
                 );
 
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => "Lead updated successfully ({$existingLead->lead_id}).",
+                    ]);
+                }
+
                 return redirect()->back()->with('success', "Lead updated successfully ({$existingLead->lead_id}).");
             }
 
             $lead = Lead::create([
                 ...$leadData,
+                'counselor_id' => $counselor->id,
                 'status' => 'New',
+                'transfer_seen' => false,
+                'received_at' => now(),
+                'picked_at' => now(),
                 'next_follow_up' => now()->addDays(1),
             ]);
 
             Timeline::create([
                 'lead_id' => $lead->id,
                 'title' => 'New Lead Created',
-                'description' => "Lead created with name: {$lead->name}",
+                'description' => "Lead created by counselor {$counselor->name} with name: {$lead->name}",
                 'event_type' => 'manual',
-                ...Timeline::performerAttributes(),
+                ...Timeline::performerAttributes($counselor),
                 'event_date' => now(),
             ]);
 
             ActivityLogger::log(
                 "Created new lead: {$lead->name}",
                 'Create',
-                auth()->guard('counselor')->user(),
+                $counselor,
                 ['lead' => $lead->id]
             );
 
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lead created successfully.',
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Lead created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please correct the highlighted fields.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            throw $e;
         } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating lead: ' . $e->getMessage(),
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Error creating lead: ' . $e->getMessage())
                 ->withInput();

@@ -270,12 +270,18 @@
                     </form>
                 </div>
 
+                @php
+                    $regPlans = \App\Services\StudentFeeService::registrationPlans();
+                    $selectedPlan = $lead->registration_fee_plan ?? optional($lead->student)->registration_fee_plan;
+                    $registrationPlanRequired = !$lead->student && empty($selectedPlan);
+                @endphp
+
                 <h5 class="mb-2 text-lg font-semibold text-slate-900">{{ $lead->name ?? 'Unknown' }}</h5>
                 <div class="lead-meta">
                     <p class="mb-0"><strong>Lead ID:</strong> {{ $lead->lead_id ?? 'Unknown' }}
                         @if($lead->lead_id)
-                        <a href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}"
-                           class="btn btn-sm btn-outline-primary lead-register-btn ms-1"
+                        <a href="{{ $registrationPlanRequired ? '#' : ($lead->student ? route('student.login') : student_registration_url($lead->lead_id)) }}"
+                           class="btn btn-sm btn-outline-primary lead-register-btn ms-1 {{ $registrationPlanRequired ? 'js-registration-plan-required' : '' }}"
                            title="{{ $lead->student ? 'Open student login' : 'Open student registration' }}">
                             <i class="bx bx-link-external" aria-hidden="true"></i>
                         </a>
@@ -286,10 +292,6 @@
                     <p class="mb-0"><strong>Next FL:</strong> {{ $lead->next_follow_up ?? 'Not Scheduled' }}</p>
                 </div>
 
-                @php
-                    $regPlans = \App\Services\StudentFeeService::registrationPlans();
-                    $selectedPlan = $lead->registration_fee_plan ?? optional($lead->student)->registration_fee_plan;
-                @endphp
                 <form method="POST" action="{{ route('counselor.leads.registration-plan', $lead->id) }}" class="lead-reg-plan mt-3 w-100">
                     @csrf
                     <label class="form-label mb-1"><strong>Registration Plan</strong></label>
@@ -357,7 +359,9 @@
                                 <i class="bx bx-test-tube"></i><span>Exams</span>
                             </a>
                             @if($lead->lead_id)
-                            <a class="nav-link lead-student-link" href="{{ $lead->student ? route('student.login') : student_registration_url($lead->lead_id) }}" target="_blank" rel="noopener"
+                            <a class="nav-link lead-student-link {{ $registrationPlanRequired ? 'js-registration-plan-required' : '' }}"
+                               href="{{ $registrationPlanRequired ? '#' : ($lead->student ? route('student.login') : student_registration_url($lead->lead_id)) }}"
+                               target="_blank" rel="noopener"
                                title="{{ $lead->student ? 'Student registered — open login' : 'Open student registration' }}">
                                 <i class="bx bx-user"></i><span>Student</span>
                                 @if($lead->student)
@@ -2510,6 +2514,26 @@
     </form>
   </div>
 </div>
+
+<div class="modal fade" id="registrationPlanRequiredModal" tabindex="-1" aria-labelledby="registrationPlanRequiredModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title text-white" id="registrationPlanRequiredModalLabel">
+                    <i class="bx bx-error-circle me-2"></i>Registration Plan Required
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please select and save a <strong>Registration Plan</strong> before sharing the student registration link.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="setRegistrationPlanBtn">Set Registration Plan</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -2521,6 +2545,29 @@
 <script src="{{url('/crm/assets/js/ui-toasts.js')}}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.js-registration-plan-required').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            bootstrap.Modal.getOrCreateInstance(
+                document.getElementById('registrationPlanRequiredModal')
+            ).show();
+        });
+    });
+
+    document.getElementById('setRegistrationPlanBtn')?.addEventListener('click', function() {
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById('registrationPlanRequiredModal')
+        ).hide();
+
+        const planSelect = document.querySelector('.lead-reg-plan [name="registration_fee_plan"]');
+        if (planSelect) {
+            planSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            window.setTimeout(function() {
+                planSelect.focus();
+            }, 350);
+        }
+    });
+
     // Initialize Bootstrap toasts
     function initializeToasts() {
         const toastElements = document.querySelectorAll('.bs-toast');

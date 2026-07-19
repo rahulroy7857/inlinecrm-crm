@@ -108,7 +108,7 @@
                       <div class="d-flex justify-content-between align-items-center">
                         <h5 class="">New Leads</h5>
                         <div class="">
-                          <!-- <button
+                          <button
                             class="btn btn-primary"
                             type="button"
                             data-bs-toggle="offcanvas"
@@ -116,7 +116,7 @@
                             aria-controls="offcanvasEnd"
                           >
                             Add New Lead
-                          </button> -->
+                          </button>
                           <form action="{{ route('counselor.leads.store') }}" method="POST" id="newLeadForm">
                           @csrf
                           <input type="hidden" name="existing_lead_id" id="existing_lead_id" value="">
@@ -213,11 +213,7 @@
                                 <div class="offcanvas-footer border-top">
                                     <div class="d-flex justify-content-end mt-3 mb-3 mr-3" style="margin-right: 20px;">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="offcanvas">Close</button>
-                                        <button type="button" class="btn btn-info me-2" id="verifyBtn">
-                                            <span class="spinner-border spinner-border-sm d-none me-1" role="status"></span>
-                                            <span class="btn-text">Verify</span>
-                                        </button>
-                                        <button type="submit" class="btn btn-primary d-none" id="submitBtn">
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
                                             <span class="spinner-border spinner-border-sm d-none me-1" role="status"></span>
                                             <span class="btn-text">Submit</span>
                                         </button>
@@ -395,8 +391,7 @@ $('#offcanvasEnd').on('hidden.bs.offcanvas', function () {
     $('#newLeadForm')[0].reset();
     $('input, select').removeClass('is-invalid');
     $('.select2').val(null).trigger('change');
-    $('#verifyBtn').removeClass('d-none').prop('disabled', false);
-    $('#submitBtn').addClass('d-none');
+    $('#existing_lead_id').val('');
 });
 
 function showToast(type, message) {
@@ -475,104 +470,77 @@ function showToast(type, message) {
 // });
 
 $(document).ready(function() {
-    // Track verification status
-    let isVerified = false;
+    // Submit the new lead via AJAX so we can reset the form and close the
+    // offcanvas immediately on success.
+    $('#newLeadForm').on('submit', function(e) {
+        e.preventDefault();
 
-    // Monitor email and phone changes
-    $('#basic-default-phone, #basic-default-email').on('change input', function() {
-        if (isVerified) {
-            $('#submitBtn').addClass('d-none');
-            $('#verifyBtn').removeClass('d-none');
-            isVerified = false;
-            $('#existing_lead_id').val('');
-            showToast('warning', 'Contact details changed. Please verify again.');
-        }
-    });
+        const form = $(this);
 
-    // Update verify button click handler
-    $('#verifyBtn').on('click', function() {
-        const btn = $(this);
-        const spinner = btn.find('.spinner-border');
-        const btnText = btn.find('.btn-text');
-        const form = $('#newLeadForm');
-
-        // Basic validation
         if (!form[0].checkValidity()) {
             form[0].reportValidity();
             return;
         }
+        if (typeof validatePhoneNumber === 'function' && !validatePhoneNumber()) {
+            form[0].reportValidity();
+            return;
+        }
 
-        // Show loading state
-        btn.prop('disabled', true);
+        const submitBtn = $('#submitBtn');
+        const spinner = submitBtn.find('.spinner-border');
+        const btnText = submitBtn.find('.btn-text');
+
+        submitBtn.prop('disabled', true);
         spinner.removeClass('d-none');
-        btnText.text('Verifying...');
+        btnText.text('Submitting...');
 
-        // Send verification request
         $.ajax({
-            url: '{{ route("counselor.leads.verify") }}',
+            url: form.attr('action'),
             method: 'POST',
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                mobile: $('#basic-default-phone').val(),
-                email: $('#basic-default-email').val()
-            },
+            data: form.serialize(),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            dataType: 'json',
             success: function(response) {
-                if (response.can_proceed) {
-                    isVerified = true;
-
-                    if (response.is_update && response.existing_lead_id) {
-                        $('#existing_lead_id').val(response.existing_lead_id);
-                        let message = '<strong>Existing lead found — record will be updated:</strong><br>';
-                        if (response.duplicates.mobile) {
-                            const mobileField = response.duplicates.mobile.field || 'Phone';
-                            message += `<br>${mobileField}: ${response.duplicates.mobile.name} (${response.duplicates.mobile.lead_id})`;
-                        }
-                        if (response.duplicates.email) {
-                            const emailField = response.duplicates.email.field || 'Email';
-                            message += `<br>${emailField}: ${response.duplicates.email.name} (${response.duplicates.email.lead_id})`;
-                        }
-                        showToast('info', message);
-                    } else {
-                        $('#existing_lead_id').val('');
-                        showToast('success', 'Verification successful! You can proceed.');
-                    }
-
-                    $('#submitBtn').removeClass('d-none');
-                    btn.addClass('d-none');
-                } else {
-                    showToast('error', 'Unable to proceed. Please try again.');
+                if (response && response.success === false) {
+                    showToast('error', response.message || 'Unable to create lead.');
+                    return;
                 }
+
+                showToast('success', (response && response.message) || 'Lead created successfully.');
+
+                // Reset the form and close the offcanvas.
+                form[0].reset();
+                $('input, select').removeClass('is-invalid');
+                $('.select2').val(null).trigger('change');
+                $('#existing_lead_id').val('');
+
+                const offcanvasEl = document.getElementById('offcanvasEnd');
+                const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl)
+                    || new bootstrap.Offcanvas(offcanvasEl);
+                offcanvas.hide();
+
+                // Refresh the list so the new lead is visible.
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1200);
             },
             error: function(xhr) {
-                showToast('error', 'Error during verification. Please try again.');
-                alert('error');
+                let message = 'Error creating lead. Please try again.';
+                if (xhr.responseJSON) {
+                    if (xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON.errors) {
+                        message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                    }
+                }
+                showToast('error', message);
             },
             complete: function() {
-                btn.prop('disabled', false);
+                submitBtn.prop('disabled', false);
                 spinner.addClass('d-none');
-                btnText.text('Verify');
+                btnText.text('Submit');
             }
         });
-    });
-
-    // Update form submission handler
-    $('#newLeadForm').on('submit', function(e) {
-        if (!isVerified) {
-            e.preventDefault();
-            showToast('warning', 'Please verify contact details before submitting.');
-            return false;
-        }
-    });
-
-    // Update offcanvas close handler
-    $('#offcanvasEnd').on('hidden.bs.offcanvas', function () {
-        $('#newLeadForm')[0].reset();
-        $('input, select').removeClass('is-invalid');
-        $('.select2').val(null).trigger('change');
-        $('#existing_lead_id').val('');
-        $('#verifyBtn').removeClass('d-none').prop('disabled', false);
-        $('#submitBtn').addClass('d-none');
-        isVerified = false;
     });
 });
 
