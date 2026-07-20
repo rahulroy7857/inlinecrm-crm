@@ -18,7 +18,8 @@ class LeadContactLog extends Model
     ];
 
     protected $casts = [
-        'contact_date' => 'datetime'
+        'contact_date' => 'datetime',
+        'duration' => 'decimal:2',
     ];
 
     public function lead()
