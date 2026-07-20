@@ -260,7 +260,7 @@ class LeadController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'mobile' => 'required|string',
-                'email' => 'required|email',
+                'email' => 'nullable|email',
                 'course_id' => 'required|exists:courses,id',
                 'academic_year_id' => 'required|exists:academic_years,id',
                 'source_id' => 'required|exists:sources,id',

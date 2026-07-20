@@ -159,7 +159,6 @@
                                                 id="basic-default-email"
                                                 class="form-control"
                                                 placeholder="Email"
-                                                required
                                             />
                                         </div>
                                         <div class="mb-2">
