@@ -13,7 +13,9 @@ class LeadPayment extends Model
         'transaction_type',
         'payment_mode',
         'amount',
-        'remark'
+        'remark',
+        'transaction_other_message',
+        'payment_type_other_message',
     ];
 
     protected $casts = [

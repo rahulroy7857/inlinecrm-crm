@@ -68,8 +68,8 @@
                     <label class="form-label">Category</label>
                     <select name="category" class="form-control">
                         <option value="">All</option>
-                        @foreach(['income','expense','transfer','other'] as $cat)
-                            <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                        @foreach(['income' => 'Income', 'expense' => 'Expense', 'transfer' => 'Transfer', 'refund' => 'Refund', 'forwarding_fee' => 'Forwarding fee', 'other' => 'Other'] as $value => $label)
+                            <option value="{{ $value }}" {{ request('category') === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -120,7 +120,7 @@
                                 @endif
                             </td>
                             <td>{{ $txn->ledgerAccount->name }}</td>
-                            <td><span class="text-capitalize">{{ $txn->category }}</span></td>
+                            <td><span class="text-capitalize">{{ str_replace('_', ' ', $txn->category) }}</span></td>
                             <td>{{ $txn->payment_mode ?? '—' }}</td>
                             <td class="text-end text-nowrap fw-semibold {{ $txn->entry_type === 'credit' ? 'text-success' : 'text-danger' }}">
                                 {{ $txn->entry_type === 'credit' ? '+' : '-' }}₹{{ number_format($txn->amount, 2) }}
@@ -136,16 +136,25 @@
                             </td>
                             @if(account_can_manage())
                             <td class="text-end">
-                                @unless($txn->is_crm_synced)
-                                <form action="{{ account_route('transactions.destroy', $txn->id) }}" method="POST" class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" data-confirm-delete="Delete this transaction?" title="Delete">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
-                                </form>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endunless
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    @if(is_admin_account_portal())
+                                    <a href="{{ account_route('transactions.edit', $txn->id) }}"
+                                       class="btn btn-icon btn-outline-warning btn-sm"
+                                       title="Edit">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    @endif
+                                    @unless($txn->is_crm_synced)
+                                    <form action="{{ account_route('transactions.destroy', $txn->id) }}" method="POST" class="d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" data-confirm-delete="Delete this transaction?" title="Delete">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </form>
+                                    @elseif(!is_admin_account_portal())
+                                        <span class="text-muted">—</span>
+                                    @endunless
+                                </div>
                             </td>
                             @endif
                         </tr>

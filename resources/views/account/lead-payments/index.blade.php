@@ -58,7 +58,16 @@
                             <td>{{ $payment->payment_type }}</td>
                             <td>{{ $payment->payment_mode }}</td>
                             <td>{{ $payment->accountTransaction?->ledgerAccount?->name ?? '—' }}</td>
-                            <td>{{ $payment->remark }}</td>
+                            <td>
+                                @php
+                                    $notes = collect([
+                                        $payment->transaction_other_message,
+                                        $payment->payment_type_other_message,
+                                        $payment->remark,
+                                    ])->filter()->implode(' | ');
+                                @endphp
+                                {{ $notes !== '' ? $notes : '—' }}
+                            </td>
                             <td class="text-end">₹{{ number_format($payment->amount, 2) }}</td>
                         </tr>
                         @empty

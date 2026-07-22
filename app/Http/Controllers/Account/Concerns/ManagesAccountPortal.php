@@ -25,4 +25,11 @@ trait ManagesAccountPortal
             abort(403, 'You do not have permission to perform this action.');
         }
     }
+
+    protected function authorizeAccountAdminEdit(): void
+    {
+        if (! is_admin_account_portal() || ! $this->accountCanManage()) {
+            abort(403, 'Only admins can edit transactions.');
+        }
+    }
 }

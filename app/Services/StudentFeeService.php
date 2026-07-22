@@ -360,6 +360,10 @@ class StudentFeeService
             return StudentPayment::where('lead_payment_id', $leadPayment->id)->first();
         }
 
+        if (! $leadPayment->lead_id) {
+            return null;
+        }
+
         if (! in_array((string) $leadPayment->transaction_type, ['1', '2', '3'], true)) {
             return null;
         }

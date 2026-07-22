@@ -17,13 +17,15 @@ class LeadPaymentService
     {
         return DB::transaction(function () use ($data, $ledgerAccountId, $createdById) {
             $payment = LeadPayment::create([
-                'lead_id' => $data['lead_id'],
+                'lead_id' => $data['lead_id'] ?? null,
                 'payment_date' => $data['payment_date'],
                 'payment_type' => $data['payment_type'],
                 'transaction_type' => (string) $data['transaction_type'],
                 'payment_mode' => $data['payment_mode'],
                 'amount' => $data['amount'],
                 'remark' => $data['remarks'] ?? null,
+                'transaction_other_message' => $data['transaction_other_message'] ?? null,
+                'payment_type_other_message' => $data['payment_type_other_message'] ?? null,
             ]);
 
             if ($ledgerAccountId) {
@@ -45,6 +47,12 @@ class LeadPaymentService
         $payment->loadMissing('lead');
         $entryType = in_array($payment->transaction_type, ['1', '2', '3'], true) ? 'credit' : 'debit';
         $category = $entryType === 'credit' ? 'income' : 'expense';
+        $notes = collect([
+            $payment->transaction_other_message,
+            $payment->payment_type_other_message,
+            $payment->remark,
+        ])->filter()->implode(' | ');
+        $description = trim($payment->payment_type . ($notes !== '' ? ' — ' . $notes : ''));
 
         return AccountTransaction::create([
             'ledger_account_id' => $ledgerAccountId,
@@ -57,7 +65,7 @@ class LeadPaymentService
             'party_name' => $payment->lead?->name,
             'amount' => $payment->amount,
             'payment_mode' => $payment->payment_mode,
-            'description' => "{$payment->payment_type} — {$payment->remark}",
+            'description' => $description !== '' ? $description : 'Other payment',
             'is_crm_synced' => true,
         ]);
     }

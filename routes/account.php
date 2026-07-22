@@ -44,7 +44,10 @@ Route::middleware(['auth:account', EnsureAccountBreakCompliance::class])->group(
     Route::controller(TransactionController::class)->group(function () {
         Route::get('transactions', 'index')->name('transactions.index');
         Route::get('transactions/create', 'create')->name('transactions.create');
+        Route::get('transactions/search-party-students', 'searchPartyStudents')->name('transactions.search-party-students');
         Route::post('transactions', 'store')->name('transactions.store');
+        Route::get('transactions/{id}/edit', 'edit')->name('transactions.edit');
+        Route::put('transactions/{id}', 'update')->name('transactions.update');
         Route::delete('transactions/{id}', 'destroy')->name('transactions.destroy');
     });
 

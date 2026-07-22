@@ -55,18 +55,27 @@ class LeadPaymentController extends Controller
     {
         $this->authorizeAccountManage();
 
+        $isOtherTxn = (string) $request->input('transaction_type') === '7';
+        $isOtherType = $request->input('payment_type') === 'Other';
+        $isOther = $isOtherTxn || $isOtherType;
+
         $validated = $request->validate([
-            'lead_id' => 'required|exists:leads,id',
+            'lead_id' => ($isOther ? 'nullable' : 'required') . '|exists:leads,id',
             'payment_date' => 'required|date|before_or_equal:today',
             'payment_type' => 'required|string',
             'transaction_type' => 'required|integer|between:1,7',
             'payment_mode' => 'required|string',
             'amount' => 'required|numeric|min:0.01',
-            'remarks' => 'nullable|string|max:255',
+            'remarks' => 'nullable|string|max:1000',
+            'transaction_other_message' => ($isOtherTxn ? 'required' : 'nullable') . '|string|max:2000',
+            'payment_type_other_message' => ($isOtherType ? 'required' : 'nullable') . '|string|max:2000',
             'ledger_account_id' => 'required|exists:ledger_accounts,id',
         ]);
 
-        $validated['remarks'] = $request->input('remarks');
+        $validated['remarks'] = $isOther ? null : $request->input('remarks');
+        $validated['transaction_other_message'] = $isOtherTxn ? $request->input('transaction_other_message') : null;
+        $validated['payment_type_other_message'] = $isOtherType ? $request->input('payment_type_other_message') : null;
+        $validated['lead_id'] = $isOther ? ($validated['lead_id'] ?? null) : $validated['lead_id'];
 
         $payment = $paymentService->create(
             $validated,
@@ -75,7 +84,9 @@ class LeadPaymentController extends Controller
         );
 
         ActivityLogger::log(
-            "Added lead payment for lead ID: {$validated['lead_id']}",
+            $validated['lead_id']
+                ? "Added lead payment for lead ID: {$validated['lead_id']}"
+                : 'Added other lead payment (no lead)',
             'Create',
             $this->accountActor(),
             ['lead_payment_id' => $payment->id, 'payment' => $validated]

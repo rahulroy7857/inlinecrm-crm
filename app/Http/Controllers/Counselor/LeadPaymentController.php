@@ -12,6 +12,10 @@ class LeadPaymentController extends Controller
 {
     public function store(Request $request, LeadPaymentService $paymentService)
     {
+        $isOtherTxn = (string) $request->input('transaction_type') === '7';
+        $isOtherType = $request->input('payment_type') === 'Other';
+        $isOther = $isOtherTxn || $isOtherType;
+
         $validated = $request->validate([
             'lead_id' => 'required|exists:leads,id',
             'payment_date' => 'required|date|before_or_equal:today',
@@ -19,19 +23,29 @@ class LeadPaymentController extends Controller
             'transaction_type' => 'required|integer|between:1,7',
             'payment_mode' => 'required|string',
             'amount' => 'required|numeric|min:0.01',
-            'remarks' => 'nullable|string|max:255',
+            'remarks' => 'nullable|string|max:1000',
+            'transaction_other_message' => ($isOtherTxn ? 'required' : 'nullable') . '|string|max:2000',
+            'payment_type_other_message' => ($isOtherType ? 'required' : 'nullable') . '|string|max:2000',
             'ledger_account_id' => 'nullable|exists:ledger_accounts,id',
         ]);
 
-        $validated['remarks'] = $request->input('remarks');
+        $validated['remarks'] = $isOther ? null : $request->input('remarks');
+        $validated['transaction_other_message'] = $isOtherTxn ? $request->input('transaction_other_message') : null;
+        $validated['payment_type_other_message'] = $isOtherType ? $request->input('payment_type_other_message') : null;
         $ledgerAccountId = $request->filled('ledger_account_id') ? (int) $request->ledger_account_id : null;
 
         $paymentService->create($validated, $ledgerAccountId);
 
+        $extraNotes = collect([
+            $validated['transaction_other_message'] ?? null,
+            $validated['payment_type_other_message'] ?? null,
+            $validated['remarks'] ?? null,
+        ])->filter()->implode(' | ');
+
         Timeline::create([
             'lead_id' => $validated['lead_id'],
             'title' => "Added payment: {$validated['payment_type']}",
-            'description' => "Amount: {$validated['amount']}, Mode: {$validated['payment_mode']}" . ($validated['remarks'] ? ", Remarks: {$validated['remarks']}" : ''),
+            'description' => "Amount: {$validated['amount']}, Mode: {$validated['payment_mode']}" . ($extraNotes !== '' ? ", Notes: {$extraNotes}" : ''),
             'event_type' => 'payment',
             ...Timeline::performerAttributes(auth()->guard('counselor')->user()),
             'event_date' => now(),
